@@ -277,8 +277,17 @@ Ini bukan mekanisme keamanan kuat, hanya untuk mencegah tebakan sederhana.
 Guard `web`, tabel `users` bawaan Laravel. Satu user, dibuat lewat seeder atau
 Tinker. Password minimal 8 karakter, di-hash dengan bcrypt (default Laravel).
 
-Semua route `/admin/*` memakai middleware `auth` + prefix `admin`. Redirect ke
-`/admin/login` kalau belum login.
+Semua route `/admin/*` memakai middleware `auth` bawaan Laravel + prefix
+`admin`. Redirect ke `/admin/login` kalau belum login. Route login memakai
+middleware `guest` supaya admin yang sudah login tidak bisa buka form login
+lagi.
+
+Tidak ada middleware `EnsureAdmin` sendiri. Karena hanya ada satu akun admin di
+tabel `users` dan tidak ada konsep role, middleware `auth` sudah cukup —
+menambah lapisan khusus hanya menambah kode tanpa menambah keamanan.
+
+`POST /admin/login` dibatasi `throttle:5,1` (5 percobaan per menit) untuk
+mencegah brute force.
 
 ### 6.2 Dashboard
 
@@ -466,7 +475,7 @@ serta `scroll-behavior: auto`.
 ```
 app/
 ├── Enums/
-│   ├── Kategori.php            # enum: PISA_NUGGET, ES_MABOO
+│   ├── Kategori.php            # enum: PisangNugget, EsMaboo
 │   └── StatusOrder.php         # enum + allowedTransitions()
 ├── Http/
 │   ├── Controllers/
@@ -480,20 +489,24 @@ app/
 │   │       ├── DashboardController.php
 │   │       ├── ProdukController.php
 │   │       └── PesananController.php
-│   ├── Middleware/
-│   │   └── EnsureAdmin.php
 │   └── Requests/
 │       ├── StoreCheckoutRequest.php
 │       └── StoreProductRequest.php
+├── Contracts/
+│   └── MidtransClient.php          # interface, di-bind ke fake saat test
+├── Exceptions/
+│   └── ProductTidakTersediaException.php
+├── Services/
+│   ├── OrderService.php        # buat order, hitung total
+│   ├── CartService.php         # baca/tulis keranjang di session
+│   ├── MidtransService.php     # logic bisnis, delegate ke MidtransClient
+│   ├── RealMidtransClient.php  # adapter ke midtrans/midtrans-php
+│   ├── FakeMidtransClient.php  # stub untuk test
+│   └── ImageService.php        # kompres & simpan upload
 ├── Models/
 │   ├── Product.php
 │   ├── Order.php
 │   └── OrderItem.php
-├── Services/
-│   ├── OrderService.php        # buat order, hitung total
-│   ├── CartService.php         # baca/tulis keranjang di session
-│   ├── MidtransService.php     # wrapper Snap API + verifikasi signature
-│   └── ImageService.php        # kompres & simpan upload
 └── Support/
     └── KodePesanan.php         # generator kode acak
 resources/views/
