@@ -1,0 +1,75 @@
+<?php
+
+$sandbox = ! env('MIDTRANS_PRODUCTION', false);
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kredensial
+    |--------------------------------------------------------------------------
+    |
+    | Diisi dari Midtrans Merchant Administration Portal. Kosongkan keduanya
+    | untuk menjalankan mode simulasi lokal (token dummy, tanpa panggilan API).
+    |
+    */
+
+    'server_key' => env('MIDTRANS_SERVER_KEY'),
+
+    'client_key' => env('MIDTRANS_CLIENT_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Environment
+    |--------------------------------------------------------------------------
+    */
+
+    'production' => ! $sandbox,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Endpoint
+    |--------------------------------------------------------------------------
+    |
+    | Base URL disimpan terpisah karena beberapa endpoint butuh order id di
+    | dalam path-nya, dan itu ditambahkan di MidtransClient saat request --
+    | bukan di file config.
+    |
+    */
+
+    'snap_token_url' => $sandbox
+        ? 'https://app.sandbox.midtrans.com/snap/v2/transactions'
+        : 'https://app.midtrans.com/snap/v2/transactions',
+
+    'api_base_url' => $sandbox
+        ? 'https://api.sandbox.midtrans.com/v2'
+        : 'https://api.midtrans.com/v2',
+
+    'snap_js_url' => $sandbox
+        ? 'https://app.sandbox.midtrans.com/snap/snap.js'
+        : 'https://app.midtrans.com/snap/snap.js',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verifikasi webhook
+    |--------------------------------------------------------------------------
+    |
+    | Kalau key webhook terpisah sudah diset di dashboard Midtrans, pakai itu.
+    | Kalau tidak, jatuh ke server key.
+    |
+    */
+
+    'webhook_hash_key' => env('MIDTRANS_WEBHOOK_HASH_KEY', env('MIDTRANS_SERVER_KEY')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Batas bayar
+    |--------------------------------------------------------------------------
+    |
+    | Order QRIS yang belum dibayar setelah selang ini ditandai kedaluwarsa.
+    |
+    */
+
+    'batas_bayar_menit' => (int) env('MIDTRANS_BATAS_BAYAR_MENIT', 15),
+
+];
