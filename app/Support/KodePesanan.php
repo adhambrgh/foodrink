@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Order;
 use Illuminate\Support\Str;
 
 class KodePesanan
@@ -37,7 +38,7 @@ class KodePesanan
         for ($percobaan = 0; $percobaan < 5; $percobaan++) {
             $kode = self::generate();
 
-            if (! \App\Models\Order::where('kode', $kode)->exists()) {
+            if (! Order::where('kode', $kode)->exists()) {
                 return $kode;
             }
         }

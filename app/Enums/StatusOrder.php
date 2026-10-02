@@ -6,10 +6,8 @@ enum StatusOrder: string
 {
     case MenungguBayar = 'menunggu_bayar';
     case Lunas = 'lunas';
-    case Dibuat = 'dibuat';
     case Selesai = 'selesai';
     case Batal = 'batal';
-    case Kedaluwarsa = 'kedaluwarsa';
 
     /**
      * Status yang boleh dipindah dari status ini.
@@ -20,10 +18,9 @@ enum StatusOrder: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::MenungguBayar => [self::Lunas, self::Kedaluwarsa, self::Batal],
-            self::Lunas => [self::Dibuat, self::Batal],
-            self::Dibuat => [self::Selesai, self::Batal],
-            self::Selesai, self::Batal, self::Kedaluwarsa => [],
+            self::MenungguBayar => [self::Lunas, self::Batal],
+            self::Lunas => [self::Selesai, self::Batal],
+            self::Selesai, self::Batal => [],
         };
     }
 
@@ -37,31 +34,43 @@ enum StatusOrder: string
     }
 
     /**
+     * Status yang tampil di daftar admin.
+     *
+     * Menunggu_bayar dan batal sengaja tidak ikut: uangnya belum masuk, jadi
+     * petugas tidak punya yang dikerjakan dari dua status itu. Pembeli yang
+     * membatalkan juga tidak meninggalkan jejak -- pesanannya dihapus, bukan
+     * cuma disembunyikan.
+     *
+     * @return list<self>
+     */
+    public static function untukAdmin(): array
+    {
+        return [self::Lunas, self::Selesai];
+    }
+
+    /**
      * Label Bahasa Indonesia untuk badge status.
      */
     public function label(): string
     {
         return match ($this) {
             self::MenungguBayar => 'Menunggu pembayaran',
-            self::Lunas => 'Sudah dibayar',
-            self::Dibuat => 'Siap diantar',
+            self::Lunas => 'Sedang diproses',
             self::Selesai => 'Selesai',
             self::Batal => 'Dibatalkan',
-            self::Kedaluwarsa => 'Kedaluwarsa',
         };
     }
 
     /**
-     * Nama variabel CSS untuk badge, supaya view tidak perlu switch warna.
+     * Nama variabel CSS untuk badge status.
      */
     public function warnaCss(): string
     {
         return match ($this) {
             self::MenungguBayar => 'kuning',
             self::Lunas => 'biru',
-            self::Dibuat => 'hijau',
-            self::Selesai => 'tinta',
-            self::Batal, self::Kedaluwarsa => 'abu',
+            self::Selesai => 'hijau',
+            self::Batal => 'abu',
         };
     }
 }

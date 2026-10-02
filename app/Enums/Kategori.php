@@ -5,7 +5,7 @@ namespace App\Enums;
 enum Kategori: string
 {
     case PisangNugget = 'pisang_nugget';
-    case EsMaboo = 'es_maboo';
+    case EsMamboo = 'es_mamboo';
 
     /**
      * Label yang tampil di katalog.
@@ -14,7 +14,7 @@ enum Kategori: string
     {
         return match ($this) {
             self::PisangNugget => 'Pisang Nugget',
-            self::EsMaboo => 'Es Maboo',
+            self::EsMamboo => 'Es Mamboo',
         };
     }
 }

@@ -7,14 +7,15 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Admin dulu, baru produk: admin yang mau manages katalog harus
-     * bisa masuk sebelum ada isi.
+     * Urut penting: admin dulu, baru produk, lalu tag. Tag menunjuk
+     * produk, jadi produk harus ada lebih dulu.
      */
     public function run(): void
     {
         $this->call([
             AdminUserSeeder::class,
             ProdukSeeder::class,
+            TagSeeder::class,
         ]);
     }
 }

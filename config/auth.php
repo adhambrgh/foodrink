@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Siswa;
+use App\Models\User;
+
 return [
 
     /*
@@ -40,6 +43,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Guard terpisah untuk siswa. Sengaja tidak memakai `web`:
+        // `web` berarti admin di aplikasi ini, dan keduanya harus tidak
+        // bisa saling menggantikan session.
+        'siswa' => [
+            'driver' => 'session',
+            'provider' => 'siswa',
+        ],
     ],
 
     /*
@@ -62,7 +73,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'siswa' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL_SISWA', Siswa::class),
         ],
 
         // 'users' => [
