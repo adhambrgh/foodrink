@@ -13,12 +13,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+WORKDIR /var/www/html
+
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf 2>/dev/null || true
 
-WORKDIR /var/www/html
 COPY . .
+
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && npm install \
     && npm run build \
@@ -26,6 +28,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 80
+
 CMD bash -c 'set -e; \
     sed -i "s/80/${PORT:-80}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf; \
     php artisan config:clear; \
