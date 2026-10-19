@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => env('CACHE_STORE', 'database'), // Driver cache default aplikasi
 
     /*
     |--------------------------------------------------------------------------
@@ -33,61 +33,61 @@ return [
 
     'stores' => [
 
-        'array' => [
-            'driver' => 'array',
-            'serialize' => false,
+        'array' => [ // Cache di memori (testing)
+            'driver' => 'array', // Driver cache array
+            'serialize' => false, // Tanpa serialisasi data
         ],
 
-        'database' => [
-            'driver' => 'database',
-            'connection' => env('DB_CACHE_CONNECTION'),
-            'table' => env('DB_CACHE_TABLE', 'cache'),
-            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
-            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
+        'database' => [ // Cache di database
+            'driver' => 'database', // Driver cache database
+            'connection' => env('DB_CACHE_CONNECTION'), // Koneksi DB khusus cache
+            'table' => env('DB_CACHE_TABLE', 'cache'), // Tabel penyimpanan cache
+            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'), // Koneksi DB untuk lock
+            'lock_table' => env('DB_CACHE_LOCK_TABLE'), // Tabel penyimpanan lock cache
         ],
 
-        'file' => [
-            'driver' => 'file',
-            'path' => storage_path('framework/cache/data'),
-            'lock_path' => storage_path('framework/cache/data'),
+        'file' => [ // Cache di file lokal
+            'driver' => 'file', // Driver cache file
+            'path' => storage_path('framework/cache/data'), // Path folder file cache
+            'lock_path' => storage_path('framework/cache/data'), // Path folder file lock
         ],
 
-        'memcached' => [
-            'driver' => 'memcached',
-            'persistent_id' => env('MEMCACHED_PERSISTENT_ID'),
+        'memcached' => [ // Cache memakai Memcached server
+            'driver' => 'memcached', // Driver cache memcached
+            'persistent_id' => env('MEMCACHED_PERSISTENT_ID'), // ID koneksi persistent
             'sasl' => [
-                env('MEMCACHED_USERNAME'),
-                env('MEMCACHED_PASSWORD'),
+                env('MEMCACHED_USERNAME'), // Username otentikasi SASL
+                env('MEMCACHED_PASSWORD'), // Password otentikasi SASL
             ],
             'options' => [
                 // Memcached::OPT_CONNECT_TIMEOUT => 2000,
             ],
             'servers' => [
                 [
-                    'host' => env('MEMCACHED_HOST', '127.0.0.1'),
-                    'port' => env('MEMCACHED_PORT', 11211),
-                    'weight' => 100,
+                    'host' => env('MEMCACHED_HOST', '127.0.0.1'), // Host server memcached
+                    'port' => env('MEMCACHED_PORT', 11211), // Port server memcached
+                    'weight' => 100, // Bobot node server
                 ],
             ],
         ],
 
-        'redis' => [
-            'driver' => 'redis',
-            'connection' => env('REDIS_CACHE_CONNECTION', 'cache'),
-            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
+        'redis' => [ // Cache memakai Redis
+            'driver' => 'redis', // Driver cache redis
+            'connection' => env('REDIS_CACHE_CONNECTION', 'cache'), // Konfigurasi koneksi redis
+            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'), // Koneksi lock redis
         ],
 
-        'dynamodb' => [
-            'driver' => 'dynamodb',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-            'table' => env('DYNAMODB_CACHE_TABLE', 'cache'),
-            'endpoint' => env('DYNAMODB_ENDPOINT'),
+        'dynamodb' => [ // Cache AWS DynamoDB
+            'driver' => 'dynamodb', // Driver cache dynamodb
+            'key' => env('AWS_ACCESS_KEY_ID'), // AWS access key
+            'secret' => env('AWS_SECRET_ACCESS_KEY'), // AWS secret key
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'), // Wilayah AWS
+            'table' => env('DYNAMODB_CACHE_TABLE', 'cache'), // Tabel DynamoDB
+            'endpoint' => env('DYNAMODB_ENDPOINT'), // Endpoint custom AWS
         ],
 
-        'octane' => [
-            'driver' => 'octane',
+        'octane' => [ // Cache untuk Laravel Octane
+            'driver' => 'octane', // Driver memori Octane
         ],
 
     ],
@@ -103,6 +103,6 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'), // Awalan key cache unik
 
 ];

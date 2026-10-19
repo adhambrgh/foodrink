@@ -8,26 +8,26 @@ namespace App\Enums;
  */
 enum Jurusan: string
 {
-    case Rpl = 'RPL';
-    case Tkj = 'TKJ';
-    case Dkv = 'DKV';
-    case Tg = 'TG';
-    case Anim = 'ANIM';
-    case Mekanika = 'MEKA';
-    case Log = 'LOG';
-    case Ph = 'PH';
+    case Rpl = 'RPL'; // jurusan RPL
+    case Tkj = 'TKJ'; // jurusan TKJ
+    case Dkv = 'DKV'; // jurusan DKV
+    case Tg = 'TG'; // jurusan TG
+    case Anim = 'ANIM'; // jurusan Animasi
+    case Mekanika = 'MEKA'; // jurusan Mekatronika
+    case Log = 'LOG'; // jurusan Logistik
+    case Ph = 'PH'; // jurusan Perhotelan
 
-    public function label(): string
+    public function label(): string // label tampilan jurusan
     {
-        return match ($this) {
-            self::Rpl => 'RPL (Rekayasa Perangkat Lunak)',
-            self::Tkj => 'TKJ (Teknik Komputer dan Jaringan)',
-            self::Dkv => 'DKV (Desain Komunikasi Visual)',
-            self::Tg => 'TG (Teknik Grafika)',
-            self::Anim => 'ANIM (Animasi)',
-            self::Mekanika => 'MEKA (Mekatronika)',
-            self::Log => 'LOG (Logistik)',
-            self::Ph => 'PH (Perhotelan)',
+        return match ($this) { // pilih label sesuai jurusan
+            self::Rpl => 'RPL (Rekayasa Perangkat Lunak)', // label lengkap RPL
+            self::Tkj => 'TKJ (Teknik Komputer dan Jaringan)', // label lengkap TKJ
+            self::Dkv => 'DKV (Desain Komunikasi Visual)', // label lengkap DKV
+            self::Tg => 'TG (Teknik Grafika)', // label lengkap TG
+            self::Anim => 'ANIM (Animasi)', // label lengkap Anim
+            self::Mekanika => 'MEKA (Mekatronika)', // label lengkap Mekanika
+            self::Log => 'LOG (Logistik)', // label lengkap Log
+            self::Ph => 'PH (Perhotelan)', // label lengkap PH
         };
     }
 
@@ -35,8 +35,8 @@ enum Jurusan: string
      * Nama pendek buat ditampilkan di daftar admin, di mana ruangannya
      * sempit dan label panjang cuma bikin berantakan.
      */
-    public function labelPendek(): string
+    public function labelPendek(): string // label pendek untuk admin
     {
-        return $this->value;
+        return $this->value; // kembalikan nilai singkat
     }
 }

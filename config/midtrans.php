@@ -1,6 +1,6 @@
 <?php
 
-$sandbox = ! env('MIDTRANS_PRODUCTION', false);
+$sandbox = ! env('MIDTRANS_PRODUCTION', false); // Mode sandbox jika bukan production
 
 return [
 
@@ -14,9 +14,9 @@ return [
     |
     */
 
-    'server_key' => env('MIDTRANS_SERVER_KEY'),
+    'server_key' => env('MIDTRANS_SERVER_KEY'), // Kunci rahasia server Midtrans
 
-    'client_key' => env('MIDTRANS_CLIENT_KEY'),
+    'client_key' => env('MIDTRANS_CLIENT_KEY'), // Kunci publik Snap JS
 
     /*
     |--------------------------------------------------------------------------
@@ -24,7 +24,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'production' => ! $sandbox,
+    'production' => ! $sandbox, // True jika mode produksi
 
     /*
     |--------------------------------------------------------------------------
@@ -37,15 +37,15 @@ return [
     |
     */
 
-    'snap_token_url' => $sandbox
+    'snap_token_url' => $sandbox // URL ambil token transaksi Snap
         ? 'https://app.sandbox.midtrans.com/snap/v2/transactions'
         : 'https://app.midtrans.com/snap/v2/transactions',
 
-    'api_base_url' => $sandbox
+    'api_base_url' => $sandbox // Base URL API Midtrans
         ? 'https://api.sandbox.midtrans.com/v2'
         : 'https://api.midtrans.com/v2',
 
-    'snap_js_url' => $sandbox
+    'snap_js_url' => $sandbox // URL script Snap JS
         ? 'https://app.sandbox.midtrans.com/snap/snap.js'
         : 'https://app.midtrans.com/snap/snap.js',
 
@@ -59,7 +59,7 @@ return [
     |
     */
 
-    'webhook_hash_key' => env('MIDTRANS_WEBHOOK_HASH_KEY', env('MIDTRANS_SERVER_KEY')),
+    'webhook_hash_key' => env('MIDTRANS_WEBHOOK_HASH_KEY', env('MIDTRANS_SERVER_KEY')), // Kunci verifikasi webhook
 
     /*
     |--------------------------------------------------------------------------
@@ -70,6 +70,6 @@ return [
     |
     */
 
-    'batas_bayar_menit' => (int) env('MIDTRANS_BATAS_BAYAR_MENIT', 15),
+    'batas_bayar_menit' => (int) env('MIDTRANS_BATAS_BAYAR_MENIT', 15), // Batas bayar (menit) sebelum order QRIS kedaluwarsa
 
 ];

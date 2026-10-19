@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Halaman keranjang: daftar jajan milik siswa yang sedang login.
@@ -7,8 +8,7 @@
 
 @section('kelas-halaman', 'halaman-keranjang')
 
-{{-- Inline section escaped, so " became &quot; and fetch() treated
-     the URL as a relative path: /%22http://...%22 -> 404. --}}
+{{-- Data body untuk checkout dan sinkron keranjang --}}
 @section('atribut-body')
 data-checkout-prepare="{{ route('checkout.prepare') }}"
 data-checkout-index="{{ route('checkout.index') }}"
@@ -76,6 +76,7 @@ data-keranjang-sinkron="{{ route('keranjang.sinkron') }}"
             @endforelse
         </ul>
 
+        {{-- Form input identitas dan tujuan pengantaran --}}
         <form id="penerima-form" class="keranjang__form" novalidate>
             <div class="keranjang__kepala-bagian">
                 <h2>Data penerima</h2>

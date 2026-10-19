@@ -9,17 +9,17 @@ namespace App\Enums;
  */
 enum KodeKelas: string
 {
-    case A = 'A';
-    case B = 'B';
-    case C = 'C';
-    case D = 'D';
-    case E = 'E';
-    case F = 'F';
-    case G = 'G';
-    case H = 'H';
+    case A = 'A'; // kode kelas A
+    case B = 'B'; // kode kelas B
+    case C = 'C'; // kode kelas C
+    case D = 'D'; // kode kelas D
+    case E = 'E'; // kode kelas E
+    case F = 'F'; // kode kelas F
+    case G = 'G'; // kode kelas G
+    case H = 'H'; // kode kelas H
 
-    public function label(): string
+    public function label(): string // label tampilan kode kelas
     {
-        return $this->value;
+        return $this->value; // kembalikan nilai kode kelas
     }
 }

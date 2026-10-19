@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Halaman katalog (halaman depan): daftar jajan per kategori.
@@ -8,6 +9,7 @@
 @section('kelas-halaman', 'halaman-katalog')
 
 @section('konten')
+    {{-- Hero pembuka katalog --}}
     <div class="katalog">
         <section class="hero" aria-labelledby="judul-katalog">
             <p class="hero__label">Pesan &middot; Pesen Online</p>
@@ -24,6 +26,7 @@
             </p>
         </section>
 
+        {{-- Tab kategori dan petunjuk --}}
         <div class="kategori-bar">
             <nav class="katalog__tab" aria-label="Kategori produk" role="tablist">
                 @foreach ($kategoris as $slug => $baris)
@@ -50,6 +53,7 @@
             </p>
         </div>
 
+        {{-- Daftar kartu produk --}}
         <ul class="produk-list" id="produk" role="list" aria-label="Daftar produk">
             @forelse ($produk as $index => $p)
                 @php
@@ -115,6 +119,7 @@
             @endforelse
         </ul>
 
+        {{-- Bar ringkasan keranjang melayang --}}
         <div class="bar-bawah bar-bawah--melayang" id="cart-summary-bar" style="display: none;" aria-live="polite">
             <div class="bar-bawah__baris bar-bawah__kartu">
                 <div class="bar-bawah__info">

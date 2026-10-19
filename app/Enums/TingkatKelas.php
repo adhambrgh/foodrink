@@ -8,16 +8,16 @@ namespace App\Enums;
  */
 enum TingkatKelas: string
 {
-    case Sepuluh = 'X';
-    case Sebelas = 'XI';
-    case DuaBelas = 'XII';
+    case Sepuluh = 'X'; // tingkat ke-10 (X)
+    case Sebelas = 'XI'; // tingkat ke-11 (XI)
+    case DuaBelas = 'XII'; // tingkat ke-12 (XII)
 
-    public function label(): string
+    public function label(): string // label tampilan tingkat kelas
     {
-        return match ($this) {
-            self::Sepuluh => 'X (10)',
-            self::Sebelas => 'XI (11)',
-            self::DuaBelas => 'XII (12)',
+        return match ($this) { // pilih label sesuai tingkat
+            self::Sepuluh => 'X (10)', // label X (10)
+            self::Sebelas => 'XI (11)', // label XI (11)
+            self::DuaBelas => 'XII (12)', // label XII (12)
         };
     }
 }

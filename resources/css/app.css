@@ -6,17 +6,17 @@
 
 :root {
     /* Warna */
-    --kertas: #f5efe3;
-    --kertas-tua: #ebe2d0;
-    --tinta: #2a2118;
-    --tinta-lunak: #6b5d4d;
-    --bata: #c8442e;
-    --bata-tua: #a03322;
-    --kunyit: #e8a33d;
-    --hijau: #4a7c4e;
-    --garis: #d9cdb8;
-    --krem: #fffdf8;
-    --putih: #ffffff;
+    --kertas: #f5efe3; /* Latar utama kertas */
+    --kertas-tua: #ebe2d0; /* Warna kertas gelap */
+    --tinta: #2a2118; /* Warna teks utama */
+    --tinta-lunak: #6b5d4d; /* Warna teks sekunder */
+    --bata: #c8442e; /* Aksen merah bata */
+    --bata-tua: #a03322; /* Aksen bata gelap */
+    --kunyit: #e8a33d; /* Warna aksen kuning */
+    --hijau: #4a7c4e; /* Warna aksen hijau */
+    --garis: #d9cdb8; /* Warna garis batas */
+    --krem: #fffdf8; /* Latar kartu terang */
+    --putih: #ffffff; /* Warna putih murni */
 
     /* Tipografi — display = Jakarta 800 rapat, bukan serif generik.
        Caveat hanya untuk coretan tangan, dipakai hemat. */
@@ -24,12 +24,12 @@
     --font-isi: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-tulis: 'Caveat', cursive;
 
-    --text-display: clamp(1.9rem, 7vw, 2.6rem);
-    --text-h1: clamp(1.4rem, 5vw, 1.8rem);
-    --text-h2: 1.25rem;
-    --text-body: 1rem;
-    --text-sm: 0.875rem;
-    --text-xs: 0.75rem;
+    --text-display: clamp(1.9rem, 7vw, 2.6rem); /* Judul utama besar */
+    --text-h1: clamp(1.4rem, 5vw, 1.8rem); /* Ukuran judul 1 */
+    --text-h2: 1.25rem; /* Ukuran judul 2 */
+    --text-body: 1rem; /* Ukuran teks isi */
+    --text-sm: 0.875rem; /* Ukuran teks kecil */
+    --text-xs: 0.75rem; /* Ukuran teks sangat kecil */
 
     /* Spacing — skala 4px */
     --s1: 4px;
@@ -58,51 +58,52 @@
    Reset ringan
    ------------------------------------------------------------ */
 
+/* Reset ringan */
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
+    box-sizing: border-box; /* Hitung padding dalam lebar */
 }
 
 * {
-    margin: 0;
+    margin: 0; /* Hilangkan margin bawaan */
 }
 
 html {
-    -webkit-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%; /* Cegah zoom otomatis iOS */
 }
 
 body {
-    font-family: var(--font-isi);
-    font-size: var(--text-body);
-    line-height: 1.6;
-    color: var(--tinta);
-    background-color: var(--kertas);
-    min-height: 100dvh;
+    font-family: var(--font-isi); /* Font utama tubuh halaman */
+    font-size: var(--text-body); /* Ukuran dasar teks */
+    line-height: 1.6; /* Jarak antar baris lega */
+    color: var(--tinta); /* Warna teks default */
+    background-color: var(--kertas); /* Latar halaman utama */
+    min-height: 100dvh; /* Isi minimal selalu mengisi layar */
     -webkit-tap-highlight-color: transparent;
     text-rendering: optimizeLegibility;
 }
 
 img,
 svg {
-    display: block;
-    max-width: 100%;
+    display: block; /* Gambar jadi blok */
+    max-width: 100%; /* Tidak meluber dari wadah */
 }
 
 input,
 button,
 textarea,
 select {
-    font: inherit;
+    font: inherit; /* Form warisi font halaman */
     color: inherit;
 }
 
 button {
-    cursor: pointer;
+    cursor: pointer; /* Kursor tangan di tombol */
 }
 
 a {
-    color: var(--bata);
+    color: var(--bata); /* Tautan pakai aksen bata */
     text-underline-offset: 3px;
 }
 
@@ -128,23 +129,24 @@ body::before {
    Judul — sans tegas rapat, bukan serif lembut
    ------------------------------------------------------------ */
 
+/* Judul — sans tegas rapat, bukan serif lembut */
 .judul,
 h1,
 h2,
 h3 {
-    font-family: var(--font-judul);
-    font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+    font-family: var(--font-judul); /* Font display Jakarta */
+    font-weight: 800; /* Bobot tebal rapat */
+    line-height: 1.08; /* Baris rapat khusus judul */
+    letter-spacing: -0.03em; /* Huruf rapat */
+    text-wrap: balance; /* Baris judul seimbang */
 }
 
 .harga {
-    font-family: var(--font-isi);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    color: var(--tinta);
+    font-family: var(--font-isi); /* Angka pakai font isi */
+    font-weight: 800; /* Teks harga tebal */
+    letter-spacing: -0.02em; /* Jarak huruf rapat */
+    font-variant-numeric: tabular-nums; /* Angka tabular rata kolom */
+    color: var(--tinta); /* Warna teks harga */
 }
 
 .harga--bata {
@@ -155,26 +157,27 @@ h3 {
    Layout
    ------------------------------------------------------------ */
 
-.bungkus {
+/* Layout */
+.bungkus { /* wadah konten tengah */
     width: 100%;
-    max-width: 34rem;
-    margin-inline: auto;
-    padding-inline: var(--s4);
+    max-width: 34rem; /* Lebar maks kolom isi */
+    margin-inline: auto; /* Tengahkan blok */
+    padding-inline: var(--s4); /* Jarak sisi konsisten */
 }
 
 .kepala {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    min-height: 72px;
+    position: sticky; /* Header menempel saat scroll */
+    top: 0; /* Menempel di atas layar */
+    z-index: 20; /* Di atas konten utama */
+    min-height: 72px; /* Tinggi minimal header */
     display: flex;
     align-items: center;
     padding-block: 6px;
-    background: var(--kertas);
-    border-bottom: 2px solid var(--tinta);
+    background: var(--kertas); /* Latar header solid */
+    border-bottom: 2px solid var(--tinta); /* Garis bawah tegas */
 }
 
-.kepala__baris {
+.kepala__baris { /* baris header fleksibel */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -182,7 +185,7 @@ h3 {
     width: 100%;
 }
 
-.merek {
+.merek { /* blok merek logo + teks */
     display: flex;
     align-items: center;
     gap: var(--s2);
@@ -222,14 +225,14 @@ h3 {
 
 /* Aksi header: riwayat · keranjang · keluar/masuk. Semua kotak sama
    besarnya supaya baris terasa rapi di mobile maupun desktop. */
-.kepala__aksi {
+.kepala__aksi { /* kumpulan ikon header */
     display: flex;
     align-items: center;
     gap: var(--s2);
-    flex-shrink: 0;
+    flex-shrink: 0; /* Aksi tidak menyusut */
 }
 
-.kepala__ikon {
+.kepala__ikon { /* tombol ikon header */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -245,18 +248,18 @@ h3 {
 }
 
 .kepala__ikon:hover {
-    border-color: var(--tinta);
+    border-color: var(--tinta); /* Border gelap saat hover */
 }
 
 .kepala__keluar {
     display: contents;
 }
 
-.kaki {
+.kaki { /* footer halaman */
     margin-top: var(--s12);
     padding-block: var(--s6);
     border-top: 1px solid var(--garis);
-    background: var(--kertas-tua);
+    background: var(--kertas-tua); /* Footer sedikit gelap */
     font-size: var(--text-sm);
     color: var(--tinta-lunak);
     text-align: center;
@@ -266,22 +269,22 @@ h3 {
    Tombol
    ------------------------------------------------------------ */
 
-.tombol {
-    display: inline-flex;
+.tombol { /* gaya tombol utama */
+    display: inline-flex; /* Konten tombol sejajar tengah */
     align-items: center;
     justify-content: center;
     gap: var(--s2);
     padding: var(--s3) var(--s4);
-    min-height: 44px;
+    min-height: 44px; /* Target sentuh memadai */
     border: 1.5px solid var(--tinta);
     border-radius: var(--r-sedang);
-    background: var(--krem);
+    background: var(--krem); /* Latar default terang */
     color: var(--tinta);
     font-size: var(--text-body);
-    font-weight: 800;
+    font-weight: 800; /* Label tombol tebal */
     letter-spacing: -0.01em;
     text-decoration: none;
-    box-shadow: 2px 2px 0 rgb(42 33 24 / 0.9);
+    box-shadow: 2px 2px 0 rgb(42 33 24 / 0.9); /* Bayangan keras kantin */
     transition: transform 100ms ease, box-shadow 100ms ease;
 }
 
@@ -291,29 +294,29 @@ h3 {
 }
 
 .tombol--bata {
-    background: var(--bata);
+    background: var(--bata); /* Tombol utama merah bata */
     border-color: var(--bata);
-    color: #fff;
+    color: #fff; /* Teks kontras di tombol */
 }
 
-.tombol--penuh {
+.tombol--penuh { /* tombol lebar penuh */
     width: 100%;
 }
 
-.tombol--kecil {
+.tombol--kecil { /* varian tombol kecil */
     min-height: 36px;
     padding: var(--s2) var(--s3);
     font-size: var(--text-sm);
 }
 
-.tombol--halus {
+.tombol--halus { /* tombol tanpa border */
     border-color: transparent;
     background: transparent;
     box-shadow: none;
 }
 
 /* Tombol ikon untuk aksi tambah keranjang */
-.tombol-ikon {
+.tombol-ikon { /* tombol ikon kotak */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -330,7 +333,7 @@ h3 {
 }
 
 /* Badge jumlah keranjang */
-.lencana {
+.lencana { /* badge angka keranjang */
     position: absolute;
     top: -4px;
     right: -4px;
@@ -347,7 +350,7 @@ h3 {
     font-variant-numeric: tabular-nums;
 }
 
-.keranjang-tombol {
+.keranjang-tombol { /* wadah relatif badge */
     position: relative;
 }
 
@@ -355,16 +358,16 @@ h3 {
    Badge & label
    ------------------------------------------------------------ */
 
-.badge {
-    display: inline-flex;
+.badge { /* label kecil */
+    display: inline-flex; /* Ikon dan teks sejajar */
     align-items: center;
     gap: var(--s1);
     padding: 2px 7px;
     border-radius: 6px;
     font-size: var(--text-xs);
-    font-weight: 800;
+    font-weight: 800; /* Label badge tebal */
     line-height: 1.5;
-    background: var(--kertas-tua);
+    background: var(--kertas-tua); /* Latar default netral */
     color: var(--tinta);
     border: 1px solid var(--tinta);
 }
@@ -389,7 +392,7 @@ h3 {
     color: var(--tinta-lunak);
 }
 
-.label {
+.label { /* label form */
     display: block;
     font-size: var(--text-sm);
     font-weight: 600;
@@ -400,7 +403,7 @@ h3 {
    Form
    ------------------------------------------------------------ */
 
-.input {
+.input { /* input teks form */
     width: 100%;
     min-height: 44px;
     padding: var(--s3);
@@ -418,7 +421,7 @@ a:focus-visible {
     outline-offset: 2px;
 }
 
-.grup {
+.grup { /* grup field form */
     margin-bottom: var(--s4);
 }
 
@@ -432,7 +435,7 @@ a:focus-visible {
     display: flex;
 }
 
-.galat-input {
+.galat-input { /* pesan error validasi */
     margin: var(--s1) 0 0;
     font-size: var(--text-xs);
     color: var(--bata-tua);
@@ -463,7 +466,7 @@ a:focus-visible {
    Baris produk — dipisah garis 1px, bukan kartu
    ------------------------------------------------------------ */
 
-.produk {
+.produk { /* baris produk */
     display: flex;
     align-items: center;
     gap: var(--s3);
@@ -528,7 +531,7 @@ a:focus-visible {
    Sticky bottom bar
    ------------------------------------------------------------ */
 
-.bar-bawah {
+.bar-bawah { /* bar bawah sticky */
     position: fixed;
     left: 0;
     right: 0;
@@ -559,7 +562,7 @@ a:focus-visible {
    Flash
    ------------------------------------------------------------ */
 
-.flash {
+.flash { /* notifikasi flash */
     display: flex;
     align-items: flex-start;
     gap: var(--s2);
@@ -600,7 +603,7 @@ a:focus-visible {
    Pointer-events mati supaya halaman tetap bisa diklik saat muncul.
    ------------------------------------------------------------ */
 
-.popup {
+.popup { /* overlay popup tengah */
     position: fixed;
     inset: 0;
     z-index: 1200;
@@ -677,7 +680,7 @@ a:focus-visible {
    Kosong
    ------------------------------------------------------------ */
 
-.kosong {
+.kosong { /* state kosong */
     padding: var(--s12) var(--s4);
     text-align: center;
     color: var(--tinta-lunak);

@@ -1,3 +1,4 @@
+{{-- Pakai kerangka admin --}}
 @extends('layouts.admin')
 
 {{-- Antrean kerja petugas: pesanan lunas yang perlu diantar. Admin bisa
@@ -16,6 +17,7 @@
         Tekan <strong>Selesai</strong> waktu jajannya sudah diambil.
     </p>
 
+    {{-- Chip saring berdasarkan status --}}
     <nav class="pesanan-filter" aria-label="Saring pesanan">
         <a
             href="{{ route('admin.pesanan.index', array_filter(['q' => $q])) }}"
@@ -35,6 +37,7 @@
         @endforeach
     </nav>
 
+    {{-- Form cari kode nama ruangan --}}
     <form method="GET" action="{{ route('admin.pesanan.index') }}" class="pesanan-cari">
         @if ($statusAktif)
             <input type="hidden" name="status" value="{{ $statusAktif->name }}">
@@ -54,6 +57,7 @@
         @endif
     </form>
 
+    {{-- Daftar kartu pesanan admin --}}
     <div class="admin__kartu">
         @forelse ($pesanan as $order)
             <article class="pesanan-admin">

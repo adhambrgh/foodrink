@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'sqlite'), // Koneksi database default dipakai
 
     /*
     |--------------------------------------------------------------------------
@@ -31,83 +31,83 @@ return [
 
     'connections' => [
 
-        'sqlite' => [
-            'driver' => 'sqlite',
-            'url' => env('DB_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
-            'prefix' => '',
-            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
-            'synchronous' => null,
+        'sqlite' => [ // Koneksi SQLite (file lokal)
+            'driver' => 'sqlite', // Driver SQLite
+            'url' => env('DB_URL'), // URL koneksi lengkap
+            'database' => env('DB_DATABASE', database_path('database.sqlite')), // Path file database
+            'prefix' => '', // Awalan nama tabel
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true), // Aktifkan foreign key
+            'busy_timeout' => null, // Waktu tunggu DB sibuk (ms)
+            'journal_mode' => null, // Mode journal SQLite
+            'synchronous' => null, // Mode sinkronisasi SQLite
         ],
 
-        'mysql' => [
-            'driver' => 'mysql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => env('DB_CHARSET', 'utf8mb4'),
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
+        'mysql' => [ // Koneksi MySQL
+            'driver' => 'mysql', // Driver MySQL
+            'url' => env('DB_URL'), // URL koneksi lengkap
+            'host' => env('DB_HOST', '127.0.0.1'), // Host database
+            'port' => env('DB_PORT', '3306'), // Port database
+            'database' => env('DB_DATABASE', 'laravel'), // Nama database
+            'username' => env('DB_USERNAME', 'root'), // Username database
+            'password' => env('DB_PASSWORD', ''), // Password database
+            'unix_socket' => env('DB_SOCKET', ''), // Socket Unix (opsional)
+            'charset' => env('DB_CHARSET', 'utf8mb4'), // Charset koneksi
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'), // Kolasi default
+            'prefix' => '', // Awalan nama tabel
+            'prefix_indexes' => true, // Awali indeks dengan prefix
+            'strict' => true, // Mode strict MySQL
+            'engine' => null, // Storage engine tabel
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'), // CA SSL MySQL
             ]) : [],
         ],
 
-        'mariadb' => [
-            'driver' => 'mariadb',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => env('DB_CHARSET', 'utf8mb4'),
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
+        'mariadb' => [ // Koneksi MariaDB
+            'driver' => 'mariadb', // Driver MariaDB
+            'url' => env('DB_URL'), // URL koneksi lengkap
+            'host' => env('DB_HOST', '127.0.0.1'), // Host database
+            'port' => env('DB_PORT', '3306'), // Port database
+            'database' => env('DB_DATABASE', 'laravel'), // Nama database
+            'username' => env('DB_USERNAME', 'root'), // Username database
+            'password' => env('DB_PASSWORD', ''), // Password database
+            'unix_socket' => env('DB_SOCKET', ''), // Socket Unix (opsional)
+            'charset' => env('DB_CHARSET', 'utf8mb4'), // Charset koneksi
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'), // Kolasi default
+            'prefix' => '', // Awalan nama tabel
+            'prefix_indexes' => true, // Awali indeks dengan prefix
+            'strict' => true, // Mode strict MariaDB
+            'engine' => null, // Storage engine tabel
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'), // CA SSL MariaDB
             ]) : [],
         ],
 
-        'pgsql' => [
-            'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => 'prefer',
+        'pgsql' => [ // Koneksi PostgreSQL
+            'driver' => 'pgsql', // Driver PostgreSQL
+            'url' => env('DB_URL'), // URL koneksi lengkap
+            'host' => env('DB_HOST', '127.0.0.1'), // Host database
+            'port' => env('DB_PORT', '5432'), // Port database
+            'database' => env('DB_DATABASE', 'laravel'), // Nama database
+            'username' => env('DB_USERNAME', 'root'), // Username database
+            'password' => env('DB_PASSWORD', ''), // Password database
+            'charset' => env('DB_CHARSET', 'utf8'), // Charset koneksi
+            'prefix' => '', // Awalan nama tabel
+            'prefix_indexes' => true, // Awali indeks dengan prefix
+            'search_path' => 'public', // Skema default PostgreSQL
+            'sslmode' => env('DB_SSLMODE', 'require'), // Mode SSL PostgreSQL
         ],
 
-        'sqlsrv' => [
-            'driver' => 'sqlsrv',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'localhost'),
-            'port' => env('DB_PORT', '1433'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
-            'prefix' => '',
-            'prefix_indexes' => true,
+        'sqlsrv' => [ // Koneksi SQL Server
+            'driver' => 'sqlsrv', // Driver SQL Server
+            'url' => env('DB_URL'), // URL koneksi lengkap
+            'host' => env('DB_HOST', 'localhost'), // Host database
+            'port' => env('DB_PORT', '1433'), // Port database
+            'database' => env('DB_DATABASE', 'laravel'), // Nama database
+            'username' => env('DB_USERNAME', 'root'), // Username database
+            'password' => env('DB_PASSWORD', ''), // Password database
+            'charset' => env('DB_CHARSET', 'utf8'), // Charset koneksi
+            'prefix' => '', // Awalan nama tabel
+            'prefix_indexes' => true, // Awali indeks dengan prefix
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
@@ -126,8 +126,8 @@ return [
     */
 
     'migrations' => [
-        'table' => 'migrations',
-        'update_date_on_publish' => true,
+        'table' => 'migrations', // Tabel riwayat migration
+        'update_date_on_publish' => true, // Update tanggal saat publish
     ],
 
     /*
@@ -143,30 +143,30 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', 'phpredis'), // Library PHP untuk Redis
 
         'options' => [
-            'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
-            'persistent' => env('REDIS_PERSISTENT', false),
+            'cluster' => env('REDIS_CLUSTER', 'redis'), // Mode cluster Redis
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'), // Awalan key Redis
+            'persistent' => env('REDIS_PERSISTENT', false), // Koneksi persisten
         ],
 
-        'default' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_DB', '0'),
+        'default' => [ // Koneksi Redis default
+            'url' => env('REDIS_URL'), // URL koneksi lengkap
+            'host' => env('REDIS_HOST', '127.0.0.1'), // Host Redis
+            'username' => env('REDIS_USERNAME'), // Username Redis
+            'password' => env('REDIS_PASSWORD'), // Password Redis
+            'port' => env('REDIS_PORT', '6379'), // Port Redis
+            'database' => env('REDIS_DB', '0'), // Nomor database Redis
         ],
 
-        'cache' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'username' => env('REDIS_USERNAME'),
-            'password' => env('REDIS_PASSWORD'),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '1'),
+        'cache' => [ // Koneksi Redis khusus cache
+            'url' => env('REDIS_URL'), // URL koneksi lengkap
+            'host' => env('REDIS_HOST', '127.0.0.1'), // Host Redis
+            'username' => env('REDIS_USERNAME'), // Username Redis
+            'password' => env('REDIS_PASSWORD'), // Password Redis
+            'port' => env('REDIS_PORT', '6379'), // Port Redis
+            'database' => env('REDIS_CACHE_DB', '1'), // Database Redis untuk cache
         ],
 
     ],

@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Profil siswa: ubah nama + kelas/ruang tujuan antar, riwayat pesanan
@@ -8,6 +9,7 @@
 
 @section('konten')
 <div class="profil">
+    {{-- Bagian atas: avatar nama dan identitas siswa --}}
     <div class="profil__kepala">
         <div class="profil__avatar" aria-hidden="true">
             {{ mb_strtoupper(mb_substr($siswa->nama, 0, 1)) }}
@@ -23,6 +25,7 @@
     </div>
 
     <div class="profil__grid">
+        {{-- Form ubah identitas dan lokasi pengantaran --}}
         <section class="admin__kartu" aria-labelledby="profil-edit">
             <h2 id="profil-edit" class="checkout__judul">Ubah profil</h2>
             <p class="admin__sub">Alamat antar ini yang dipakai form pembayaran.</p>
@@ -60,6 +63,7 @@
             </form>
         </section>
 
+        {{-- Riwayat pesanan terakhir milik siswa --}}
         <section class="admin__kartu profil__riwayat" aria-labelledby="profil-riwayat">
             <div class="profil__riwayat-kepala">
                 <h2 id="profil-riwayat" class="checkout__judul">Riwayat terakhir</h2>

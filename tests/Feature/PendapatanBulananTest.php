@@ -557,8 +557,10 @@ it('pesanan orang lain tidak bisa dibuka lewat kode struk', function () {
     $this->get(route('pesanan.show', $order->kode))->assertNotFound();
 });
 
-it('keranjang dan halaman pesanan menolak tamu yang belum login', function () {
-    $this->get(route('keranjang'))->assertRedirect(route('siswa.masuk'));
+it('keranjang terbuka untuk tamu, tapi checkout dan pesanan menolaknya', function () {
+    // Keranjang sengaja publik: tamu boleh melihat isinya dari cache
+    // browser, dan baru diminta login saat menekan tombol bayar.
+    $this->get(route('keranjang'))->assertOk();
     $this->get(route('checkout.index'))->assertRedirect(route('siswa.masuk'));
     $this->get(route('pesanan.index'))->assertRedirect(route('siswa.masuk'));
 });
@@ -813,13 +815,21 @@ it('keranjang menandai semua isian penerima sebagai wajib', function () {
         // muncul sudah sejak halaman dibuka.
         ->assertSeeHtml('id="galat-nama-penerima" data-galat hidden')
         ->assertSeeHtml('id="galat-kode-kelas" data-galat hidden')
-        ->assertSee('Semua diisi dulu ya, biar jajanmu nggak nyasar.', false)
+        // Siswa yang sudah login melihat data penerima terisi otomatis
+        // dari profilnya, jadi pesannya bukan "isi dulu" tapi "cek dulu".
+        ->assertSee('Terisi otomatis dari profilmu. Cek dulu, ya.')
         // Dua cara bayar jadi keputusan wajib berikutnya di halaman ini.
         ->assertSee('Bayar pakai')
         ->assertSee('Non tunai')
         ->assertSee('Tunai')
         ->assertSeeHtml('name="cara_bayar"')
         ->assertSeeHtml('value="tunai"');
+});
+
+it('tamu di keranjang diminta mengisi semua data penerima', function () {
+    $this->get(route('keranjang'))
+        ->assertOk()
+        ->assertSee('Semua diisi dulu ya, biar jajanmu nggak nyasar.');
 });
 
 

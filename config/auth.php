@@ -17,8 +17,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => env('AUTH_GUARD', 'web'), // Guard default = admin
+        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'), // Broker reset password default
     ],
 
     /*
@@ -39,17 +39,17 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
+        'web' => [ // Guard admin pakai session
+            'driver' => 'session', // Simpan login di session
+            'provider' => 'users', // Ambil data dari provider users
         ],
 
         // Guard terpisah untuk siswa. Sengaja tidak memakai `web`:
         // `web` berarti admin di aplikasi ini, dan keduanya harus tidak
         // bisa saling menggantikan session.
-        'siswa' => [
-            'driver' => 'session',
-            'provider' => 'siswa',
+        'siswa' => [ // Guard siswa terpisah dari admin
+            'driver' => 'session', // Simpan login di session
+            'provider' => 'siswa', // Ambil data dari provider siswa
         ],
     ],
 
@@ -71,14 +71,14 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+        'users' => [ // Provider akun admin/bawaan
+            'driver' => 'eloquent', // Pakai Eloquent ORM
+            'model' => env('AUTH_MODEL', User::class), // Model akun admin
         ],
 
-        'siswa' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL_SISWA', Siswa::class),
+        'siswa' => [ // Provider akun siswa
+            'driver' => 'eloquent', // Pakai Eloquent ORM
+            'model' => env('AUTH_MODEL_SISWA', Siswa::class), // Model akun siswa
         ],
 
         // 'users' => [
@@ -107,11 +107,11 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
-            'throttle' => 60,
+        'users' => [ // Broker reset password akun
+            'provider' => 'users', // Pakai provider users
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'), // Tabel simpan token reset
+            'expire' => 60, // Token valid 60 menit
+            'throttle' => 60, // Jeda kirim ulang 60 detik
         ],
     ],
 
@@ -126,6 +126,6 @@ return [
     |
     */
 
-    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800), // Batas konfirmasi ulang password (detik)
 
 ];

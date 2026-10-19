@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'stack'), // Channel log default aplikasi
 
     /*
     |--------------------------------------------------------------------------
@@ -32,8 +32,8 @@ return [
     */
 
     'deprecations' => [
-        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
-        'trace' => env('LOG_DEPRECATIONS_TRACE', false),
+        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'), // Channel log deprecations
+        'trace' => env('LOG_DEPRECATIONS_TRACE', false), // Sertakan trace deprecations
     ],
 
     /*
@@ -52,79 +52,79 @@ return [
 
     'channels' => [
 
-        'stack' => [
-            'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
-            'ignore_exceptions' => false,
+        'stack' => [ // Gabungan multi-channel log
+            'driver' => 'stack', // Driver log stack
+            'channels' => explode(',', env('LOG_STACK', 'single')), // Daftar channel tujuan
+            'ignore_exceptions' => false, // Abaikan exception saat logging
         ],
 
-        'single' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'replace_placeholders' => true,
+        'single' => [ // Log ke file tunggal
+            'driver' => 'single', // Driver file tunggal
+            'path' => storage_path('logs/laravel.log'), // Lokasi file log
+            'level' => env('LOG_LEVEL', 'debug'), // Level log minimal
+            'replace_placeholders' => true, // Ganti placeholder context
         ],
 
-        'daily' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_DAILY_DAYS', 14),
-            'replace_placeholders' => true,
+        'daily' => [ // Log berganti harian
+            'driver' => 'daily', // Driver log harian
+            'path' => storage_path('logs/laravel.log'), // Lokasi file log
+            'level' => env('LOG_LEVEL', 'debug'), // Level log minimal
+            'days' => env('LOG_DAILY_DAYS', 14), // Simpan log N hari
+            'replace_placeholders' => true, // Ganti placeholder context
         ],
 
-        'slack' => [
-            'driver' => 'slack',
-            'url' => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => env('LOG_SLACK_USERNAME', 'Laravel Log'),
-            'emoji' => env('LOG_SLACK_EMOJI', ':boom:'),
-            'level' => env('LOG_LEVEL', 'critical'),
-            'replace_placeholders' => true,
+        'slack' => [ // Kirim log ke webhook Slack
+            'driver' => 'slack', // Driver notifikasi Slack
+            'url' => env('LOG_SLACK_WEBHOOK_URL'), // URL webhook Slack
+            'username' => env('LOG_SLACK_USERNAME', 'Laravel Log'), // Nama pengirim di Slack
+            'emoji' => env('LOG_SLACK_EMOJI', ':boom:'), // Emoji bot Slack
+            'level' => env('LOG_LEVEL', 'critical'), // Level minimal kirim Slack
+            'replace_placeholders' => true, // Ganti placeholder context
         ],
 
-        'papertrail' => [
-            'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class),
-            'handler_with' => [
-                'host' => env('PAPERTRAIL_URL'),
-                'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+        'papertrail' => [ // Kirim log ke layanan Papertrail
+            'driver' => 'monolog', // Driver kustom Monolog
+            'level' => env('LOG_LEVEL', 'debug'), // Level log minimal
+            'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class), // Monolog handler Papertrail
+            'handler_with' => [ // Opsi handler Papertrail
+                'host' => env('PAPERTRAIL_URL'), // Host Papertrail
+                'port' => env('PAPERTRAIL_PORT'), // Port Papertrail
+                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'), // String koneksi TLS
             ],
-            'processors' => [PsrLogMessageProcessor::class],
+            'processors' => [PsrLogMessageProcessor::class], // Processor format log
         ],
 
-        'stderr' => [
-            'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => StreamHandler::class,
-            'formatter' => env('LOG_STDERR_FORMATTER'),
+        'stderr' => [ // Output log ke standar error
+            'driver' => 'monolog', // Driver kustom Monolog
+            'level' => env('LOG_LEVEL', 'debug'), // Level log minimal
+            'handler' => StreamHandler::class, // Handler stream Monolog
+            'formatter' => env('LOG_STDERR_FORMATTER'), // Format teks log
             'with' => [
-                'stream' => 'php://stderr',
+                'stream' => 'php://stderr', // Stream output stderr
             ],
-            'processors' => [PsrLogMessageProcessor::class],
+            'processors' => [PsrLogMessageProcessor::class], // Processor format log
         ],
 
-        'syslog' => [
-            'driver' => 'syslog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
-            'replace_placeholders' => true,
+        'syslog' => [ // Simpan log ke syslog OS
+            'driver' => 'syslog', // Driver syslog sistem
+            'level' => env('LOG_LEVEL', 'debug'), // Level log minimal
+            'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER), // Fasilitas logging sistem
+            'replace_placeholders' => true, // Ganti placeholder context
         ],
 
-        'errorlog' => [
-            'driver' => 'errorlog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'replace_placeholders' => true,
+        'errorlog' => [ // Simpan log via PHP error_log
+            'driver' => 'errorlog', // Driver error_log PHP
+            'level' => env('LOG_LEVEL', 'debug'), // Level log minimal
+            'replace_placeholders' => true, // Ganti placeholder context
         ],
 
-        'null' => [
-            'driver' => 'monolog',
-            'handler' => NullHandler::class,
+        'null' => [ // Nonaktifkan logging (dibuang)
+            'driver' => 'monolog', // Driver Monolog
+            'handler' => NullHandler::class, // Handler tanpa aksi
         ],
 
-        'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+        'emergency' => [ // Log darurat saat logger gagal
+            'path' => storage_path('logs/laravel.log'), // Path fallback darurat
         ],
 
     ],

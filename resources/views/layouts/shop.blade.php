@@ -24,12 +24,14 @@
     @stack('head')
 </head>
 <body @yield('atribut-body')>
+    {{-- Inisialisasi hitungan keranjang belanja --}}
     @php
         // Task 7 akan menyuntikkan angka ini lewat view composer.
         // Default 0 supaya halaman tidak error sebelum keranjang ada.
         $jumlahKeranjang = $jumlahKeranjang ?? 0;
     @endphp
 
+    {{-- Header logo keranjang dan akun --}}
     <header class="kepala">
         <div class="bungkus kepala__baris">
             <a href="{{ route('katalog') }}" class="merek" aria-label="Foodrink - kembali ke katalog">
@@ -88,12 +90,14 @@
         </div>
     </header>
 
+    {{-- Konten utama tiap halaman --}}
     <main class="bungkus @yield('kelas-halaman')">
         @include('partials.flash')
 
         @yield('konten')
     </main>
 
+    {{-- Footer merek dan info --}}
     <footer class="kaki">
         <div class="bungkus kaki__isi">
             <div class="kaki__merek">

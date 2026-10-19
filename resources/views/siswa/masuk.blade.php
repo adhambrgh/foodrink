@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Form login siswa memakai NIS + kata sandi (guard `siswa`).
@@ -5,6 +6,7 @@
 @section('judul', 'Masuk')
 
 @section('konten')
+    {{-- Wadah halaman masuk siswa --}}
     <div class="akun">
         <p class="hero__label"><strong>Siswa</strong> &middot; buat akun dulu</p>
         <h1 class="akun__judul">Masuk</h1>
@@ -12,6 +14,7 @@
             Pake NIS sekolah sama kata sandi. Kalau belum punya, daftar dulu ya.
         </p>
 
+        {{-- Daftar seluruh pesan error validasi --}}
         @if ($errors->any())
             <div class="kartu kartu--galat" role="alert">
                 <ul class="galat-daftar">

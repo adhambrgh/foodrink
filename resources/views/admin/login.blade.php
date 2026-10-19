@@ -1,3 +1,4 @@
+{{-- Pakai kerangka admin --}}
 @extends('layouts.admin')
 
 {{-- Form login petugas/admin. Dilindungi CSRF token & rate limiter. --}}

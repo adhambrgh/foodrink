@@ -16,41 +16,41 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class KeranjangItem extends Model
 {
     /** @use HasFactory<KeranjangItemFactory> */
-    use HasFactory;
+    use HasFactory; // trait factory untuk pembuatan data testing
 
-    protected $fillable = ['keranjang_id', 'product_id', 'jumlah'];
+    protected $fillable = ['keranjang_id', 'product_id', 'jumlah']; // kolom yang boleh diisi mass-assignment
 
-    protected function casts(): array
+    protected function casts(): array // tentukan konversi tipe data kolom
     {
         return [
-            'jumlah' => 'integer',
+            'jumlah' => 'integer', // ubah jumlah menjadi angka bulat
         ];
     }
 
-    public function keranjang(): BelongsTo
+    public function keranjang(): BelongsTo // relasi balik ke keranjang induk
     {
-        return $this->belongsTo(Keranjang::class);
+        return $this->belongsTo(Keranjang::class); // item dimiliki satu keranjang
     }
 
-    public function produk(): BelongsTo
+    public function produk(): BelongsTo // relasi produk yang ada di item
     {
         // Foreign key ditulis eksplisit: kalau tidak, Eloquent menurunkannya
         // dari nama relasi jadi `produk_id`, sedangkan kolomnya `product_id`.
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id'); // item menuju satu produk lewat product_id
     }
 
     /**
      * @return array{id: int, nama: string, harga: int, jumlah: int, stok: int, gambar: ?string}
      */
-    public function keBaris(): array
+    public function keBaris(): array // ubah item menjadi array untuk ditampilkan
     {
         return [
-            'id' => $this->product_id,
-            'nama' => $this->produk->nama,
-            'harga' => $this->produk->harga,
-            'jumlah' => $this->jumlah,
-            'stok' => $this->produk->stok,
-            'gambar' => $this->produk->foto_fallback,
+            'id' => $this->product_id, // ambil id produk
+            'nama' => $this->produk->nama, // ambil nama produk
+            'harga' => $this->produk->harga, // ambil harga produk terbaru
+            'jumlah' => $this->jumlah, // ambil jumlah item yang dipilih
+            'stok' => $this->produk->stok, // ambil stok produk terbaru
+            'gambar' => $this->produk->foto_fallback, // ambil foto produk atau fallbacknya
         ];
     }
 }

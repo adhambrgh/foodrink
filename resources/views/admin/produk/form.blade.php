@@ -1,3 +1,4 @@
+{{-- Pakai kerangka admin --}}
 @extends('layouts.admin')
 
 {{-- Satu form untuk tambah & ubah produk. !$produk->exists menentukan

@@ -26,13 +26,13 @@ use Illuminate\Notifications\Notifiable;
 class Siswa extends Authenticatable
 {
     /** @use HasFactory<SiswaFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable; // factory dan notifikasi untuk model siswa
 
     // Tabelnya tunggal ("siswa") karena yang diistirahawakan adalah orangnya,
     // bukan kumpulan. Tanpa ini Eloquent akan mencari tabel "siswas".
-    protected $table = 'siswa';
+    protected $table = 'siswa'; // paksa nama tabel tunggal siswa
 
-    protected $fillable = [
+    protected $fillable = [ // kolom yang boleh diisi mass-assignment
         'nis',
         'nama',
         'tingkat',
@@ -42,7 +42,7 @@ class Siswa extends Authenticatable
         'password',
     ];
 
-    protected $hidden = [
+    protected $hidden = [ // kolom yang disembunyikan dari serialisasi
         'password',
         'remember_token',
     ];
@@ -50,13 +50,13 @@ class Siswa extends Authenticatable
     /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected function casts(): array // tentukan konversi tipe data kolom
     {
         return [
-            'tingkat' => TingkatKelas::class,
-            'jurusan' => Jurusan::class,
-            'kode_kelas' => KodeKelas::class,
-            'password' => 'hashed',
+            'tingkat' => TingkatKelas::class, // cast ke enum TingkatKelas
+            'jurusan' => Jurusan::class, // cast ke enum Jurusan
+            'kode_kelas' => KodeKelas::class, // cast ke enum KodeKelas
+            'password' => 'hashed', // enkripsi otomatis kata sandi
         ];
     }
 
@@ -64,19 +64,19 @@ class Siswa extends Authenticatable
      * NIS dibersihkan spasinya supaya " 20240001 " dianggap sama dengan
      * "20240001" dan tidak bisa dipakai mendaftar dua kali.
      */
-    public function setNisAttribute(string $value): void
+    public function setNisAttribute(string $value): void // mutator untuk membersihkan nilai NIS
     {
-        $this->attributes['nis'] = trim($value);
+        $this->attributes['nis'] = trim($value); // bersihkan spasi awal dan akhir
     }
 
-    public function orders(): HasMany
+    public function orders(): HasMany // relasi pesanan milik siswa
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class); // satu siswa punya banyak order
     }
 
-    public function keranjang(): HasOne
+    public function keranjang(): HasOne // relasi keranjang milik siswa
     {
-        return $this->hasOne(Keranjang::class);
+        return $this->hasOne(Keranjang::class); // satu siswa punya satu keranjang
     }
 
     /**
@@ -85,14 +85,14 @@ class Siswa extends Authenticatable
      *
      * @return array{nama: string, tingkat: string|null, jurusan: string|null, kode_kelas: string|null, ruang: string|null}
      */
-    public function tujuanAntar(): array
+    public function tujuanAntar(): array // data alamat antar default profil
     {
         return [
-            'nama' => $this->nama,
-            'tingkat' => $this->tingkat?->value,
-            'jurusan' => $this->jurusan?->value,
-            'kode_kelas' => $this->kode_kelas?->value,
-            'ruang' => $this->ruang,
+            'nama' => $this->nama, // nama lengkap siswa
+            'tingkat' => $this->tingkat?->value, // nilai enum tingkat
+            'jurusan' => $this->jurusan?->value, // nilai enum jurusan
+            'kode_kelas' => $this->kode_kelas?->value, // nilai enum kode kelas
+            'ruang' => $this->ruang, // nama atau nomor ruangan
         ];
     }
 }

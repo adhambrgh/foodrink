@@ -1,3 +1,4 @@
+{{-- Pakai kerangka admin --}}
 @extends('layouts.admin')
 
 {{-- Daftar & pencarian produk untuk admin: filter kategori, cari nama,
@@ -13,6 +14,7 @@
         <a href="{{ route('admin.produk.create') }}" class="tombol tombol--bata">+ Tambah produk</a>
     </div>
 
+    {{-- Form cari nama dan stok menipis --}}
     <form method="GET" action="{{ route('admin.produk.index') }}" class="admin__cari">
         <label class="hanya-layar-baca" for="q">Cari produk</label>
         <div class="admin__cari-field">
@@ -34,6 +36,7 @@
         <button type="submit" class="tombol tombol--kecil">Terapkan</button>
     </form>
 
+    {{-- Tab saring kategori produk --}}
     <nav class="admin__filter" aria-label="Saring kategori">
         <a
             href="{{ route('admin.produk.index', array_filter(['q' => $cari, 'menipis' => $menipis ? 1 : null])) }}"
@@ -47,6 +50,7 @@
         @endforeach
     </nav>
 
+    {{-- Daftar baris produk admin --}}
     <ul class="admin__list" role="list">
         @forelse ($produk as $p)
             @php $kelasStok = $p->stok <= 0 ? 'stok--habis' : ($p->stok <= 5 ? 'stok--tipis' : 'stok--aman'); @endphp

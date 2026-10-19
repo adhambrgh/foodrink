@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'local'), // Disk default penyimpanan file
 
     /*
     |--------------------------------------------------------------------------
@@ -30,34 +30,34 @@ return [
 
     'disks' => [
 
-        'local' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
-            'throw' => false,
-            'report' => false,
+        'local' => [ // Disk lokal privat
+            'driver' => 'local', // Driver filesystem lokal
+            'root' => storage_path('app/private'), // Folder akar penyimpanan
+            'serve' => true, // Izinkan serve file via route
+            'throw' => false, // Lempar exception saat gagal
+            'report' => false, // Laporkan error ke logger
         ],
 
-        'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
-            'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
+        'public' => [ // Disk publik (diakses via URL)
+            'driver' => 'local', // Driver filesystem lokal
+            'root' => storage_path('app/public'), // Folder akar publik
+            'url' => env('APP_URL').'/storage', // URL akses publik
+            'visibility' => 'public', // Izin akses publik
+            'throw' => false, // Lempar exception saat gagal
+            'report' => false, // Laporkan error ke logger
         ],
 
-        's3' => [
-            'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
-            'report' => false,
+        's3' => [ // Disk AWS S3
+            'driver' => 's3', // Driver AWS S3
+            'key' => env('AWS_ACCESS_KEY_ID'), // AWS access key
+            'secret' => env('AWS_SECRET_ACCESS_KEY'), // AWS secret key
+            'region' => env('AWS_DEFAULT_REGION'), // Wilayah AWS
+            'bucket' => env('AWS_BUCKET'), // Nama bucket S3
+            'url' => env('AWS_URL'), // URL bucket custom
+            'endpoint' => env('AWS_ENDPOINT'), // Endpoint custom S3
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false), // Pakai path-style URL
+            'throw' => false, // Lempar exception saat gagal
+            'report' => false, // Laporkan error ke logger
         ],
 
     ],
@@ -74,7 +74,7 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public'),
+        public_path('storage') => storage_path('app/public'), // Symlink: public/storage -> storage/app/public
     ],
 
 ];

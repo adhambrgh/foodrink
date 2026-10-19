@@ -10,9 +10,11 @@ import './bootstrap';
  * Begitu siswa login, isi keranjang ikut ke akun: bukan digabung dengan
  * cache browser, tapi diganti seluruhnya oleh isi server.
  */
+// Kunci cache tamu dan cache server
 const CART_KEY = 'foodrink_cart';
 const SERVER_KEY = 'foodrink_cart_server';
 
+// Baca cache keranjang dari localStorage
 function readCache(kunci) {
     try {
         return JSON.parse(localStorage.getItem(kunci)) || [];
@@ -21,10 +23,12 @@ function readCache(kunci) {
     }
 }
 
+// Ambil data keranjang dari cache
 function getCart() {
     return readCache(SERVER_KEY).length ? readCache(SERVER_KEY) : readCache(CART_KEY);
 }
 
+// Simpan data keranjang ke localStorage
 function saveCart(cart) {
     // Cache browser ditulis hanya kalau keranjang masih milik satu akun
     // saja (tamu). Begitu isinya berasal dari server, localStorage
@@ -44,6 +48,7 @@ function saveCart(cart) {
  * Tandai isi keranjang sebagai milik akun, lalu buang cache browser.
  * Dipanggil setelah server menyalin keranjang ke akun siswa.
  */
+// Tandai cart milik server dan buang cache tamu
 function adoptServerCart(cart) {
     const ditandai = cart.map((item) => ({ ...item, _dariServer: true }));
     localStorage.setItem(SERVER_KEY, JSON.stringify(ditandai));
@@ -57,10 +62,12 @@ function adoptServerCart(cart) {
     renderCart(ditandai);
 }
 
+// Hitung total item dalam keranjang
 function getCartCount() {
     return getCart().reduce((sum, item) => sum + item.jumlah, 0);
 }
 
+// Perbarui angka badge pada ikon keranjang
 function updateCartBadge() {
     const badge = document.querySelector('.lencana');
     const count = getCartCount();
@@ -77,6 +84,7 @@ function updateCartBadge() {
 /**
  * Add product to cart
  */
+// Tambah produk ke keranjang belanja
 function addToCart(produk) {
     const cart = getCart();
     const existing = cart.find(item => item.id === produk.id);
@@ -119,7 +127,8 @@ function addToCart(produk) {
  * server. Jadi angka yang tampil selalu hasil perhitungan server, bukan
  * hasil additions di browser yang bisa tertinggal kalau stok sudah
  * berubah karena pembeli lain.
- */
+  */
+// Ubah jumlah item lalu sinkron server
 async function updateQuantity(id, delta) {
     const cart = getCart();
     const item = cart.find(i => i.id === id);
@@ -146,6 +155,7 @@ async function updateQuantity(id, delta) {
 /**
  * Remove item entirely
  */
+// Hapus item seluruhnya dari keranjang
 async function removeItem(id) {
     const cart = getCart();
     const item = cart.find(i => i.id === id);
@@ -170,7 +180,8 @@ async function removeItem(id) {
  *
  * @returns {Promise<boolean>} true kalau isi keranjang tersimpan
  *   (di server, atau di browser untuk tamu yang belum login).
- */
+  */
+// Kirim cart ke server dan pakai balasan
 async function kirimKeServer(cart) {
     const url = document.body.dataset.keranjangSinkron;
     const sebelum = getCart();
@@ -244,7 +255,8 @@ async function kirimKeServer(cart) {
  * data server: harga dan stok tidak boleh berasal dari cache browser.
  * Yang tidak disentuh adalah pilihan cara bayar dan tombolnya, yang
  * sengaja diluar area ini -- rebuilding pernah menghapus radi-nya.
- */
+  */
+// Render ulang daftar item dari server
 function renderCart(cart = getCart()) {
     const list = document.querySelector('.keranjang__list');
     const ringkasan = document.querySelector('.keranjang__ringkasan');
@@ -322,7 +334,8 @@ function renderCart(cart = getCart()) {
 /**
  * Tulis ulang baris total saja. Pilihan cara bayar dan tombol bayar
  * sengaja tidak disentuh supaya radio tidak hilang tiap kali total berubah.
- */
+  */
+// Tulis ulang baris total saja
 function segarkanRingkasan() {
     const totalEl = document.getElementById('keranjang-total');
     if (!totalEl) return;
@@ -340,6 +353,7 @@ function segarkanRingkasan() {
 /**
  * Simple flash message
  */
+// Tampilkan pesan flash mengambang sementara
 function showFlash(type, message) {
     const flashContainer = document.createElement('div');
     flashContainer.style.cssText = 'position:fixed;bottom:var(--s4);left:50%;transform:translateX(-50%);z-index:1000;';
@@ -379,12 +393,14 @@ const IKON_POPUP = {
 // Popup yang lagi tampil, supaya tidak ada dua yang numpuk.
 let popupAktif = null;
 
+// Bersihkan karakter khusus untuk cegah XSS
 function escapeHtml(teks) {
     return String(teks).replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
     })[c]);
 }
 
+// Tutup popup konfirmasi yang aktif
 function tutupPopup() {
     if (!popupAktif) return;
 
@@ -397,6 +413,7 @@ function tutupPopup() {
     setTimeout(() => popup.remove(), 220);
 }
 
+// Tutup popup kalau tombol Escape ditekan
 function onPopupKey(e) {
     if (e.key === 'Escape') tutupPopup();
 }
@@ -435,6 +452,7 @@ function bukaPopup(isi, { durasi = 1000 } = {}) {
     popupAktif = { popup, timer };
 }
 
+// Popup sukses tambah keranjang dengan ringkasan total
 function showPopupTambahKeranjang(produk) {
     const total = getCartCount();
     const totalHarga = getCart().reduce((sum, item) => sum + item.harga * item.jumlah, 0);
@@ -450,6 +468,7 @@ function showPopupTambahKeranjang(produk) {
 /**
  * Initialize katalog page: add-to-cart buttons
  */
+// Pasang handler tombol tambah tiap kartu produk
 function initKatalog() {
     document.querySelectorAll('[data-produk-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -477,6 +496,7 @@ function initKatalog() {
 /**
  * Menu admin: sidebar di laptop, panel buka-tutup di layar sempit.
  */
+// Buka-tutup sidebar admin di layar sempit
 function initAdminMenu() {
     const tombol = document.querySelector('[data-menu-tombol]');
     const menu = document.getElementById('admin-menu');
@@ -510,6 +530,7 @@ function initAdminMenu() {
 /**
  * Initialize keranjang page: quantity buttons, remove, checkout
  */
+// Pasang handler kuantitas, hapus, dan checkout
 function initKeranjang() {
     const list = document.querySelector('.keranjang__list');
     const ringkasan = document.querySelector('.keranjang__ringkasan');
@@ -691,6 +712,7 @@ function initKeranjang() {
 /**
  * Init on DOM ready
  */
+// Inisialisasi global setelah DOM siap
 document.addEventListener('DOMContentLoaded', () => {
     // Flash auto-hide
     document.querySelectorAll('[data-flash]').forEach((banner) => {

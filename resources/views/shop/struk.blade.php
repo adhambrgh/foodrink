@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Struk/bukti detail satu pesanan. Hanya bisa dibuka oleh siswa pemilik
@@ -12,11 +13,13 @@
          pesanan ditonjolkan karena itu satu-satunya hal yang benar-benar
          dibaca petugas. --}}
     <article class="struk">
+        {{-- Nama dan alamat singkat usaha --}}
         <header class="struk__kepala">
             <p class="struk__merek">Foodrink</p>
             <p class="struk__alamat">Jajanan sekolah &middot; antar ke kelas</p>
         </header>
 
+        {{-- Badge status pesanan --}}
         <div class="struk__status">
             <span class="badge badge--{{ $order->status->warnaCss() }}">{{ $order->status->label() }}</span>
         </div>
@@ -52,6 +55,7 @@
             </div>
         </dl>
 
+        {{-- Daftar item yang dibeli beserta subtotal --}}
         <ul class="struk__items" role="list">
             @foreach ($order->items as $item)
                 <li class="struk__item">
@@ -62,6 +66,7 @@
             @endforeach
         </ul>
 
+        {{-- Ringkasan total, ongkir gratis antar ke kelas --}}
         <div class="struk__total">
             <div class="struk__total-baris">
                 <span>Subtotal</span>
@@ -81,6 +86,7 @@
             <p>Terima kasih sudah jajan di Foodrink!</p>
         </footer>
 
+        {{-- Aksi cetak dan navigasi --}}
         <div class="struk__aksi">
             <button type="button" class="tombol tombol--outline tombol--penuh" data-cetak-struk>
                 <x-icon name="cetak" size="18" />

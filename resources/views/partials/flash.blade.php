@@ -6,12 +6,14 @@
      * role="alert" supaya screen reader langsung membacanya saat muncul,
      * bukan menunggu pengguna menemukan sendiri.
      */
+    // Petakan jenis flash ke kelas css dan ikon
     $peta = [
         'sukses' => ['kelas' => 'flash--sukses', 'ikon' => 'cek'],
         'peringatan' => ['kelas' => 'flash--peringatan', 'ikon' => 'silang'],
         'galat' => ['kelas' => 'flash--galat', 'ikon' => 'silang'],
     ];
 
+    // Tampung pesan yang siap dirender
     $pesan = [];
 
     foreach (['sukses', 'peringatan', 'galat'] as $jenis) {

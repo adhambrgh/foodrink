@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Halaman bayar pesanan: ringkasan belanja, data penerima,

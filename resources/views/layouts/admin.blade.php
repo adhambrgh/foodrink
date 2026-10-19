@@ -14,6 +14,7 @@
     @stack('head')
 </head>
 <body class="admin">
+    {{-- Kepala halaman admin dengan logo dan aksi navigasi --}}
     <header class="kepala">
         <div class="bungkus admin__bungkus kepala__baris">
             <a href="{{ route('admin.produk.index') }}" class="merek" aria-label="Admin Foodrink">
@@ -106,6 +107,7 @@
             </nav>
         @endauth
 
+        {{-- Area konten utama admin --}}
         <main class="admin__main">
             @include('partials.flash')
 

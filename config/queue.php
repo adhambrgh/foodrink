@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    'default' => env('QUEUE_CONNECTION', 'database'), // Backend antrean default
 
     /*
     |--------------------------------------------------------------------------
@@ -30,46 +30,46 @@ return [
 
     'connections' => [
 
-        'sync' => [
-            'driver' => 'sync',
+        'sync' => [ // Antrean sinkron (langsung)
+            'driver' => 'sync', // Driver eksekusi langsung
         ],
 
-        'database' => [
-            'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
-            'table' => env('DB_QUEUE_TABLE', 'jobs'),
-            'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
-            'after_commit' => false,
+        'database' => [ // Antrean di database
+            'driver' => 'database', // Driver antrean database
+            'connection' => env('DB_QUEUE_CONNECTION'), // Koneksi DB antrean
+            'table' => env('DB_QUEUE_TABLE', 'jobs'), // Tabel job antrean
+            'queue' => env('DB_QUEUE', 'default'), // Nama queue default
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90), // Jeda retry job (detik)
+            'after_commit' => false, // Dispatch setelah commit transaksi
         ],
 
-        'beanstalkd' => [
-            'driver' => 'beanstalkd',
-            'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
-            'queue' => env('BEANSTALKD_QUEUE', 'default'),
-            'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
-            'block_for' => 0,
-            'after_commit' => false,
+        'beanstalkd' => [ // Antrean via Beanstalkd
+            'driver' => 'beanstalkd', // Driver Beanstalkd
+            'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'), // Host Beanstalkd
+            'queue' => env('BEANSTALKD_QUEUE', 'default'), // Nama queue
+            'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90), // Jeda retry job (detik)
+            'block_for' => 0, // Lama blocking ambil job (detik)
+            'after_commit' => false, // Dispatch setelah commit transaksi
         ],
 
-        'sqs' => [
-            'driver' => 'sqs',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
-            'queue' => env('SQS_QUEUE', 'default'),
-            'suffix' => env('SQS_SUFFIX'),
-            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-            'after_commit' => false,
+        'sqs' => [ // Antrean AWS SQS
+            'driver' => 'sqs', // Driver Amazon SQS
+            'key' => env('AWS_ACCESS_KEY_ID'), // AWS access key
+            'secret' => env('AWS_SECRET_ACCESS_KEY'), // AWS secret key
+            'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'), // Prefix URL SQS
+            'queue' => env('SQS_QUEUE', 'default'), // Nama queue SQS
+            'suffix' => env('SQS_SUFFIX'), // Suffix nama queue
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'), // Wilayah AWS
+            'after_commit' => false, // Dispatch setelah commit transaksi
         ],
 
-        'redis' => [
-            'driver' => 'redis',
-            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
-            'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
-            'block_for' => null,
-            'after_commit' => false,
+        'redis' => [ // Antrean via Redis
+            'driver' => 'redis', // Driver antrean Redis
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'), // Koneksi Redis
+            'queue' => env('REDIS_QUEUE', 'default'), // Nama queue Redis
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90), // Jeda retry job (detik)
+            'block_for' => null, // Lama blocking ambil job (detik)
+            'after_commit' => false, // Dispatch setelah commit transaksi
         ],
 
     ],
@@ -86,8 +86,8 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
-        'table' => 'job_batches',
+        'database' => env('DB_CONNECTION', 'sqlite'), // Koneksi DB batch job
+        'table' => 'job_batches', // Tabel penyimpanan batch job
     ],
 
     /*
@@ -104,9 +104,9 @@ return [
     */
 
     'failed' => [
-        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
-        'table' => 'failed_jobs',
+        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'), // Driver simpan job gagal
+        'database' => env('DB_CONNECTION', 'sqlite'), // Koneksi DB job gagal
+        'table' => 'failed_jobs', // Tabel job gagal
     ],
 
 ];

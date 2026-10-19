@@ -6,6 +6,7 @@
 @props(['name', 'size' => 20, 'class' => ''])
 
 @php
+    // Daftar path svg per nama ikon
     $ikon = [
         'keranjang' => '<path d="M4 8h16l-1.4 10.6A2 2 0 0 1 16.6 20H7.4a2 2 0 0 1-2-1.4L4 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M9.5 12.5v4M14.5 12.5v4"/>',
 

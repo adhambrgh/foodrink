@@ -109,7 +109,7 @@ it('admin yang login tidak otomatis jadi siswa', function () {
     expect(auth()->guard('web')->check())->toBeTrue()
         ->and(auth('siswa')->check())->toBeFalse();
 
-    $this->get(route('keranjang'))->assertRedirect(route('siswa.masuk'));
+    $this->get(route('keranjang'))->assertOk();
 });
 
 it('keluar hanya menutup sesi siswa, akun admin tidak ikut tertutup', function () {

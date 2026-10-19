@@ -1,3 +1,4 @@
+{{-- Pakai kerangka admin --}}
 @extends('layouts.admin')
 
 {{-- Rekap omzet bulanan + grafik tren 12 bulan terakhir. Semua angka
@@ -21,6 +22,7 @@
         </form>
     </div>
 
+    {{-- Kartu ringkasan angka pendapatan --}}
     <div class="pendapatan__kartu-grid">
         <div class="admin__kartu pendapatan__kartu--sorot">
             <p class="pendapatan__label">Pendapatan {{ $labelBulan }}</p>
@@ -50,6 +52,7 @@
         </div>
     </div>
 
+    {{-- Grafik batang tren 12 bulan --}}
     <section class="admin__kartu pendapatan__grafik" aria-labelledby="judul-grafik">
         <div class="pendapatan__kepala-kartu">
             <h2 class="pendapatan__judul" id="judul-grafik">12 bulan terakhir</h2>
@@ -70,6 +73,7 @@
         <p class="admin__sub pendapatan__satuan">Tinggi batang = jumlah uang, angka di atasnya dalam ribuan rupiah.</p>
     </section>
 
+    {{-- Dua kolom terlaris dan rincian --}}
     <div class="pendapatan__dua-kolom">
         <section class="admin__kartu" aria-labelledby="judul-terlaris">
             <div class="pendapatan__kepala-kartu">

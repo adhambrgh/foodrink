@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Riwayat pesanan pembeli. Daftar diambil dari akun siswa (bukan session),
@@ -8,6 +9,7 @@
 
 @section('konten')
     <div class="pesanan-saya">
+        {{-- Header daftar riwayat pesanan --}}
         <header class="pesanan-saya__kepala">
             <p class="hero__label">Riwayat</p>
             <h1 class="admin__judul">Pesanan kamu</h1>
@@ -18,6 +20,7 @@
         </header>
 
         @forelse ($pesanan as $order)
+            {{-- Kartu pesanan per transaksi --}}
             <article class="pesanan-kartu">
                 <div class="pesanan-kartu__kepala">
                     <div>
@@ -45,12 +48,14 @@
                     </div>
                 </dl>
 
+                {{-- Daftar item pesanan --}}
                 <ul class="pesanan-kartu__items" role="list">
                     @foreach ($order->items as $item)
                         <li>{{ $item->nama }} &times; {{ $item->jumlah }}</li>
                     @endforeach
                 </ul>
 
+                {{-- Total dan tombol lihat struk --}}
                 <div class="pesanan-kartu__kaki">
                     <span class="harga pesanan-kartu__total">{{ $order->total_rupiah }}</span>
                     <a href="{{ route('pesanan.show', $order->kode) }}" class="tombol tombol--kecil tombol--outline">Lihat struk</a>

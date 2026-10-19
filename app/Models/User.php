@@ -11,14 +11,14 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable; // trait factory dan notifikasi untuk user
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    protected $fillable = [
+    protected $fillable = [ // kolom yang boleh diisi mass-assignment
         'name',
         'email',
         'password',
@@ -29,7 +29,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $hidden = [
+    protected $hidden = [ // kolom yang disembunyikan saat serialisasi
         'password',
         'remember_token',
     ];
@@ -39,11 +39,11 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected function casts(): array // tentukan konversi tipe data kolom
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at' => 'datetime', // ubah jadi objek tanggal
+            'password' => 'hashed', // enkripsi otomatis kata sandi
         ];
     }
 }

@@ -1,3 +1,4 @@
+{{-- Pakai kerangka toko --}}
 @extends('layouts.shop')
 
 {{-- Form pendaftaran siswa baru (guard `siswa`). NIS wajib unik.
@@ -14,6 +15,7 @@
             nanti tinggal klik bayar.
         </p>
 
+        {{-- Daftar seluruh pesan error validasi --}}
         @if ($errors->any())
             <div class="kartu kartu--galat" role="alert">
                 <ul class="galat-daftar">
@@ -87,6 +89,7 @@
                 </div>
             </div>
 
+            {{-- Kelompokan field kelas untuk tujuan pengantaran --}}
             <fieldset class="akun__kelompok">
                 <legend class="label">Kelas <span class="akun__opsional">(wajib diisi, dipakai untuk antar jajan)</span></legend>
 

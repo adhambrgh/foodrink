@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'log'), // Mailer default pengiriman email
 
     /*
     |--------------------------------------------------------------------------
@@ -37,61 +37,61 @@ return [
 
     'mailers' => [
 
-        'smtp' => [
-            'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
-            'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
-            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        'smtp' => [ // Mailer SMTP standar
+            'transport' => 'smtp', // Jenis transport SMTP
+            'scheme' => env('MAIL_SCHEME'), // Skema enkripsi (tls/ssl)
+            'url' => env('MAIL_URL'), // URL DSN mailer
+            'host' => env('MAIL_HOST', '127.0.0.1'), // Host server SMTP
+            'port' => env('MAIL_PORT', 2525), // Port server SMTP
+            'username' => env('MAIL_USERNAME'), // Username SMTP
+            'password' => env('MAIL_PASSWORD'), // Password SMTP
+            'timeout' => null, // Batas waktu koneksi
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)), // Domain EHLO
         ],
 
-        'ses' => [
-            'transport' => 'ses',
+        'ses' => [ // Mailer Amazon SES
+            'transport' => 'ses', // Jenis transport SES
         ],
 
-        'postmark' => [
-            'transport' => 'postmark',
+        'postmark' => [ // Mailer Postmark
+            'transport' => 'postmark', // Jenis transport Postmark
             // 'message_stream_id' => env('POSTMARK_MESSAGE_STREAM_ID'),
             // 'client' => [
             //     'timeout' => 5,
             // ],
         ],
 
-        'resend' => [
-            'transport' => 'resend',
+        'resend' => [ // Mailer Resend API
+            'transport' => 'resend', // Jenis transport Resend
         ],
 
-        'sendmail' => [
-            'transport' => 'sendmail',
-            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+        'sendmail' => [ // Mailer sendmail lokal
+            'transport' => 'sendmail', // Jenis transport sendmail
+            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'), // Path binary sendmail
         ],
 
-        'log' => [
-            'transport' => 'log',
-            'channel' => env('MAIL_LOG_CHANNEL'),
+        'log' => [ // Mailer tulis ke log
+            'transport' => 'log', // Jenis transport log
+            'channel' => env('MAIL_LOG_CHANNEL'), // Channel log tujuan
         ],
 
-        'array' => [
-            'transport' => 'array',
+        'array' => [ // Mailer simpan di array (testing)
+            'transport' => 'array', // Jenis transport array
         ],
 
-        'failover' => [
-            'transport' => 'failover',
-            'mailers' => [
-                'smtp',
-                'log',
+        'failover' => [ // Mailer failover berurutan
+            'transport' => 'failover', // Jenis transport failover
+            'mailers' => [ // Daftar mailer cadangan
+                'smtp', // Coba SMTP dulu
+                'log', // Fallback ke log
             ],
         ],
 
-        'roundrobin' => [
-            'transport' => 'roundrobin',
-            'mailers' => [
-                'ses',
-                'postmark',
+        'roundrobin' => [ // Mailer giliran round-robin
+            'transport' => 'roundrobin', // Jenis transport roundrobin
+            'mailers' => [ // Daftar mailer bergantian
+                'ses', // Mailer SES
+                'postmark', // Mailer Postmark
             ],
         ],
 
@@ -109,8 +109,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'), // Alamat pengirim global
+        'name' => env('MAIL_FROM_NAME', 'Example'), // Nama pengirim global
     ],
 
 ];

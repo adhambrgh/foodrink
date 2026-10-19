@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Laravel'), // Nama aplikasi ditampilkan di UI
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'production'),
+    'env' => env('APP_ENV', 'production'), // Lingkungan aplikasi (local/production)
 
     /*
     |--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', false), // Mode debug untuk tampilkan error detail
 
     /*
     |--------------------------------------------------------------------------
@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://localhost'), // Base URL aplikasi untuk generate link
 
     /*
     |--------------------------------------------------------------------------
@@ -66,7 +66,7 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => env('APP_TIMEZONE', 'UTC'), // Zona waktu default aplikasi
 
     /*
     |--------------------------------------------------------------------------
@@ -79,11 +79,11 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'en'), // Bahasa utama aplikasi
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // Bahasa cadangan jika translation hilang
 
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'), // Bahasa data palsu untuk faker
 
     /*
     |--------------------------------------------------------------------------
@@ -96,11 +96,11 @@ return [
     |
     */
 
-    'cipher' => 'AES-256-CBC',
+    'cipher' => 'AES-256-CBC', // Algoritma enkripsi data
 
-    'key' => env('APP_KEY'),
+    'key' => env('APP_KEY'), // Kunci rahasia enkripsi Laravel
 
-    'previous_keys' => [
+    'previous_keys' => [ // Kunci enkripsi lama saat rotasi
         ...array_filter(
             explode(',', env('APP_PREVIOUS_KEYS', ''))
         ),
@@ -120,8 +120,8 @@ return [
     */
 
     'maintenance' => [
-        'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
-        'store' => env('APP_MAINTENANCE_STORE', 'database'),
+        'driver' => env('APP_MAINTENANCE_DRIVER', 'file'), // Driver status mode perbaikan
+        'store' => env('APP_MAINTENANCE_STORE', 'database'), // Tempat simpan cache mode perbaikan
     ],
 
 ];

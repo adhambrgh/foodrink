@@ -1,3 +1,4 @@
+{{-- Pakai kerangka admin --}}
 @extends('layouts.admin')
 
 {{-- Manajemen label produk (mis. "Paling Laris", "Promo"). Terhubung ke
@@ -12,7 +13,7 @@
         </div>
     </div>
     <p class="admin__sub">
-        Tag itu label kecil di kartu jajan, misalnya “Paling laris” atau “Musiman”.
+        Tag itu label kecil di kartu jajan, misalnya “Paling laris” atau “Musiman”.45
         Buat tag di sini, lalu centang produk yang boleh memakainya. Tag dengan
         <strong>sorot</strong> juga membuat kartunya dibedain di katalog.
     </p>

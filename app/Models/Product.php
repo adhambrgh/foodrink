@@ -15,9 +15,9 @@ use Illuminate\Support\Str;
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
-    use HasFactory;
+    use HasFactory; // trait factory untuk pembuatan data testing
 
-    protected $fillable = [
+    protected $fillable = [ // kolom yang boleh diisi mass-assignment
         'nama',
         'slug',
         'deskripsi',
@@ -29,116 +29,116 @@ class Product extends Model
         'urutan',
     ];
 
-    protected function casts(): array
+    protected function casts(): array // tentukan konversi tipe data kolom
     {
         return [
-            'harga' => 'integer',
-            'stok' => 'integer',
-            'tersedia' => 'boolean',
-            'urutan' => 'integer',
-            'kategori' => Kategori::class,
+            'harga' => 'integer', // ubah harga jadi angka bulat
+            'stok' => 'integer', // ubah stok jadi angka bulat
+            'tersedia' => 'boolean', // ubah tersedia jadi boolean
+            'urutan' => 'integer', // ubah urutan jadi angka bulat
+            'kategori' => Kategori::class, // ubah kategori jadi enum Kategori
         ];
     }
 
-    protected static function booted(): void
+    protected static function booted(): void // hook saat model di-boot
     {
-        static::saving(function (Product $produk) {
-            if (blank($produk->slug)) {
-                $produk->slug = static::slugDari($produk->nama, $produk->exists ? $produk->getKey() : null);
+        static::saving(function (Product $produk) { // jalankan sebelum data disimpan
+            if (blank($produk->slug)) { // jika slug masih kosong
+                $produk->slug = static::slugDari($produk->nama, $produk->exists ? $produk->getKey() : null); // buat slug unik dari nama
             }
         });
     }
 
-    public function orderItems(): HasMany
+    public function orderItems(): HasMany // relasi item pesanan produk ini
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(OrderItem::class); // satu produk muncul di banyak item
     }
 
     /**
      * Label(jualan) yang menempel di produk, mis. "Paling laris". Diatur
      * admin lewat halaman Tag, bukan dari kode.
      */
-    public function tags(): BelongsToMany
+    public function tags(): BelongsToMany // relasi label produk
     {
-        return $this->belongsToMany(Tag::class)->withTimestamps();
+        return $this->belongsToMany(Tag::class)->withTimestamps(); // relasi many-to-many dengan timestamp pivot
     }
 
-    public function scopeTersedia(Builder $query): Builder
+    public function scopeTersedia(Builder $query): Builder // scope produk yang tersedia
     {
-        return $query->where('tersedia', true);
+        return $query->where('tersedia', true); // hanya produk bertanda tersedia
     }
 
     /**
      * Urutan tampil: kolom urutan dulu, nama sebagai pemutus agar katalog
      * tidak berganti-ganti posisi kalau dua produk punya urutan sama.
      */
-    public function scopeUrut(Builder $query): Builder
+    public function scopeUrut(Builder $query): Builder // scope urutan tampil produk
     {
-        return $query->orderBy('urutan')->orderBy('nama');
+        return $query->orderBy('urutan')->orderBy('nama'); // urutkan berdasarkan urutan lalu nama
     }
 
-    public function scopeKategori(Builder $query, Kategori $kategori): Builder
+    public function scopeKategori(Builder $query, Kategori $kategori): Builder // scope filter per kategori
     {
-        return $query->where('kategori', $kategori->value);
+        return $query->where('kategori', $kategori->value); // cocokkan kolom kategori
     }
 
     /**
      * Stok menipis, untuk chip filter di admin. Batasnya longgar supaya
      * admin diberi tahu sebelum benar-benar habis.
      */
-    public function scopeStokMenipis(Builder $query, int $maks = 5): Builder
+    public function scopeStokMenipis(Builder $query, int $maks = 5): Builder // scope stok menipis
     {
-        return $query->where('stok', '<=', $maks);
+        return $query->where('stok', '<=', $maks); // produk dengan stok di bawah batas
     }
 
-    public function scopeCari(Builder $query, ?string $kata): Builder
+    public function scopeCari(Builder $query, ?string $kata): Builder // scope pencarian produk
     {
-        $kata = trim((string) $kata);
+        $kata = trim((string) $kata); // bersihkan spasi kata kunci
 
-        if ($kata === '') {
-            return $query;
+        if ($kata === '') { // jika kata kunci kosong
+            return $query; // kembalikan query tanpa filter
         }
 
         // Escape wildcard LIKE supaya "%" yang diketik pengguna tidak
         // membuat semua baris ikut terbawa.
-        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $kata);
+        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $kata); // escape karakter khusus LIKE
 
-        return $query->where('nama', 'like', "%{$escaped}%");
+        return $query->where('nama', 'like', "%{$escaped}%"); // cari nama mengandung kata kunci
     }
 
     /**
      * Stok 0 = sudah habis, tombol tambah di katalog dimatikan.
      */
-    public function getHabisAttribute(): bool
+    public function getHabisAttribute(): bool // accessor status habis
     {
-        return $this->stok <= 0;
+        return $this->stok <= 0; // habis jika stok nol atau kurang
     }
 
     /**
      * Label stok untuk badge di katalog dan admin.
      */
-    public function getLabelStokAttribute(): string
+    public function getLabelStokAttribute(): string // accessor label stok
     {
-        return match (true) {
-            $this->stok <= 0 => 'Habis',
-            $this->stok === 1 => 'Sisa 1',
-            default => 'Sisa '.$this->stok,
+        return match (true) { // pilih label sesuai kondisi
+            $this->stok <= 0 => 'Habis', // label jika stok habis
+            $this->stok === 1 => 'Sisa 1', // label jika stok tersisa satu
+            default => 'Sisa '.$this->stok, // label sisa stok lainnya
         };
     }
 
     /**
      * Harga dalam format Rupiah untuk ditampilkan.
      */
-    public function getHargaRupiahAttribute(): string
+    public function getHargaRupiahAttribute(): string // accessor harga format rupiah
     {
-        return 'Rp '.number_format($this->harga, 0, ',', '.');
+        return 'Rp '.number_format($this->harga, 0, ',', '.'); // format harga jadi rupiah
     }
 
-    public function getUrlGambarAttribute(): ?string
+    public function getUrlGambarAttribute(): ?string // accessor URL gambar upload
     {
-        return $this->gambar
-            ? asset('storage/'.$this->gambar)
-            : null;
+        return $this->gambar // jika ada file gambar
+            ? asset('storage/'.$this->gambar) // kembalikan URL dari storage
+            : null; // kosongkan jika tidak ada
     }
 
     /**
@@ -153,49 +153,49 @@ class Product extends Model
      * Foto bawaan diambil versi WebP 360px: aslinya PNG 900-1131px sampai
      * 1,5 MB padahal di katalog cuma tampil ~300px.
      */
-    public function getFotoFallbackAttribute(): ?string
+    public function getFotoFallbackAttribute(): ?string // foto upload atau foto bawaan
     {
-        if ($this->gambar) {
-            return $this->url_gambar;
+        if ($this->gambar) { // jika ada foto upload
+            return $this->url_gambar; // pakai URL upload
         }
 
-        return $this->fotoBawaan(360);
+        return $this->fotoBawaan(360); // fallback ke foto bawaan lebar 360px
     }
 
     /**
      * srcset supaya browser hanya unduh ukuran yang pas dengan layarnya
      * (180w buat HP kecil, 720b buat desktop). Nol kalau pakai foto upload.
      */
-    public function getFotoSrcsetAttribute(): ?string
+    public function getFotoSrcsetAttribute(): ?string // susun atribut srcset gambar
     {
-        if ($this->gambar) {
-            return null;
+        if ($this->gambar) { // foto upload tidak perlu srcset
+            return null; // kembalikan null
         }
 
-        $bagian = [];
+        $bagian = []; // siapkan daftar kandidat srcset
 
-        foreach ([180, 360, 720] as $lebar) {
-            if ($url = $this->fotoBawaan($lebar)) {
-                $bagian[] = $url.' '.$lebar.'w';
+        foreach ([180, 360, 720] as $lebar) { // iterasi tiap lebar
+            if ($url = $this->fotoBawaan($lebar)) { // ambil URL foto bawaan bila ada
+                $bagian[] = $url.' '.$lebar.'w'; // susun format srcset
             }
         }
 
-        return $bagian === [] ? null : implode(', ', $bagian);
+        return $bagian === [] ? null : implode(', ', $bagian); // gabung atau null
     }
 
     /**
      * Nama file foto bawaan untuk kategori produk ini, opsional disesuaikan
      * lebar pikselnya. Null kalau kategorinya bukan keduanya.
      */
-    protected function fotoBawaan(?int $lebar): ?string
+    protected function fotoBawaan(?int $lebar): ?string // bangun URL foto bawaan
     {
-        $nama = match ($this->kategori) {
-            Kategori::PisangNugget => 'pisang-nugget',
-            Kategori::EsMamboo => 'es-mambo',
-            default => null,
+        $nama = match ($this->kategori) { // petakan kategori ke nama file
+            Kategori::PisangNugget => 'pisang-nugget', // nama file kategori nugget
+            Kategori::EsMamboo => 'es-mambo', // nama file kategori es mambo
+            default => null, // kategori lain tanpa foto bawaan
         };
 
-        return $nama ? GambarBawaan::url($nama, $lebar) : null;
+        return $nama ? GambarBawaan::url($nama, $lebar) : null; // ambil URL file atau null
     }
 
     /**
@@ -205,32 +205,32 @@ class Product extends Model
      * $abaikanId dipakai supaya produk yang sedang di-update tidak dianggap
      * bentrok dengan slug lamanya sendiri.
      */
-    public static function slugDari(string $nama, ?int $abaikanId = null): string
+    public static function slugDari(string $nama, ?int $abaikanId = null): string // buat slug unik dari nama
     {
-        $dasar = Str::slug($nama);
+        $dasar = Str::slug($nama); // ubah nama jadi slug
 
-        if ($dasar === '') {
-            $dasar = 'produk';
+        if ($dasar === '') { // jika slug kosong
+            $dasar = 'produk'; // pakai nama dasar default
         }
 
-        $slug = $dasar;
-        $urutan = 2;
+        $slug = $dasar; // inisialisasi slug sementara
+        $urutan = 2; // inisialisasi nomor akhiran
 
-        $bentrok = static::query()
-            ->where('slug', $slug)
-            ->when($abaikanId !== null, fn (Builder $q) => $q->where('id', '!=', $abaikanId))
-            ->exists();
+        $bentrok = static::query() // cek keberadaan slug
+            ->where('slug', $slug) // cocokkan slug
+            ->when($abaikanId !== null, fn (Builder $q) => $q->where('id', '!=', $abaikanId)) // abaikan id produk sendiri
+            ->exists(); // hasil true bila sudah terpakai
 
-        while ($bentrok) {
-            $slug = $dasar.'-'.$urutan;
-            $urutan++;
+        while ($bentrok) { // selama slug masih bentrok
+            $slug = $dasar.'-'.$urutan; // tambahkan nomor akhiran
+            $urutan++; // naikkan nomor akhiran
 
-            $bentrok = static::query()
-                ->where('slug', $slug)
-                ->when($abaikanId !== null, fn (Builder $q) => $q->where('id', '!=', $abaikanId))
-                ->exists();
+            $bentrok = static::query() // cek ulang slug bentrok
+                ->where('slug', $slug) // cocokkan slug baru
+                ->when($abaikanId !== null, fn (Builder $q) => $q->where('id', '!=', $abaikanId)) // abaikan id produk sendiri
+                ->exists(); // hasil true bila bentrok lagi
         }
 
-        return $slug;
+        return $slug; // kembalikan slug yang sudah unik
     }
 }
