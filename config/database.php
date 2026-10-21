@@ -42,45 +42,9 @@ return [
             'synchronous' => null, // Mode sinkronisasi SQLite
         ],
 
-        'mysql' => [ // Koneksi MySQL
-            'driver' => 'mysql', // Driver MySQL
-            'url' => env('DB_URL'), // URL koneksi lengkap
-            'host' => env('DB_HOST', '127.0.0.1'), // Host database
-            'port' => env('DB_PORT', '3306'), // Port database
-            'database' => env('DB_DATABASE', 'laravel'), // Nama database
-            'username' => env('DB_USERNAME', 'root'), // Username database
-            'password' => env('DB_PASSWORD', ''), // Password database
-            'unix_socket' => env('DB_SOCKET', ''), // Socket Unix (opsional)
-            'charset' => env('DB_CHARSET', 'utf8mb4'), // Charset koneksi
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'), // Kolasi default
-            'prefix' => '', // Awalan nama tabel
-            'prefix_indexes' => true, // Awali indeks dengan prefix
-            'strict' => true, // Mode strict MySQL
-            'engine' => null, // Storage engine tabel
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'), // CA SSL MySQL
-            ]) : [],
-        ],
-
-        'mariadb' => [ // Koneksi MariaDB
-            'driver' => 'mariadb', // Driver MariaDB
-            'url' => env('DB_URL'), // URL koneksi lengkap
-            'host' => env('DB_HOST', '127.0.0.1'), // Host database
-            'port' => env('DB_PORT', '3306'), // Port database
-            'database' => env('DB_DATABASE', 'laravel'), // Nama database
-            'username' => env('DB_USERNAME', 'root'), // Username database
-            'password' => env('DB_PASSWORD', ''), // Password database
-            'unix_socket' => env('DB_SOCKET', ''), // Socket Unix (opsional)
-            'charset' => env('DB_CHARSET', 'utf8mb4'), // Charset koneksi
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'), // Kolasi default
-            'prefix' => '', // Awalan nama tabel
-            'prefix_indexes' => true, // Awali indeks dengan prefix
-            'strict' => true, // Mode strict MariaDB
-            'engine' => null, // Storage engine tabel
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'), // CA SSL MariaDB
-            ]) : [],
-        ],
+        // Blok `mysql` dan `mariadb` sengaja tidak ada: app hanya pakai
+        // PostgreSQL (Supabase) dan SQLite (test). Menyimpan keduanya
+        // memicu deprecation PDO::MYSQL_ATTR_SSL_CA di PHP 8.5 tanpa manfaat.
 
         'pgsql' => [ // Koneksi PostgreSQL
             'driver' => 'pgsql', // Driver PostgreSQL
