@@ -58,7 +58,7 @@ class ProductController extends Controller // kontroler produk admin
         $data = $this->validasi($request); // validasi input
 
         if ($request->hasFile('gambar')) { // cek ada file gambar
-            $data['gambar'] = $request->file('gambar')->store('produk', 'public'); // upload gambar
+            $data['gambar'] = $request->file('gambar')->store('produk'); // upload gambar ke disk default
         }
 
         $data['tersedia'] = $request->boolean('tersedia'); // konversi boolean
@@ -85,13 +85,13 @@ class ProductController extends Controller // kontroler produk admin
         $data = $this->validasi($request); // validasi input
 
         if ($request->boolean('hapus_gambar') && $produk->gambar) { // cek hapus gambar
-            Storage::disk('public')->delete($produk->gambar); // hapus file lama
+            Storage::delete($produk->gambar); // hapus file lama
             $data['gambar'] = null; // kosongkan gambar
         } elseif ($request->hasFile('gambar')) { // cek upload baru
             if ($produk->gambar) { // ada gambar lama
-                Storage::disk('public')->delete($produk->gambar); // hapus lama
+                Storage::delete($produk->gambar); // hapus lama
             }
-            $data['gambar'] = $request->file('gambar')->store('produk', 'public'); // upload baru
+            $data['gambar'] = $request->file('gambar')->store('produk'); // upload baru ke disk default
         } else { // tidak ubah gambar
             unset($data['gambar']); // biarkan gambar lama
         }
@@ -114,7 +114,7 @@ class ProductController extends Controller // kontroler produk admin
     public function destroy(Product $produk): RedirectResponse // hapus produk
     {
         if ($produk->gambar) { // cek ada gambar
-            Storage::disk('public')->delete($produk->gambar); // hapus file gambar
+            Storage::delete($produk->gambar); // hapus file gambar
         }
 
         $nama = $produk->nama; // simpan nama

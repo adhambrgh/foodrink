@@ -436,7 +436,7 @@ class CheckoutController extends Controller // kontroler checkout
                 'status' => $tunai ? StatusOrder::Lunas : StatusOrder::MenungguBayar, // status sesuai bayar
                 'total' => $total, // total bayar
                 'midtrans_order_id' => $this->midtransOrderId(), // ID Midtrans unik
-                'batas_bayar' => $tunai ? null : now()->addMinutes(30), // batas bayar 30 menit
+                'batas_bayar' => $tunai ? null : now()->addMinutes((int) config('services.midtrans.batas_bayar_menit')), // batas bayar QRIS
             ]);
 
             foreach ($cart as $item) { // loop item keranjang

@@ -27,7 +27,7 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="MIDTRANS_SERVER_KEY" value=""/>
         <env name="MIDTRANS_CLIENT_KEY" value=""/>
-        <env name="MIDTRANS_PRODUCTION" value="false"/>
+        <env name="MIDTRANS_IS_PRODUCTION" value="false"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

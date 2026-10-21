@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Product extends Model
@@ -137,7 +138,7 @@ class Product extends Model
     public function getUrlGambarAttribute(): ?string // accessor URL gambar upload
     {
         return $this->gambar // jika ada file gambar
-            ? asset('storage/'.$this->gambar) // kembalikan URL dari storage
+            ? Storage::url($this->gambar) // URL mengikuti disk aktif (lokal publik atau S3)
             : null; // kosongkan jika tidak ada
     }
 

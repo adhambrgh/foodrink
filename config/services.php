@@ -39,6 +39,13 @@ return [
         'server_key' => env('MIDTRANS_SERVER_KEY'), // Kunci server Midtrans
         'client_key' => env('MIDTRANS_CLIENT_KEY'), // Kunci client Midtrans
         'is_production' => env('MIDTRANS_IS_PRODUCTION', false), // Penanda mode produksi
+        'batas_bayar_menit' => (int) env('MIDTRANS_BATAS_BAYAR_MENIT', 30), // Batas bayar QRIS (menit)
+    ],
+
+    'cron' => [
+        // Rahasia yang dikirim Vercel Cron lewat header Authorization.
+        // Selama nilainya kosong, endpoint cron mati total.
+        'secret' => env('CRON_SECRET'), // Token verifikasi cron
     ],
 
 ];

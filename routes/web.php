@@ -11,6 +11,8 @@ use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\Siswa\AuthController as SiswaAuthController;
 use App\Http\Controllers\Siswa\ProfilController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // Login siswa. Pakai guard `siswa` yang terpisah dari `web` milik admin.
@@ -59,6 +61,19 @@ Route::middleware('auth:siswa')->group(function () { // Route butuh login siswa
 // datang dari verifikasi signature_key dengan server key di dalam controller.
 Route::post('/checkout/callback', [CheckoutController::class, 'callback']) // Webhook callback Midtrans
     ->name('checkout.callback');
+
+// Pemicu pembersihan pesanan kedaluwarsa, dipanggil Vercel Cron. Di serverless
+// tidak ada daftar cron Laravel yang jalan sendiri, jadi tugas terjadwal
+// dijalankan lewat endpoint ini dengan token rahasia.
+Route::get('/cron/orders-expire', function (Request $request) { // endpoint cron expiry
+    $secret = (string) config('services.cron.secret'); // ambil token rahasia
+
+    abort_unless($secret !== '' && hash_equals($secret, (string) $request->bearerToken()), 403); // tolak tanpa token sah
+
+    Artisan::call('orders:expire'); // jalankan pembersihan
+
+    return response('OK'); // balas sukses
+})->name('cron.orders-expire');
 
 Route::prefix('admin')->name('admin.')->group(function () { // Group route admin dengan prefix /admin
     Route::get('/login', [AuthController::class, 'login'])->name('login'); // Halaman login admin

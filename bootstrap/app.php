@@ -12,8 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Vercel menaruh proxy di depan app. Tanpa mempercayai header
+        // X-Forwarded-*, Laravel mengira request datang via http dan
+        // menghasilkan URL asset/route yang salah.
+        $middleware->trustProxies(at: '*');
+
+        // Webhook Midtrans datang dari server mereka tanpa cookie/session,
+        // jadi tidak mungkin membawa token CSRF. Tanpa pengecualian ini,
+        // callback selalu ditolak 419 dan order tidak pernah jadi lunas.
         $middleware->validateCsrfTokens(except: [
             'checkout/prepare',
+            'checkout/callback',
         ]);
 
         // Pengunjung yang belum login diarahkan ke halaman login yang

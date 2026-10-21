@@ -1,0 +1,11 @@
+/node_modules
+/.git
+/.idea
+/.vscode
+/.env
+/.env.*
+/storage/*.key
+/tests
+phpunit.xml
+/.phpunit.cache
+/.phpunit.result.cache

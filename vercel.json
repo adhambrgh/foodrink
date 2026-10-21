@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "/api/index.php", "use": "vercel-php@0.9.0", "config": { "memory": 1024, "maxDuration": 30 } },
+    { "src": "/public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/(build|images)/(.*)", "dest": "/public/$1/$2" },
+    { "src": "/(favicon\\.ico|robots\\.txt)", "dest": "/public/$1" },
+    { "src": "/(.*)", "dest": "/api/index.php" }
+  ],
+  "crons": [
+    { "path": "/cron/orders-expire", "schedule": "0 17 * * *" }
+  ]
+}
