@@ -1,7 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { "src": "/api/index.php", "use": "vercel-php@0.8.0", "config": { "memory": 1024, "maxDuration": 30 } },
+    { 
+      "src": "/api/index.php", 
+      "use": "vercel-php@0.8.0", 
+      "config": { 
+        "memory": 1024, 
+        "maxDuration": 30,
+        "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan migrate --force"
+      } 
+    },
     { "src": "/public/**", "use": "@vercel/static" }
   ],
   "routes": [
