@@ -61,8 +61,16 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })->create();
 
 /**
- * Serverless fallback: Register core providers at runtime if config cache not loaded.
- * Runs after app is booted but before handling requests.
+ * Serverless fix 1: Force load config cache if exists (build-time generated).
+ */
+$configCache = __DIR__.'/../bootstrap/cache/config.php';
+if (file_exists($configCache)) {
+    $app->loadConfigFromCache($configCache);
+}
+
+/**
+ * Serverless fix 2: Register core providers via booted callback.
+ * Runs after app is fully booted, before handling requests.
  */
 $coreProviders = [
     FoundationServiceProvider::class,
@@ -80,18 +88,20 @@ $coreProviders = [
     LogServiceProvider::class,
 ];
 
-foreach ($coreProviders as $provider) {
-    $app->register($provider);
-}
+$app->booted(function () use ($app, $coreProviders) {
+    foreach ($coreProviders as $provider) {
+        $app->register($provider);
+    }
 
-/**
- * Fallback: Force package discovery for additional packages.
- */
-try {
-    $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
-    $kernel->call('package:discover', ['--ansi' => true]);
-} catch (Throwable $e) {
-    // Ignore if console kernel not available
-}
+    /**
+     * Fallback: Force package discovery for additional packages.
+     */
+    try {
+        $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
+        $kernel->call('package:discover', ['--ansi' => true]);
+    } catch (Throwable $e) {
+        // Ignore if console kernel not available
+    }
+});
 
 return $app;
