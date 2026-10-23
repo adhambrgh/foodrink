@@ -10,9 +10,7 @@
       "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan package:discover --ansi",
       "writableDirs": ["storage", "bootstrap/cache"],
       "extensions": ["pdo_pgsql", "mbstring", "xml", "curl", "zip", "bcmath", "gd"],
-      "buildEnv": {
-        "APP_DEBUG": "true"
-      }
+      
     }
   }, { "src": "/public/**", "use": "@vercel/static" }],
   "routes": [
