@@ -4,20 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\View\ViewServiceProvider;
-use Illuminate\Routing\RoutingServiceProvider;
-use Illuminate\Foundation\Providers\FoundationServiceProvider;
-use Illuminate\Translation\TranslationServiceProvider;
-use Illuminate\Validation\ValidationServiceProvider;
-use Illuminate\Auth\AuthServiceProvider;
-use Illuminate\Session\SessionServiceProvider;
-use Illuminate\Cookie\CookieServiceProvider;
-use Illuminate\Encryption\EncryptionServiceProvider;
-use Illuminate\Filesystem\FilesystemServiceProvider;
-use Illuminate\Pipeline\PipelineServiceProvider;
-use Illuminate\Events\EventServiceProvider;
-use Illuminate\Log\LogServiceProvider;
-use Illuminate\Container\ContainerServiceProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,22 +11,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withProviders([
-        ContainerServiceProvider::class,
-        FoundationServiceProvider::class,
-        EventServiceProvider::class,
-        LogServiceProvider::class,
-        RoutingServiceProvider::class,
-        CookieServiceProvider::class,
-        SessionServiceProvider::class,
-        EncryptionServiceProvider::class,
-        ViewServiceProvider::class,
-        TranslationServiceProvider::class,
-        ValidationServiceProvider::class,
-        AuthServiceProvider::class,
-        FilesystemServiceProvider::class,
-        PipelineServiceProvider::class,
-    ])
     ->withMiddleware(function (Middleware $middleware) {
         // Vercel menaruh proxy di depan app. Tanpa mempercayai header
         // X-Forwarded-*, Laravel mengira request datang via http dan
