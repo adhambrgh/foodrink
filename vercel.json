@@ -9,8 +9,7 @@
       "runtime": "php-8.3",
       "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan package:discover --ansi && php artisan config:cache",
       "writableDirs": ["storage", "bootstrap/cache"],
-      "extensions": ["pdo_pgsql", "mbstring", "xml", "curl", "zip", "bcmath", "gd"],
-      
+      "extensions": ["pdo_pgsql", "mbstring", "xml", "curl", "zip", "bcmath", "gd"]
     }
   }, { "src": "/public/**", "use": "@vercel/static" }],
   "routes": [
