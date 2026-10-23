@@ -7,7 +7,7 @@
       "memory": 1024,
       "maxDuration": 30,
       "runtime": "php-8.3",
-      "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan package:discover --ansi",
+      "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan package:discover --ansi && php artisan config:cache",
       "writableDirs": ["storage", "bootstrap/cache"],
       "extensions": ["pdo_pgsql", "mbstring", "xml", "curl", "zip", "bcmath", "gd"],
       
