@@ -1,17 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    { 
-      "src": "/api/index.php", 
-      "use": "vercel-php@0.8.0", 
-      "config": { 
-        "memory": 1024, 
-        "maxDuration": 30,
-        "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan migrate --force"
-      } 
-    },
-    { "src": "/public/**", "use": "@vercel/static" }
-  ],
+  "builds": [{
+    "src": "/api/index.php",
+    "use": "vercel-php@0.15.0",
+    "config": {
+      "memory": 1024,
+      "maxDuration": 30,
+      "runtime": "php-8.3",
+      "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build",
+      "writableDirs": ["storage", "bootstrap/cache"]
+    }
+  }, { "src": "/public/**", "use": "@vercel/static" }],
   "routes": [
     { "src": "/(build|images)/(.*)", "dest": "/public/$1/$2" },
     { "src": "/(favicon\\.ico|robots\\.txt)", "dest": "/public/$1" },
