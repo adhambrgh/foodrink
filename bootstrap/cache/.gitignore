@@ -1,2 +1,5 @@
+# Ignore everything except these production cache files
 *
 !.gitignore
+!packages.php
+!services.php
