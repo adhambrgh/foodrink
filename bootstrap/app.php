@@ -4,8 +4,21 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Providers\FoundationServiceProvider;
+use Illuminate\Routing\RoutingServiceProvider;
+use Illuminate\View\ViewServiceProvider;
+use Illuminate\Translation\TranslationServiceProvider;
+use Illuminate\Validation\ValidationServiceProvider;
+use Illuminate\Auth\AuthServiceProvider;
+use Illuminate\Session\SessionServiceProvider;
+use Illuminate\Cookie\CookieServiceProvider;
+use Illuminate\Encryption\EncryptionServiceProvider;
+use Illuminate\Filesystem\FilesystemServiceProvider;
+use Illuminate\Pipeline\PipelineServiceProvider;
+use Illuminate\Events\EventServiceProvider;
+use Illuminate\Log\LogServiceProvider;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
@@ -46,3 +59,39 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
+/**
+ * Serverless fix: Register core service providers at runtime.
+ * Build-time package:discover tidak persist ke runtime di Vercel.
+ */
+$coreProviders = [
+    FoundationServiceProvider::class,
+    RoutingServiceProvider::class,
+    ViewServiceProvider::class,
+    TranslationServiceProvider::class,
+    ValidationServiceProvider::class,
+    AuthServiceProvider::class,
+    SessionServiceProvider::class,
+    CookieServiceProvider::class,
+    EncryptionServiceProvider::class,
+    FilesystemServiceProvider::class,
+    PipelineServiceProvider::class,
+    EventServiceProvider::class,
+    LogServiceProvider::class,
+];
+
+foreach ($coreProviders as $provider) {
+    $app->register($provider);
+}
+
+/**
+ * Fallback: Force package discovery for additional packages.
+ */
+try {
+    $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
+    $kernel->call('package:discover', ['--ansi' => true]);
+} catch (Throwable $e) {
+    // Ignore if console kernel not available
+}
+
+return $app;
