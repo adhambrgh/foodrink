@@ -146,6 +146,20 @@ export async function deleteCategory(formData: FormData) {
   const supabase = createAdminClient();
   const id = formData.get('id') as string;
 
+  const { data: linkedProducts, error: countError } = await supabase
+    .from('products')
+    .select('id')
+    .eq('category_id', id)
+    .limit(1);
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  if (linkedProducts && linkedProducts.length > 0) {
+    throw new Error('Tidak dapat menghapus kategori karena masih ada produk terhubung. Pindahkan atau hapus produk terlebih dahulu.');
+  }
+
   const { error } = await supabase.from('categories').delete().eq('id', id);
   if (error) throw new Error(error.message);
   revalidatePath('/admin/kategori');

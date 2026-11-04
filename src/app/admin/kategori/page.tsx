@@ -1,7 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/server-admin';
 import { Plus, Edit, Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream } from 'lucide-react';
 import Link from 'next/link';
-import { deleteCategory } from '../menu/actions';
+import { getCategoriesWithCounts } from '@/lib/supabase/kategori';
 import { DeleteCategoryButton } from './delete-category-button';
 
 const categoryIcons = {
@@ -14,34 +13,9 @@ const categoryIcons = {
   icecream: IceCream,
 };
 
-async function getCategoriesWithCounts() {
-  const supabase = createAdminClient();
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('id, name, icon, active')
-    .order('name');
-
-  if (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
-
-  const counts = await Promise.all(
-    (categories || []).map(async (c: any) => {
-      const { count } = await supabase.from('products').select('id', { count: 'exact', head: true }).eq('category_id', c.id);
-      return { id: c.id, productCount: count || 0 };
-    })
-  );
-
-  return (categories || []).map((c: any) => {
-    const cnt = counts.find((x) => x.id === c.id);
-    const IconComponent = c.icon && categoryIcons[c.icon as keyof typeof categoryIcons] ? categoryIcons[c.icon as keyof typeof categoryIcons] : null;
-    return { ...c, productCount: cnt?.productCount || 0, IconComponent };
-  });
-}
-
 export default async function AdminKategoriPage() {
   const categories = await getCategoriesWithCounts();
+  const categoryOptions = categories.map(({ id, name }: any) => ({ id, name }));
 
   return (
     <div className="p-4 md:p-6 space-y-5">
@@ -104,10 +78,12 @@ export default async function AdminKategoriPage() {
                           <Link href={`/admin/kategori/${c.id}/edit`} className="p-1.5 text-text-muted hover:text-primary rounded-lg hover:bg-surface-variant transition-colors">
                             <Edit className="w-4 h-4" />
                           </Link>
-                          <form action={deleteCategory} method="post" className="inline">
-                            <input type="hidden" name="id" value={c.id} />
-                            <DeleteCategoryButton />
-                          </form>
+                          <DeleteCategoryButton
+                            categoryId={c.id}
+                            categoryName={c.name}
+                            productCount={c.productCount}
+                            allCategories={categoryOptions}
+                          />
                         </div>
                       </td>
                     </tr>

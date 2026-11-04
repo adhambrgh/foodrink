@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { LogOut, User, Bell, Shield, Settings, CreditCard } from 'lucide-react';
 import Link from 'next/link';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 export default function AkunPage() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function AkunPage() {
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-        <div>Memuat...</div>
+        <LoadingSpinner />
       </main>
     );
   }

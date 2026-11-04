@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Send, MapPin } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
+import { formatCurrency } from '@/lib/utils';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 interface CheckoutFormData {
   delivery_method: 'antar_ke_kelas' | 'ambil_sendiri';
@@ -65,7 +67,7 @@ export default function CheckoutPage() {
   };
 
   if (cartLoading || items.length === 0) {
-    return <div className="min-h-screen bg-surface flex items-center justify-center">Memuat...</div>;
+    return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingSpinner /></div>;
   }
 
   return (
@@ -143,16 +145,16 @@ export default function CheckoutPage() {
           {/* Order Summary */}
           <div className="bg-white rounded-lg p-4 border border-border">
             <h2 className="text-lg font-semibold text-text mb-3">Ringkasan Pesanan</h2>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-text-muted">Subtotal</span>
-                <span className="text-text">Rp {subtotal.toLocaleString('id-ID')}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Subtotal</span>
+                  <span className="text-text">{formatCurrency(subtotal)}</span>
+                </div>
+                <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span className="text-primary">{formatCurrency(total)}</span>
+                </div>
               </div>
-              <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span className="text-primary">Rp {total.toLocaleString('id-ID')}</span>
-              </div>
-            </div>
           </div>
 
           {/* Notes */}

@@ -1,14 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { TrendingUp, ShoppingCart, Package, Users } from 'lucide-react';
 import Link from 'next/link';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/utils';
 
 async function getDashboardStats() {
   const supabase = createAdminClient();

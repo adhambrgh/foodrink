@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Menu, Receipt, Tags, Heart, ChevronRight } from 'lucide-react';
+import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
@@ -10,6 +10,8 @@ const navItems = [
   { href: '/admin/menu', label: 'Kelola Menu', icon: Menu },
   { href: '/admin/kategori', label: 'Kategori', icon: Tags },
   { href: '/admin/pesanan', label: 'Pesanan', icon: Receipt },
+  { href: '/admin/reviews', label: 'Review', icon: MessageSquare },
+  { href: '/admin/banner', label: 'Banner', icon: MessageSquare },
 ];
 
 function NavLinks({ className = '' }: { className?: string }) {

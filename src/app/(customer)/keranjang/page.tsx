@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/use-cart';
 import { supabase } from '@/lib/supabase/client';
 import QuantityStepper from '@/components/customer/quantity-stepper';
 import { formatCurrency } from '@/lib/utils';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 export default function KeranjangPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function KeranjangPage() {
     setTotal(calcTotal);
   }, [items]);
 
-  if (loading) return <div className="p-4">Memuat...</div>;
+  if (loading) return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingSpinner /></div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (items.length === 0) {
     return (
@@ -74,7 +75,7 @@ export default function KeranjangPage() {
               />
               <div className="flex-1">
                 <h3 className="font-medium text-text">{item.product.name}</h3>
-                <p className="text-sm text-text-muted">Rp {item.product.price.toLocaleString('id-ID')}</p>
+                <p className="text-sm text-text-muted">{formatCurrency(item.product.price)}</p>
                 <QuantityStepper
                   value={item.qty}
                   min={1}

@@ -59,6 +59,20 @@ export type OrderItem = {
   subtotal: number;
 };
 
+export type Review = {
+  id: string;
+  user_id?: string;
+  product_id?: string;
+  order_id?: string;
+  order_item_id: string;
+  rating: number;
+  comment?: string | null;
+  is_visible?: boolean;
+  created_at: string;
+  updated_at?: string;
+  profiles?: { name: string };
+};
+
 export type Favorite = {
   id: string;
   user_id: string;

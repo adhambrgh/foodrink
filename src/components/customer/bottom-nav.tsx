@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ReceiptText, ShoppingBag, Heart, UserCircle } from 'lucide-react';
+import { Home, ReceiptText, ShoppingBag, Package, UserCircle } from 'lucide-react';
 
 const links = [
   { href: '/beranda', label: 'Beranda', icon: Home },
-  { href: '/pesanan', label: 'Pesanan', icon: ReceiptText },
+  { href: '/produk', label: 'Produk', icon: Package },
   { href: '/keranjang', label: 'Keranjang', icon: ShoppingBag, raised: true },
-  { href: '/favorit', label: 'Favorit', icon: Heart },
+  { href: '/pesanan', label: 'Pesanan', icon: ReceiptText },
   { href: '/akun', label: 'Akun', icon: UserCircle },
 ];
 

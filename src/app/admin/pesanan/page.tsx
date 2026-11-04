@@ -1,14 +1,7 @@
 import { Package, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { getOrders } from '../menu/actions';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/utils';
 
 const statusConfig = {
   pending: { label: 'Menunggu Pembayaran', color: 'bg-yellow-100 text-yellow-700' },
