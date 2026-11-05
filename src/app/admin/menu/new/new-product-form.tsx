@@ -42,6 +42,12 @@ export function NewProductForm({ categories }: NewProductFormProps) {
 
     try {
       const response = await fetch('/api/upload-image', { method: 'POST', body: uploadData });
+if (!response.ok) {
+  const err = await response.json();
+  alert('Upload gagal: ' + (err.error ?? 'unknown'));
+  setUploading(false);
+  return;
+}
       const result = await response.json();
 
       if (result.success && result.url) {

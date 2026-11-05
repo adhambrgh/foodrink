@@ -42,11 +42,17 @@ export function EditBannerForm({ banner }: { banner: Banner }) {
     const fd = new FormData();
     fd.append('file', file);
     const resp = await fetch('/api/upload-image', { method: 'POST', body: fd });
+    if (!resp.ok) {
+      const err = await resp.json();
+      alert('Upload gagal: ' + (err.error ?? 'unknown'));
+      setUploading(false);
+      return;
+    }
     const json = await resp.json();
-    if (json.success) {
+    if (json.success && json.url) {
       setImagePreview(json.url);
     } else {
-      alert('Upload gagal: ' + json.error);
+      alert('Upload gagal: ' + (json.error ?? 'unknown'));
     }
     setUploading(false);
   };

@@ -41,13 +41,19 @@ export function EditProductForm({ categories, product }: EditProductFormProps) {
 
     try {
       const response = await fetch('/api/upload-image', { method: 'POST', body: uploadData });
-      const result = await response.json();
-      if (result.success && result.url) {
-        setImagePreview(result.url);
-        setData({ ...data, image_url: result.url });
-      } else {
-        alert('Gagal upload gambar: ' + result.error);
-      }
+if (!response.ok) {
+  const err = await response.json();
+  alert('Upload gagal: ' + (err.error ?? 'unknown'));
+  setUploading(false);
+  return;
+}
+const result = await response.json();
+if (result.success && result.url) {
+  setImagePreview(result.url);
+  setData({ ...data, image_url: result.url });
+} else {
+  alert('Upload gagal: ' + (result.error ?? 'unknown'));
+}
     } catch {
       alert('Gagal upload gambar');
     }

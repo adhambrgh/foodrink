@@ -1,9 +1,9 @@
 import '../styles/globals.css';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import { Poppins, Playfair_Display } from 'next/font/google';
 import SupabaseProvider from '@/components/providers/supabase-provider';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta', weight: ['600','700'] });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400','500','600','700'], variable: '--font-poppins' });
+const display = Playfair_Display({ subsets: ['latin'], weight: ['700'], variable: '--font-display' });
 
 export const metadata = {
   title: 'FoodDrink',
@@ -12,8 +12,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${jakarta.variable}`}>
-      <body className="bg-surface text-text min-h-screen">
+    <html lang="id" className={`${poppins.variable} ${display.variable}`}>
+      <body className="bg-surface text-text min-h-screen font-poppins">
         <SupabaseProvider>{children}</SupabaseProvider>
       </body>
     </html>

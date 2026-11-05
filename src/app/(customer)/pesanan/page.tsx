@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
-import { History } from 'lucide-react';
+import { ArrowLeft, History, UserRound } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 export default function PesananPage() {
@@ -23,8 +24,19 @@ export default function PesananPage() {
   }, []);
 
   return (
-    <main className="flex flex-col min-h-screen bg-surface p-4">
-      <h1 className="text-2xl font-bold text-text mb-4">Pesanan Saya</h1>
+    <main className="flex min-h-screen flex-col bg-surface px-4 pb-28 pt-safe pt-4">
+      <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
+        <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div className="text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
+          <h1 className="font-display text-lg leading-tight text-text">Pesanan Saya</h1>
+        </div>
+        <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+          <UserRound className="h-4 w-4" />
+        </Link>
+      </header>
       {orders.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center">
           <History className="w-12 h-12 text-text-muted/30 mx-auto mb-4" />

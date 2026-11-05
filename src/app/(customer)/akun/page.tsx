@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Bell, Shield, Settings, CreditCard } from 'lucide-react';
+import { ArrowLeft, User, Bell, Shield, Settings, CreditCard, Heart } from 'lucide-react';
 import Link from 'next/link';
-import LoadingSpinner from '@/components/ui/loading-spinner';
+import LoadingScreen from '@/components/ui/LoadingScreen';
 
 export default function AkunPage() {
   const router = useRouter();
@@ -36,14 +36,25 @@ export default function AkunPage() {
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-        <LoadingSpinner />
+        <LoadingScreen />
       </main>
     );
   }
 
   return (
-    <main className="flex flex-col min-h-screen bg-surface p-4">
-      <h1 className="text-2xl font-bold text-text mb-4">Akun Saya</h1>
+    <main className="flex min-h-screen flex-col bg-surface px-4 pb-28 pt-safe pt-4">
+      <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
+        <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div className="text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
+          <h1 className="font-display text-lg leading-tight text-text">Akun Saya</h1>
+        </div>
+        <Link href="/notifikasi" aria-label="Buka notifikasi" className="rounded-full bg-primary p-2 text-white">
+          <Bell className="h-4 w-4" />
+        </Link>
+      </header>
 
       {/* Profile */}
       <div className="bg-white rounded-lg p-4 mb-4 border border-gray-100">
@@ -98,6 +109,15 @@ export default function AkunPage() {
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-text-muted" />
             <span className="text-text">Keamanan</span>
+          </div>
+        </Link>
+        <Link
+          href="/akun/favorit"
+          className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
+        >
+          <div className="flex items-center gap-3">
+            <Heart className="w-5 h-5 text-text-muted" />
+            <span className="text-text">Favorit Saya</span>
           </div>
         </Link>
         <Link

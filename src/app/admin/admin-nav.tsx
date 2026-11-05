@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 
+import { Bell } from 'lucide-react';
+
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: Home, exact: true },
   { href: '/admin/menu', label: 'Kelola Menu', icon: Menu },
@@ -12,6 +14,7 @@ const navItems = [
   { href: '/admin/pesanan', label: 'Pesanan', icon: Receipt },
   { href: '/admin/reviews', label: 'Review', icon: MessageSquare },
   { href: '/admin/banner', label: 'Banner', icon: MessageSquare },
+  { href: '/admin/notifikasi', label: 'Notifikasi', icon: Bell },
 ];
 
 function NavLinks({ className = '' }: { className?: string }) {

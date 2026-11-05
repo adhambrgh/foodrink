@@ -25,8 +25,8 @@ module.exports = {
         error: '#BA1A1A',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'system-ui', 'serif'],
       },
       spacing: {
         'space-xs': '0.25rem',

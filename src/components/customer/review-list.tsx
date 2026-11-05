@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import ReviewCard from '@/components/customer/review-card';
 import ReviewForm from '@/components/customer/review-form';
-import StarRating from '@/components/customer/star-rating';
 import type { Review } from '@/lib/types';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 
 type ReviewListProps = {
   productId: string;
@@ -58,7 +56,16 @@ export default function ReviewList({ productId }: ReviewListProps) {
   };
 
   if (loading) {
-    return <div className="text-sm text-text-muted"><LoadingSpinner className="w-4 h-4" /><span className="ml-2">Memuat review...</span></div>;
+    return (
+      <div className="flex min-h-[180px] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-14 w-14 animate-pulse overflow-hidden rounded-full">
+            <img src="/images/logo.jpeg" alt="Foodrink" className="h-full w-full object-cover" />
+          </div>
+          <div className="h-7 w-7 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -90,7 +97,6 @@ export default function ReviewList({ productId }: ReviewListProps) {
 
 function CreateReviewForm({ productId, onSubmit }: { productId: string; onSubmit: () => void }) {
   const [eligibleItems, setEligibleItems] = useState<any[]>([]);
-  const [selectedItem, setSelectedItem] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
 

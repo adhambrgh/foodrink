@@ -1,8 +1,6 @@
-// Order ID generator
+// UUID generator
 export function generateOrderId(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${timestamp}-${random}`;
+  return crypto.randomUUID();
 }
 
 // Remove unused function

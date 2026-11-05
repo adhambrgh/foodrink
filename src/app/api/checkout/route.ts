@@ -10,10 +10,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { items, address, notes } = await request.json();
+  const { items, address, notes, payment_method = 'midtrans' } = await request.json();
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: 'Keranjang kosong' }, { status: 400 });
+  }
+
+  if (!['midtrans', 'cod'].includes(payment_method)) {
+    return NextResponse.json({ error: 'Metode pembayaran tidak valid' }, { status: 400 });
   }
 
   // Get product details and calculate total
@@ -46,7 +50,6 @@ export async function POST(request: Request) {
       price_snapshot: parseFloat(product.price),
       qty: item.qty,
       subtotal: parseFloat(product.price) * item.qty,
-      image_url: product.image_url,
     });
   }
 

@@ -1,50 +1,79 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ShoppingBag, Plus, Minus, Trash2, User, LogOut } from 'lucide-react';
+import {
+  ArrowLeft,
+  Clock3,
+  ReceiptText,
+  ShoppingBag,
+  Trash2,
+  UserRound,
+} from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { supabase } from '@/lib/supabase/client';
 import QuantityStepper from '@/components/customer/quantity-stepper';
 import { formatCurrency } from '@/lib/utils';
-import LoadingSpinner from '@/components/ui/loading-spinner';
+import LoadingScreen from '@/components/ui/LoadingScreen';
 
 export default function KeranjangPage() {
   const router = useRouter();
-  const { items, loading, add, update, remove, error } = useCart();
-  const [total, setTotal] = useState(0);
+  const { items, loading, update, remove, error } = useCart();
 
-  // Check auth
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) router.replace('/login');
     });
   }, [router]);
 
-  useEffect(() => {
-    const calcTotal = items.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
-    setTotal(calcTotal);
-  }, [items]);
+  const total = useMemo(
+    () => items.reduce((sum, item) => sum + item.product.price * item.qty, 0),
+    [items]
+  );
 
-  if (loading) return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingSpinner /></div>;
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  const itemCount = items.reduce((sum, item) => sum + item.qty, 0);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <LoadingScreen />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-surface px-5 text-center">
+        <p className="text-sm text-red-600">{error}</p>
+      </main>
+    );
+  }
+
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col">
-        <header className="p-4 border-b border-border bg-surface">
+      <div className="flex min-h-screen flex-col bg-surface">
+        <header className="border-b border-black/5 bg-surface px-4 pb-4 pt-safe pt-5">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-text">Keranjang</h1>
-            <Link href="/login" className="p-2 rounded-lg hover:bg-surface-variant">
-              <User className="w-5 h-5 text-text" />
+            <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text hover:bg-surface-variant">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <h1 className="font-display text-lg text-text">Keranjang Belanja</h1>
+            <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+              <UserRound className="h-4 w-4" />
             </Link>
           </div>
         </header>
-        <main className="flex-1 flex flex-col items-center justify-center">
-          <ShoppingBag className="w-12 h-12 text-text-muted mb-3" />
-          <p className="text-text-muted">Keranjang masih kosong</p>
-          <Link href="/beranda" className="mt-4 text-primary hover:underline">
-            Mulai belanja
+        <main className="flex flex-1 flex-col items-center justify-center px-6 pb-20 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary">
+            <ShoppingBag className="h-7 w-7" />
+          </div>
+          <h2 className="font-display text-xl text-text">Belum ada yang dipesan</h2>
+          <p className="mt-1 max-w-xs text-sm leading-relaxed text-text-muted">
+            Pilih menu yang ingin kamu nikmati, lalu kembali ke sini.
+          </p>
+          <Link href="/produk" className="mt-5 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-dark">
+            Lihat menu
           </Link>
         </main>
       </div>
@@ -52,60 +81,105 @@ export default function KeranjangPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      {/* Header */}
-      <header className="p-4 border-b border-border bg-surface">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-text">Keranjang</h1>
-          <Link href="/akun" className="p-2 rounded-lg hover:bg-surface-variant">
-            <User className="w-5 h-5 text-text" />
+    <div className="min-h-screen bg-surface text-text">
+      <header className="sticky top-0 z-30 border-b border-black/5 bg-surface px-4 pb-3 pt-safe pt-4">
+        <div className="mx-auto flex max-w-2xl items-center justify-between">
+          <Link href="/produk" aria-label="Kembali ke produk" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div className="text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
+            <h1 className="font-display text-lg leading-tight">Keranjang Belanja</h1>
+          </div>
+          <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+            <UserRound className="h-4 w-4" />
           </Link>
         </div>
       </header>
 
-      {/* Cart Items */}
-      <main className="flex-1 p-4">
-        <div className="space-y-4">
-          {items.map((item) => (
-            <div key={item.cart_id} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-border">
-              <img
-                src={item.product.image_url || `https://picsum.photos/80/80?random=${item.product_id}`}
-                alt={item.product.name}
-                className="w-16 h-16 object-cover rounded"
-              />
-              <div className="flex-1">
-                <h3 className="font-medium text-text">{item.product.name}</h3>
-                <p className="text-sm text-text-muted">{formatCurrency(item.product.price)}</p>
-                <QuantityStepper
-                  value={item.qty}
-                  min={1}
-                  onChange={(val: number) => update(item.cart_id, val)}
-                />
+      <main className="mx-auto max-w-2xl px-4 pb-40 pt-4">
+        <section className="mb-5 rounded-[1.15rem] bg-white p-4 shadow-[0_5px_18px_rgba(70,40,25,0.06)]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <ReceiptText className="h-5 w-5" />
               </div>
-              <button
-                onClick={() => remove(item.cart_id)}
-                className="p-2 rounded-lg hover:bg-red-50 text-red-500"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-semibold">Pesanan Foodrink</h2>
+                <p className="truncate text-xs text-text-muted">{items.length} jenis menu untuk kamu</p>
+              </div>
             </div>
-          ))}
-        </div>
+            <span className="shrink-0 rounded-full bg-secondary/10 px-2.5 py-1 text-[10px] font-semibold text-secondary">
+              Siap diproses
+            </span>
+          </div>
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-xs text-text-muted">
+            <Clock3 className="h-3.5 w-3.5 text-primary" />
+            Cek stok sebelum checkout
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-3 flex items-end justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Pesananmu</p>
+              <h2 className="mt-1 font-display text-xl">{itemCount} menu</h2>
+            </div>
+            <Link href="/produk" className="text-xs font-semibold text-primary hover:underline">
+              + Tambah menu
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {items.map((item) => (
+              <article key={item.cart_id} className="rounded-[1.15rem] bg-white p-3.5 shadow-[0_5px_18px_rgba(70,40,25,0.06)]">
+                <div className="flex gap-3">
+                  <img
+                    src={item.product.image_url || `https://picsum.photos/80/80?random=${item.product_id}`}
+                    alt={item.product.name}
+                    className="h-20 w-20 shrink-0 rounded-xl object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{item.product.name}</h3>
+                      <button
+                        type="button"
+                        onClick={() => remove(item.cart_id)}
+                        aria-label={`Hapus ${item.product.name}`}
+                        className="shrink-0 rounded-full p-1 text-text-muted transition-colors hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-text-muted">{item.product.description || 'Menu pilihan Foodrink'}</p>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <span className="text-sm font-bold text-text">{formatCurrency(item.product.price * item.qty)}</span>
+                      <QuantityStepper
+                        value={item.qty}
+                        min={1}
+                        max={item.product.stock}
+                        onChange={(value) => update(item.cart_id, value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </main>
 
-      {/* Summary & Checkout */}
-      <div className="bg-white p-4 border-t border-border">
-        <div className="flex justify-between mb-3">
-          <span className="text-text-muted">Subtotal</span>
-          <span className="font-medium text-text">Rp {total.toLocaleString('id-ID')}</span>
+      <aside className="fixed inset-x-0 bottom-20 z-40 border-t border-black/5 bg-white px-4 pb-safe pt-3 shadow-[0_-8px_24px_rgba(70,40,25,0.08)]">
+        <div className="mx-auto flex max-w-2xl items-center gap-4 pb-3">
+          <div className="min-w-0 shrink-0">
+            <p className="text-xs text-text-muted">Total pesanan</p>
+            <p className="truncate text-lg font-bold text-text">{formatCurrency(total)}</p>
+          </div>
+          <Link href="/checkout" className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-[0_5px_12px_rgba(161,64,0,0.2)] transition-colors hover:bg-primary-dark">
+            Lanjut ke checkout
+          </Link>
         </div>
-        <Link
-          href="/checkout"
-          className="w-full inline-flex items-center justify-center py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
-        >
-          Lanjut ke Pembayaran
-        </Link>
-      </div>
+      </aside>
     </div>
   );
 }

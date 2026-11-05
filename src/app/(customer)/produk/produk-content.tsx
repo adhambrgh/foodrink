@@ -4,17 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import ProductCard from '@/components/customer/product-card';
-import BottomNav from '@/components/customer/bottom-nav';
-import { Filter } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, Filter, UserRound } from 'lucide-react';
 import FilterBar from './filter-bar';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 
 export default function ProdukContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
   const search = searchParams.get('search') || '';
@@ -58,10 +58,48 @@ export default function ProdukContent() {
         }
 
         setProducts(filteredProducts);
+
+        // Fetch ratings for these products
+        if (filteredProducts.length > 0) {
+          const productIds = filteredProducts.map(p => p.id);
+          const { data: ratingData } = await supabase
+            .from('reviews')
+            .select('product_id, rating')
+            .in('product_id', productIds)
+            .eq('is_visible', true);
+
+          if (ratingData) {
+            const avgRatings: Record<string, number> = {};
+            const countMap: Record<string, number> = {};
+            ratingData.forEach(r => {
+              if (!avgRatings[r.product_id]) {
+                avgRatings[r.product_id] = 0;
+                countMap[r.product_id] = 0;
+              }
+              avgRatings[r.product_id] += r.rating;
+              countMap[r.product_id] += 1;
+            });
+            Object.keys(avgRatings).forEach(key => {
+              avgRatings[key] = avgRatings[key] / countMap[key];
+            });
+            setRatings(avgRatings);
+          }
+
+          // Fetch favorites for current user
+          const { data: favData } = await supabase
+            .from('favorites')
+            .select('product_id')
+            .eq('user_id', user.id)
+            .in('product_id', productIds);
+
+          if (favData) {
+            const favMap: Record<string, boolean> = {};
+            favData.forEach(f => { favMap[f.product_id] = true; });
+            setFavorites(favMap);
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Gagal memuat produk');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -70,40 +108,39 @@ export default function ProdukContent() {
 
   const categoryName = categories?.find(c => c.id === category)?.name;
 
-  if (loading) {
-    return (
-      <>
-        <main className="flex min-h-screen flex-col bg-surface">
-          <div className="px-4 pt-safe pb-28 flex items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        </main>
-        <BottomNav />
-      </>
-    );
-  }
-
   if (error) {
     return (
-      <>
-        <main className="flex min-h-screen flex-col bg-surface items-center justify-center">
-          <div className="px-4 text-center">
-            <p className="text-red-500 mb-2">{error}</p>
-          </div>
-        </main>
-        <BottomNav />
-      </>
+      <main className="flex min-h-screen flex-col bg-surface items-center justify-center px-4">
+        <div className="px-4 text-center">
+          <p className="text-red-500 mb-2">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 text-sm font-semibold text-primary hover:underline"
+          >
+            Kembali
+          </button>
+        </div>
+      </main>
     );
   }
 
   return (
     <>
       <main className="flex min-h-screen flex-col bg-surface">
-        <div className="px-4 pt-safe pb-28">
-          <header className="mb-4">
-            <h1 className="text-xl font-bold text-text">Produk</h1>
-            <p className="text-sm text-text-muted">Semua menu makanan & minuman</p>
+        <div className="px-4 pt-safe pt-6 pb-28">
+          <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
+            <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div className="text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
+              <h1 className="font-display text-lg leading-tight text-text">Produk</h1>
+            </div>
+            <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+              <UserRound className="h-4 w-4" />
+            </Link>
           </header>
+          <p className="mb-4 text-sm text-text-muted">Semua menu makanan & minuman</p>
 
           <FilterBar
             categories={categories || []}
@@ -122,7 +159,12 @@ export default function ProdukContent() {
           <div className="grid grid-cols-2 gap-3">
             {products && products.length > 0 ? (
               products.map((p: any) => (
-                <ProductCard key={p.id} product={p as any} />
+                <ProductCard
+                  key={p.id}
+                  product={p as any}
+                  rating={ratings[p.id]}
+                  isFavorite={favorites[p.id]}
+                />
               ))
             ) : (
               <div className="col-span-2 flex flex-col items-center justify-center py-12">
@@ -137,7 +179,6 @@ export default function ProdukContent() {
           </div>
         </div>
       </main>
-      <BottomNav />
     </>
   );
 }
