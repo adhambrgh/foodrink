@@ -71,7 +71,7 @@ export function MobileAdminNav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="border-t border-border md:hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full px-4 py-2 flex items-center justify-between text-sm font-medium text-text"

@@ -39,7 +39,7 @@ export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="w-full p-4 md:p-6 space-y-6">
       <div>
         <h1 className="text-xl font-bold text-text font-heading">Dashboard</h1>
         <p className="text-sm text-text-muted mt-0.5">Ringkasan performa toko</p>

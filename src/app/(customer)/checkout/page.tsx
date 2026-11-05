@@ -67,11 +67,7 @@ export default function CheckoutPage() {
     const data = await res.json();
 
     if (data.success) {
-      if (data.redirect_url) {
-        window.location.href = data.redirect_url;
-      } else {
-        router.push('/ringkasan-pembayaran');
-      }
+      window.location.href = data.redirect_url;
     } else {
       alert(data.error || 'Gagal memproses order');
     }

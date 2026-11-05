@@ -65,6 +65,7 @@ export async function POST(request: Request) {
       notes,
       status: 'pending',
       payment_status: 'pending',
+      payment_method,
     })
     .select()
     .single();
@@ -104,6 +105,6 @@ export async function POST(request: Request) {
     order_id: orderId,
     total,
     items: orderItems,
-    redirect_url: `/checkout/${orderId}`,
+    redirect_url: `/checkout/success/${orderId}`,
   });
 }

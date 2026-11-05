@@ -14,7 +14,7 @@ export default async function AdminPesananPage() {
   const { orders = [], error } = await getOrders();
 
   return (
-    <div className="p-4 md:p-6 space-y-5">
+    <div className="w-full p-4 md:p-6 space-y-5">
       <div>
         <h1 className="text-xl font-bold text-text font-heading">Pesanan Masuk</h1>
         <p className="text-sm text-text-muted mt-0.5">Kelola semua pesanan yang masuk</p>

@@ -174,6 +174,7 @@ export async function getOrders() {
       user_id,
       status,
       payment_status,
+      payment_method,
       total,
       address,
       notes,
@@ -193,9 +194,24 @@ export async function getOrders() {
 
 export async function updateOrderStatus(id: string, status: string) {
   const supabase = createAdminClient();
+
+  // Get current order to check payment_method
+  const { data: order } = await supabase
+    .from('orders')
+    .select('payment_method, payment_status')
+    .eq('id', id)
+    .single();
+
+  const updateData: { status: string; payment_status?: string } = { status };
+
+  // If COD and status changes to 'selesai', set payment_status to 'paid'
+  if (order?.payment_method === 'cod' && status === 'selesai' && order.payment_status !== 'paid') {
+    updateData.payment_status = 'paid';
+  }
+
   const { error } = await supabase
     .from('orders')
-    .update({ status })
+    .update(updateData)
     .eq('id', id);
 
   if (error) {
