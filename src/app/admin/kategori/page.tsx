@@ -2,6 +2,7 @@ import { Plus, Edit, Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream
 import Link from 'next/link';
 import { getCategoriesWithCounts } from '@/lib/supabase/kategori';
 import { DeleteCategoryButton } from './delete-category-button';
+import { PaginatedTable } from '@/components/admin/pagination';
 
 const categoryIcons = {
   utensils: Utensils,
@@ -39,63 +40,55 @@ export default async function AdminKategoriPage() {
           <p className="text-text-muted text-sm">Belum ada kategori</p>
           <Link href="/admin/kategori/new" className="inline-flex items-center gap-2 mt-3 text-sm font-medium text-primary hover:underline">
             <Plus className="w-4 h-4" />
-            Tambah Kategori Pertama
+            Tambah Kategori
           </Link>
         </div>
       ) : (
-        <div className="bg-surface-card border border-border rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-text-muted border-b border-border bg-surface-variant/40">
-                  <th className="px-4 py-3 font-medium">Ikon</th>
-                  <th className="px-4 py-3 font-medium">Nama</th>
-                  <th className="px-4 py-3 font-medium text-center">Produk</th>
-                  <th className="px-4 py-3 font-medium text-center">Status</th>
-                  <th className="px-4 py-3 font-medium text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {categories.map((c: any) => {
-                  const IconKey = categoryIcons[c.icon as keyof typeof categoryIcons] ? c.icon : 'utensils';
-                  const Icon = categoryIcons[IconKey as keyof typeof categoryIcons];
-                  return (
-                    <tr key={c.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30 transition-colors">
-                      <td className="px-4 py-3 text-center">
-                        <div className="w-10 h-10 rounded-lg bg-surface-variant/60 flex items-center justify-center mx-auto">
-                          <Icon className="w-5 h-5 text-primary" />
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 font-medium text-text">{c.name}</td>
-                      <td className="px-4 py-3 text-center text-text-muted">{c.productCount}</td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${c.active ? 'bg-success/10 text-success' : 'bg-text-muted/10 text-text-muted'}`}>
-                          {c.active ? 'Aktif' : 'Nonaktif'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Link href={`/admin/kategori/${c.id}/edit`} className="p-1.5 text-text-muted hover:text-primary rounded-lg hover:bg-surface-variant transition-colors">
-                            <Edit className="w-4 h-4" />
-                          </Link>
-                          <DeleteCategoryButton
-                            categoryId={c.id}
-                            categoryName={c.name}
-                            productCount={c.productCount}
-                            allCategories={categoryOptions}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <PaginatedTable
+          columns={
+            <>
+              <th className="px-4 py-3 font-medium text-center">Ikon</th>
+              <th className="px-4 py-3 font-medium">Nama</th>
+              <th className="px-4 py-3 font-medium text-center">Produk</th>
+              <th className="px-4 py-3 font-medium text-center">Status</th>
+              <th className="px-4 py-3 font-medium text-center">Aksi</th>
+            </>
+          }
+          rows={categories.map((c) => {
+            const IconKey = categoryIcons[c.icon as keyof typeof categoryIcons] ? c.icon : 'utensils';
+            const Icon = categoryIcons[IconKey as keyof typeof categoryIcons];
+            return (
+              <tr key={c.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30 transition-colors">
+                <td className="px-4 py-3 text-center">
+                  <div className="w-10 h-10 rounded-lg bg-surface-variant/60 flex items-center justify-center mx-auto">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                </td>
+                <td className="px-4 py-3 font-medium text-text">{c.name}</td>
+                <td className="px-4 py-3 text-center text-text-muted">{c.productCount}</td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${c.active ? 'bg-success/10 text-success' : 'bg-text-muted/10 text-text-muted'}`}>
+                    {c.active ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <Link href={`/admin/kategori/${c.id}/edit`} className="p-1.5 text-text-muted hover:text-primary rounded-lg hover:bg-surface-variant transition-colors">
+                      <Edit className="w-4 h-4" />
+                    </Link>
+                    <DeleteCategoryButton
+                      categoryId={c.id}
+                      categoryName={c.name}
+                      productCount={c.productCount}
+                      allCategories={categoryOptions}
+                    />
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        />
       )}
-
-      {categories.length > 0 && <p className="text-xs text-text-muted">{categories.length} kategori</p>}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { generateOrderId } from '@/lib/midtrans';
+import { createMidtransTransaction, generateOrderId, getSnapUrl } from '@/lib/midtrans';
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { items, address, notes, payment_method = 'midtrans' } = await request.json();
+  const { items, address, notes, payment_method = 'midtrans' } = await request.json().catch(() => ({}));
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: 'Keranjang kosong' }, { status: 400 });
@@ -63,12 +63,13 @@ export async function POST(request: Request) {
       total,
       address,
       notes,
-      status: 'pending',
+      status: 'pending', // pending until Midtrans confirms
       payment_status: 'pending',
       payment_method,
     })
     .select()
     .single();
+
 
   if (orderError) {
     return NextResponse.json({ error: orderError.message }, { status: 500 });
@@ -88,23 +89,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: itemsError.message }, { status: 500 });
   }
 
-  // Decrease stock
-  for (const item of items) {
-    const product = products.find((p: any) => p.id === item.product_id);
-    if (product) {
-      await supabase
-        .from('products')
-        .update({ stock: product.stock - item.qty })
-        .eq('id', product.id);
+  // No stock decrement here; stock will be decreased after successful Midtrans payment via webhook
+
+  let midtransToken: string | null = null;
+
+  if (payment_method === 'midtrans') {
+    try {
+      const transaction = await createMidtransTransaction({
+        orderId,
+        grossAmount: total,
+        items: orderItems.map(item => ({
+          id: item.product_id,
+          price: item.price_snapshot,
+          quantity: item.qty,
+          name: item.name_snapshot,
+        })),
+      });
+      midtransToken = transaction.token;
+    } catch (error) {
+      await supabase.from('order_items').delete().eq('order_id', orderId);
+      await supabase.from('orders').delete().eq('id', orderId);
+      console.error('Midtrans create failed:', error);
+      return NextResponse.json({
+        error: error instanceof Error ? error.message : 'Gagal membuat pembayaran Midtrans',
+      }, { status: 502 });
     }
   }
 
-  // Return order info for client-side payment modal
   return NextResponse.json({
     success: true,
     order_id: orderId,
     total,
     items: orderItems,
-    redirect_url: `/checkout/success/${orderId}`,
+    midtrans_token: midtransToken,
+    redirect_url:
+      payment_method === 'cod'
+        ? `/checkout/success/${orderId}`
+        : midtransToken
+        ? getSnapUrl(midtransToken, orderId)
+        : null,
   });
 }
+

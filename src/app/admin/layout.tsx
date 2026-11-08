@@ -1,5 +1,6 @@
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Store } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -40,7 +41,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Isi halaman kanan sidebar */}
       <section className="flex min-w-0 flex-col bg-surface">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface px-4 py-3">
-          <Link href="/admin" className="font-heading text-lg font-bold text-text">FoodDrink</Link>
+          <Link href="/admin" className="flex items-center gap-2" aria-label="Foodrink Admin">
+            <Image
+              src="/images/logo.jpeg"
+              alt="Foodrink"
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+            <span className="font-heading text-lg font-bold text-text">FoodDrink</span>
+          </Link>
           <Store className="h-5 w-5 text-text-muted" />
         </header>
 

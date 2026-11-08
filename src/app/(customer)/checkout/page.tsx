@@ -20,7 +20,7 @@ interface CheckoutFormData {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, loading: cartLoading } = useCart();
+  const { items, loading: cartLoading, selectedCartIds } = useCart();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CheckoutFormData>({
     delivery_method: 'ambil_sendiri',
@@ -32,7 +32,8 @@ export default function CheckoutPage() {
     payment_method: 'midtrans',
   });
 
-  const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+  const filteredItems = items.filter(item => selectedCartIds.includes(item.cart_id));
+  const subtotal = filteredItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
   const total = subtotal; // Delivery optional later
 
   useEffect(() => {
@@ -55,7 +56,7 @@ export default function CheckoutPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        items: items.map(i => ({ product_id: i.product_id, qty: i.qty })),
+        items: filteredItems.map(i => ({ product_id: i.product_id, qty: i.qty })),
         address: formData.delivery_method === 'antar_ke_kelas'
           ? `${formData.recipient_name} - Kelas ${formData.grade} ${formData.major} - Ruangan ${formData.room}`
           : 'Ambil sendiri',

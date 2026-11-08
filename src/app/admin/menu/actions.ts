@@ -189,7 +189,26 @@ export async function getOrders() {
     return { error: error.message };
   }
 
-  return { orders: data || [] };
+  // Filter out orders that are still pending payment (Midtrans not yet confirmed)
+  const orders = (data || []).filter((order: any) => order.payment_status !== 'pending');
+
+  const { data: usersData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+  const emailByUserId = new Map(
+    (usersData?.users || []).map((user) => [user.id, user.email || ''])
+  );
+
+  const ordersWithEmails = orders.map((order: any) => {
+    const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles;
+    return {
+      ...order,
+      profiles: {
+        ...profile,
+        email: emailByUserId.get(order.user_id) || '',
+      },
+    };
+  });
+
+  return { orders: ordersWithEmails };
 }
 
 export async function updateOrderStatus(id: string, status: string) {
@@ -204,8 +223,8 @@ export async function updateOrderStatus(id: string, status: string) {
 
   const updateData: { status: string; payment_status?: string } = { status };
 
-  // If COD and status changes to 'selesai', set payment_status to 'paid'
-  if (order?.payment_method === 'cod' && status === 'selesai' && order.payment_status !== 'paid') {
+  if (status === 'selesai') {
+    // Set payment_status to paid when order marked selesai, regardless of payment method
     updateData.payment_status = 'paid';
   }
 
@@ -220,5 +239,6 @@ export async function updateOrderStatus(id: string, status: string) {
   }
 
   revalidatePath('/admin/pesanan');
-  return { success: true };
+  revalidatePath(`/admin/pesanan/${id}`);
+  return { success: true, status: updateData.status };
 }

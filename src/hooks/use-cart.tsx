@@ -14,6 +14,8 @@ interface CartContextValue {
   items: CartItem[];
   loading: boolean;
   error?: string;
+  selectedCartIds: string[];
+  setSelectedCartIds: (ids: string[] | ((prev: string[]) => string[])) => void;
   add: (productId: string, qty?: number) => Promise<void>;
   update: (cartId: string, qty: number) => Promise<void>;
   remove: (cartId: string) => Promise<void>;
@@ -25,6 +27,7 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [selectedCartIds, setSelectedCartIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -65,7 +68,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <CartContext.Provider value={{ items, loading, error, add, update, remove, clear, refresh: load }}>
+    <CartContext.Provider value={{ items, loading, error, selectedCartIds, setSelectedCartIds, add, update, remove, clear, refresh: load }}>
       {children}
     </CartContext.Provider>
   );

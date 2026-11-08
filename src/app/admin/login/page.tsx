@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { signIn } from '@/lib/supabase/client';
+import { signIn, supabase } from '@/lib/supabase/client';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -25,17 +25,22 @@ export default function AdminLoginPage() {
     if (error) {
       setError(error.message);
     } else {
-      // Check user role via API
-      try {
-        const response = await fetch('/api/admin-check');
-        if (response.ok) {
-          router.push(decodeURIComponent(redirectTo));
-        } else {
-          // Sign out if not admin
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.role !== 'admin') {
           await fetch('/api/logout', { method: 'POST' });
           setError('Akun Anda bukan admin. Silakan hubungi owner.');
+        } else {
+          router.push(decodeURIComponent(redirectTo));
         }
-      } catch {
+      } else {
         router.push(decodeURIComponent(redirectTo));
       }
     }

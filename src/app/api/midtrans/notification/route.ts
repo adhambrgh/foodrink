@@ -74,6 +74,68 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // If payment successful (settlement or accepted capture), decrease stock
+    if (paymentStatus === 'paid') {
+      const { data: paidItems } = await supabase
+        .from('order_items')
+        .select('product_id, qty')
+        .eq('order_id', payload.order_id);
+
+      for (const item of paidItems || []) {
+        const { data: product } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.product_id)
+          .single();
+
+        if (product) {
+          await supabase
+            .from('products')
+            .update({ stock: product.stock - item.qty })
+            .eq('id', item.product_id);
+        }
+      }
+      console.log(`Order ${payload.order_id} paid successfully, stock decreased`);
+    }
+
+    // If payment failed (cancel, deny, expire, refund), restore stock and delete the order
+    if (paymentStatus === 'failed') {
+      const { data: failedItems } = await supabase
+        .from('order_items')
+        .select('product_id, qty')
+        .eq('order_id', payload.order_id);
+
+      for (const item of failedItems || []) {
+        const { data: product } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.product_id)
+          .single();
+
+        if (product) {
+          await supabase
+            .from('products')
+            .update({ stock: product.stock + item.qty })
+            .eq('id', item.product_id);
+        }
+      }
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', payload.order_id);
+      if (itemsError) {
+        console.error('Error deleting order items:', itemsError);
+      }
+      const { error: orderDeleteError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', payload.order_id);
+      if (orderDeleteError) {
+        console.error('Error deleting order:', orderDeleteError);
+      }
+    }
+
     // If paid, could trigger notification, email, etc.
     if (paymentStatus === 'paid') {
       console.log(`Order ${payload.order_id} paid successfully`);

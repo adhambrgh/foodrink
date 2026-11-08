@@ -13,13 +13,16 @@ export default function PesananPage() {
     const fetchOrders = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
       const { data } = await supabase
         .from('orders')
-        .select('id, total, payment_status, created_at, order_items (product_id, qty, price_snapshot)')
+        .select('id, total, status, payment_status, created_at, order_items (product_id, qty, price_snapshot)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
+
       setOrders(data || []);
     };
+
     fetchOrders();
   }, []);
 
@@ -47,13 +50,13 @@ export default function PesananPage() {
         <div className="space-y-4">
           {orders.map((order) => (
             <div key={order.id} className="bg-white rounded-lg p-4 border border-gray-100">
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <p className="font-medium text-text">#{order.id.slice(0,8)}</p>
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-text truncate">#{order.id.slice(0,8)}</p>
                   <p className="text-xs text-text-muted">{new Date(order.created_at).toLocaleDateString('id-ID')}</p>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment_status==='paid' ? 'bg-green-100 text-success' : 'bg-orange-100 text-orange-800'}`}>
-                  {order.payment_status==='paid' ? 'Lunas' : 'Menunggu Bayar'}
+                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+                  {order.status === 'selesai' ? 'Selesai' : 'Diproses'}
                 </span>
               </div>
               {(order.order_items || []).map((item: any, idx: number) => (

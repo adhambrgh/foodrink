@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
+  CheckSquare,
   Clock3,
   ReceiptText,
   ShoppingBag,
+  Square,
   Trash2,
   UserRound,
 } from 'lucide-react';
@@ -19,7 +21,8 @@ import LoadingScreen from '@/components/ui/LoadingScreen';
 
 export default function KeranjangPage() {
   const router = useRouter();
-  const { items, loading, update, remove, error } = useCart();
+  const { items, loading, update, remove, error, selectedCartIds, setSelectedCartIds } = useCart();
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,7 +35,28 @@ export default function KeranjangPage() {
     [items]
   );
 
-  const itemCount = items.reduce((sum, item) => sum + item.qty, 0);
+  const selectedTotal = useMemo(
+    () => items
+      .filter(item => selectedCartIds.includes(item.cart_id))
+      .reduce((sum, item) => sum + item.product.price * item.qty, 0),
+    [items, selectedCartIds]
+  );
+
+  const allSelected = items.length > 0 && items.every(item => selectedCartIds.includes(item.cart_id));
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedCartIds([]);
+    } else {
+      setSelectedCartIds(items.map(item => item.cart_id));
+    }
+  };
+
+  const toggleItem = (cartId: string) => {
+    setSelectedCartIds(prev =>
+      prev.includes(cartId) ? prev.filter(id => id !== cartId) : [...prev, cartId]
+    );
+  };
 
   if (loading) {
     return (
@@ -120,11 +144,12 @@ export default function KeranjangPage() {
         </section>
 
         <section>
-          <div className="mb-3 flex items-end justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Pesananmu</p>
-              <h2 className="mt-1 font-display text-xl">{itemCount} menu</h2>
-            </div>
+          <div className="mb-3 flex items-center justify-between">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
+              <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="sr-only" />
+              {allSelected ? <CheckSquare className="h-5 w-5 text-primary" /> : <Square className="h-5 w-5 text-text-muted" />}
+              Pilih semua
+            </label>
             <Link href="/produk" className="text-xs font-semibold text-primary hover:underline">
               + Tambah menu
             </Link>
@@ -134,6 +159,16 @@ export default function KeranjangPage() {
             {items.map((item) => (
               <article key={item.cart_id} className="rounded-[1.15rem] bg-white p-3.5 shadow-[0_5px_18px_rgba(70,40,25,0.06)]">
                 <div className="flex gap-3">
+                  <label className="flex shrink-0 cursor-pointer items-start pt-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedCartIds.includes(item.cart_id)}
+                      onChange={() => toggleItem(item.cart_id)}
+                      aria-label={`Pilih ${item.product.name}`}
+                      className="sr-only"
+                    />
+                    {selectedCartIds.includes(item.cart_id) ? <CheckSquare className="h-5 w-5 text-primary" /> : <Square className="h-5 w-5 text-text-muted" />}
+                  </label>
                   <img
                     src={item.product.image_url || `https://picsum.photos/80/80?random=${item.product_id}`}
                     alt={item.product.name}
@@ -173,13 +208,41 @@ export default function KeranjangPage() {
         <div className="mx-auto flex max-w-2xl items-center gap-4 pb-3">
           <div className="min-w-0 shrink-0">
             <p className="text-xs text-text-muted">Total pesanan</p>
-            <p className="truncate text-lg font-bold text-text">{formatCurrency(total)}</p>
+            <p className="truncate text-lg font-bold text-text">{formatCurrency(selectedTotal)}</p>
           </div>
-          <Link href="/checkout" className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-[0_5px_12px_rgba(161,64,0,0.2)] transition-colors hover:bg-primary-dark">
+          <button
+            type="button"
+            onClick={() => {
+              if (selectedCartIds.length === 0) {
+                setShowAlert(true);
+              } else {
+                router.push('/checkout');
+              }
+            }}
+            className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-[0_5px_12px_rgba(161,64,0,0.2)] transition-colors hover:bg-primary-dark"
+          >
             Lanjut ke checkout
-          </Link>
+          </button>
         </div>
       </aside>
+
+      {showAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowAlert(false)}>
+          <div
+            className="rounded-[1.15rem] bg-white p-5 shadow-[0_10px_40px_rgba(0,0,0,0.25)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-semibold text-text">Pilih produk terlebih dahulu</p>
+            <button
+              type="button"
+              onClick={() => setShowAlert(false)}
+              className="mx-auto mt-4 block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+            >
+              Oke
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

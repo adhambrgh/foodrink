@@ -2,13 +2,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, CheckCircle, Clock, Package } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
-import { updateOrderStatus } from '../../menu/actions';
 import { formatCurrency } from '@/lib/utils';
 
 const statusConfig = {
-  pending: 'Menunggu pembayaran',
-  diproses: 'Diproses',
-  dikirim: 'Dikirim',
+  diproses: 'Sedang Diproses',
   selesai: 'Selesai',
 } as const;
 
@@ -27,14 +24,6 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const isCod = order.payment_method === 'cod';
   const profiles = order.profiles as { name?: string } | { name?: string }[] | null;
   const customerName = Array.isArray(profiles) ? profiles[0]?.name : profiles?.name;
-
-  async function updateStatus(formData: FormData) {
-    'use server';
-    const status = formData.get('status');
-    if (typeof status === 'string') {
-      await updateOrderStatus(order.id, status);
-    }
-  }
 
   return (
     <div className="p-4 md:p-6 space-y-5">
@@ -84,18 +73,6 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         <div className="mt-4 flex justify-between border-t border-border pt-3 font-bold"><span>Total</span><span className="text-primary">{formatCurrency(order.total)}</span></div>
       </section>
 
-      <section className="rounded-xl border border-border bg-surface-card p-4">
-        <h2 className="mb-3 font-semibold text-text">Perbarui Status</h2>
-        <form action={updateStatus} className="flex flex-wrap items-center gap-3">
-          <select name="status" defaultValue={order.status} className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" aria-label="Status pesanan">
-            <option value="pending">Menunggu</option>
-            <option value="diproses">Diproses</option>
-            <option value="selesai">Selesai</option>
-          </select>
-          <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">Simpan status</button>
-          {isCod && !isPaid && <p className="w-full text-xs text-text-muted">COD otomatis ditandai lunas saat status menjadi Selesai.</p>}
-        </form>
-      </section>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
@@ -52,11 +53,15 @@ export function AdminNav() {
     <>
       <div className="p-5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-            <Heart className="w-5 h-5 text-white" />
-          </div>
+          <Image
+            src="/images/logo.jpeg"
+            alt="Foodrink"
+            width={36}
+            height={36}
+            className="rounded-full"
+          />
           <div>
-            <h1 className="text-base font-bold text-text font-heading">FoodDrink</h1>
+            <h1 className="text-base font-bold text-text font-heading">Foodrink</h1>
             <p className="text-[11px] text-text-muted">Admin Portal</p>
           </div>
         </div>
