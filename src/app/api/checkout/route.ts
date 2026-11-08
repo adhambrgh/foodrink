@@ -126,8 +126,8 @@ export async function POST(request: Request) {
       payment_method === 'cod'
         ? `/checkout/success/${orderId}`
         : midtransToken
-        ? getSnapUrl(midtransToken, orderId)
-        : null,
+          ? getSnapUrl(midtransToken, orderId)
+          : null,
   });
 }
 

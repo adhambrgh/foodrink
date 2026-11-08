@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
-import { CheckCircle2, Home, Receipt, Package, UserRound, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Home, Receipt, Package, ArrowLeft } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
@@ -15,44 +15,92 @@ interface OrderDetail {
   status: string;
   payment_status: string;
   created_at: string;
-  order_items: {
-    product_id: string;
-    qty: number;
-    price_snapshot: number;
-    name_snapshot: string;
-  }[];
+  order_items: OrderItem[];
+}
+
+interface OrderItem {
+  product_id: string;
+  qty: number;
+  price_snapshot: number;
+  name_snapshot: string;
 }
 
 export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: string }> }) {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paymentFailed, setPaymentFailed] = useState(false);
+  const [items, setItems] = useState<OrderItem[]>([]);
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const { id } = await params;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const resolvedParams = await params;
+      const { id } = resolvedParams;
+      if (typeof window !== 'undefined' && window.location.search.includes('payment_failed=true')) {
+        setPaymentFailed(true);
+        setLoading(false);
+        return;
+      }
 
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError('Sesi login tidak ditemukan');
+        setLoading(false);
+        return;
+      }
+
+      const { data, error: supError } = await supabase
         .from('orders')
-        .select('id, total, address, notes, status, payment_status, created_at, order_items (product_id, qty, price_snapshot, name_snapshot)')
+        .select('id, total, address, notes, status, payment_status, created_at')
         .eq('id', id)
         .eq('user_id', user.id)
         .single();
 
-      if (error) {
-        setError(error.message);
-      } else {
-        setOrder(data);
+      if (supError) {
+        setError(supError.message);
+      } else if (data) {
+        setOrder({ ...data, order_items: [] } as OrderDetail);
       }
       setLoading(false);
     };
+
     fetchOrder();
   }, [params]);
 
+  useEffect(() => {
+    if (!order) return;
+
+    const fetchItems = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('order_items')
+        .select('product_id, qty, price_snapshot, name_snapshot')
+        .eq('order_id', order.id);
+
+      if (data) {
+        setItems(data);
+      }
+    };
+
+    fetchItems();
+  }, [order?.id]);
+
   if (loading) {
     return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>;
+  }
+
+  if (paymentFailed) {
+    return (
+      <main className="flex min-h-screen flex-col bg-surface px-4 pb-28 pt-safe pt-4">
+        <div className="flex-1 flex items-center justify-center text-center">
+          <h1 className="font-display text-xl text-text mb-2">Pembayaran Gagal / Pending</h1>
+          <p className="text-sm text-text-muted mb-4">Transaksi tidak berhasil diproses. Anda dapat mencobanya lagi.</p>
+          <Link href="/pesanan" className="text-primary hover:underline">Lihat Pesanan Saya</Link>
+        </div>
+      </main>
+    );
   }
 
   if (error || !order) {
@@ -128,7 +176,7 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
           <div className="mt-4 border-t pt-4">
             <h4 className="font-medium text-text mb-2">Item Pesanan</h4>
             <div className="space-y-2">
-              {order.order_items.map((item, idx) => (
+              {items.map((item, idx) => (
                 <div key={idx} className="flex justify-between text-sm">
                   <div className="flex-1 mr-2">
                     <p className="font-medium text-text">{item.name_snapshot}</p>

@@ -40,7 +40,7 @@ describe('createMidtransTransaction', () => {
     expect(requestBody.transaction_details.order_id).toBe('ord-1');
     expect(requestBody.transaction_details.gross_amount).toBe(20000);
     expect(requestBody.callbacks.finish).toBe('http://localhost:3000/checkout/success/ord-1');
-    expect(requestBody.callbacks.error).toBe('http://localhost:3000/checkout?payment_failed=true');
-    expect(requestBody.callbacks.pending).toBe('http://localhost:3000/checkout?payment_failed=true');
+    expect(requestBody.callbacks.error).toBe('http://localhost:3000/checkout/success/ord-1?payment_failed=true');
+    expect(requestBody.callbacks.pending).toBe('http://localhost:3000/checkout/success/ord-1?payment_failed=true');
   });
 });

@@ -9,7 +9,7 @@ export function isMidtransProduction(): boolean {
 }
 
 export function getSnapUrl(token: string, orderId: string): string {
-  return `https://app.${isMidtransProduction() ? 'midtrans.com' : 'sandbox.midtrans.com'}/snap/v2/vtweb/${token}?order_id=${encodeURIComponent(orderId)}`;
+  return `https://app.${isMidtransProduction() ? 'midtrans.com' : 'sandbox.midtrans.com'}/snap/v4/${token}?order_id=${encodeURIComponent(orderId)}`;
 }
 
 export function getAppUrl(): string {
@@ -75,8 +75,8 @@ export async function createMidtransTransaction(params: {
   const finishUrl = `${appUrl}checkout/success/${params.orderId}`;
   const callbacks = {
     finish: finishUrl,
-    error: `${appUrl}checkout?payment_failed=true`,
-    pending: `${appUrl}checkout?payment_failed=true`,
+    error: `${finishUrl}?payment_failed=true`,
+    pending: `${finishUrl}?payment_failed=true`,
   };
 
   const payload = {

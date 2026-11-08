@@ -55,6 +55,7 @@ export default function CheckoutPage() {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         items: filteredItems.map(i => ({ product_id: i.product_id, qty: i.qty })),
         address: formData.delivery_method === 'antar_ke_kelas'
