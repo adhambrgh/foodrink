@@ -17,6 +17,7 @@ export function usePagination<T>(items: T[], pageSize = 10) {
     pageCount,
     setPage,
     pagedItems,
+    pageSize,
     hasPrev: currentPage > 1,
     hasNext: currentPage < pageCount,
   };
