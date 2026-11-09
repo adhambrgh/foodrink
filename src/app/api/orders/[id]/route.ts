@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createAdminClient } from '@/lib/supabase/server-admin';
 import { cookies } from 'next/headers';
 
 export async function DELETE(
@@ -39,10 +40,13 @@ export async function DELETE(
     return NextResponse.json({ error: 'Tidak diizinkan' }, { status: 403 });
   }
 
-  // 2) Pastikan order yang dihapus adalah milik user yang sama (scope).
-  const { data: order } = await supabase
+  // 2) Admin sudah terverifikasi — pakai service role untuk lookup + hapus,
+  //    karena RLS "user own" menghalangi admin melihat order milik customer.
+  const admin = createAdminClient();
+
+  const { data: order } = await admin
     .from('orders')
-    .select('id, user_id')
+    .select('id')
     .eq('id', params.id)
     .single();
 
@@ -51,8 +55,8 @@ export async function DELETE(
   }
 
   // 3) Hapus item terlebih dahulu, lalu order.
-  await supabase.from('order_items').delete().eq('order_id', params.id);
-  const { error: orderError } = await supabase
+  await admin.from('order_items').delete().eq('order_id', params.id);
+  const { error: orderError } = await admin
     .from('orders')
     .delete()
     .eq('id', params.id);
