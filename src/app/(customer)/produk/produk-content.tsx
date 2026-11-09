@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import ProductCard from '@/components/customer/product-card';
 import Link from 'next/link';
-import { ArrowLeft, Filter, UserRound } from 'lucide-react';
+import { ArrowLeft, Filter, UserRound, Package } from 'lucide-react';
 import FilterBar from './filter-bar';
 
 export default function ProdukContent() {
@@ -148,14 +148,6 @@ export default function ProdukContent() {
             category={category}
           />
 
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-text">
-              {categoryName ? `${categoryName}` : 'Semua Produk'}
-              {search && ` - Hasil untuk "${search}"`}
-            </h2>
-            <span className="text-sm text-text-muted">{products?.length || 0} produk</span>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
             {products && products.length > 0 ? (
               products.map((p: any) => (
@@ -168,7 +160,7 @@ export default function ProdukContent() {
               ))
             ) : (
               <div className="col-span-2 flex flex-col items-center justify-center py-12">
-                <Filter className="w-12 h-12 text-text-muted/30 mb-3" />
+                <Package className="w-12 h-12 text-text-muted/30 mb-3" />
                 <p className="text-text-muted text-center">
                   {search || category
                     ? 'Tidak ada produk yang cocok'

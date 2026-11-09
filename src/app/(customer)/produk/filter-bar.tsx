@@ -84,11 +84,7 @@ export default function FilterBar({ categories, search, category }: FilterBarPro
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                  category === cat.id
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-text border border-border hover:bg-surface-variant'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${category === cat.id ? 'bg-primary text-white' : 'bg-white text-text border border-border hover:bg-surface-variant'}`}
                 onClick={() => {
                   const params = new URLSearchParams(searchParams.toString());
                   if (query.trim()) params.set('search', query.trim());
