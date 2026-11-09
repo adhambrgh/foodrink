@@ -117,50 +117,50 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
         <div className="overflow-hidden rounded-xl border border-border bg-surface-card">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-                 <thead>
-                 <tr className="border-b border-border bg-surface-variant/40 text-left text-text-muted">
-                   <th className="px-4 py-3 font-medium">ID</th>
-                   <th className="px-4 py-3 font-medium">Pelanggan</th>
-                   <th className="px-4 py-3 text-right font-medium">Total</th>
-                   <th className="px-4 py-3 text-center font-medium">Status</th>
-                   <th className="px-4 py-3 text-center font-medium">Bayar</th>
-                   <th className="px-4 py-3 text-center font-medium">Metode</th>
-                   <th className="px-4 py-3 text-center font-medium">Waktu</th>
-                   <th className="px-4 py-3 text-center font-medium">No.</th>
-                   <th className="px-4 py-3 text-center font-medium">Aksi</th>
-                 </tr>
-               </thead>
+<thead>
+                  <tr className="border-b border-border bg-surface-variant/40 text-left text-text-muted">
+                    <th className="px-4 py-3 text-center font-medium">No.</th>
+                    <th className="px-4 py-3 font-medium">ID</th>
+                    <th className="px-4 py-3 font-medium">Pelanggan</th>
+                    <th className="px-4 py-3 text-right font-medium">Total</th>
+                    <th className="px-4 py-3 text-center font-medium">Status</th>
+                    <th className="px-4 py-3 text-center font-medium">Bayar</th>
+                    <th className="px-4 py-3 text-center font-medium">Metode</th>
+                    <th className="px-4 py-3 text-center font-medium">Waktu</th>
+                    <th className="px-4 py-3 text-center font-medium">Aksi</th>
+                  </tr>
+                </thead>
                <tbody>
                  {pagedItems.map((order, i) => {
                    const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles;
                    const isPaid = order.status === 'selesai' || order.payment_status === 'paid';
                    return (
-                       <tr key={order.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30">
-                         <td className="px-4 py-3 font-mono text-xs text-text-muted">#{order.id.slice(0, 8)}</td>
-                         <td className="px-4 py-3">
-                           <div className="font-medium text-text">{profile?.name || '-'}</div>
-                           <div className="text-xs text-text-muted">{profile?.email || ''}</div>
-                         </td>
-                         <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-text">{formatCurrency(order.total)}</td>
-                         <td className="px-4 py-3 text-center"><StatusBadge status={order.status} /></td>
-                         <td className="px-4 py-3 text-center">
-                           {isPaid ? <CheckCircle className="mx-auto h-5 w-5 text-success" /> : <Clock className="mx-auto h-5 w-5 text-yellow-500" />}
-                         </td>
-                         <td className="px-4 py-3 text-center"><PaymentBadge method={order.payment_method} /></td>
-                         <td className="whitespace-nowrap px-4 py-3 text-center text-xs text-text-muted">
-                           {new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                         </td>
-                         <td className="px-4 py-3 text-center font-mono text-xs">{startIndex + i + 1}</td>
-                         <td className="px-4 py-3 text-center">
-                           <div className="flex flex-wrap items-center justify-center gap-2">
-                             <OrderStatusButton orderId={order.id} currentStatus={order.status} />
-                             <Link href={`/admin/pesanan/${order.id}`} className="inline-flex rounded-lg p-1.5 text-primary hover:bg-primary/10" title="Detail">
-                               <Package className="h-4 w-4" />
-                             </Link>
-                             <DeleteOrderButton orderId={order.id} />
-                           </div>
-                         </td>
-                       </tr>
+<tr key={order.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30">
+                          <td className="px-4 py-3 text-center font-mono text-xs">{startIndex + i + 1}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-text-muted">#{order.id.slice(0, 8)}</td>
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-text">{profile?.name || '-'}</div>
+                            <div className="text-xs text-text-muted">{profile?.email || ''}</div>
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-text">{formatCurrency(order.total)}</td>
+                          <td className="px-4 py-3 text-center"><StatusBadge status={order.status} /></td>
+                          <td className="px-4 py-3 text-center">
+                            {isPaid ? <CheckCircle className="mx-auto h-5 w-5 text-success" /> : <Clock className="mx-auto h-5 w-5 text-yellow-500" />}
+                          </td>
+                          <td className="px-4 py-3 text-center"><PaymentBadge method={order.payment_method} /></td>
+                          <td className="whitespace-nowrap px-4 py-3 text-center text-xs text-text-muted">
+                            {new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                              <OrderStatusButton orderId={order.id} currentStatus={order.status} />
+                              <Link href={`/admin/pesanan/${order.id}`} className="inline-flex rounded-lg p-1.5 text-primary hover:bg-primary/10" title="Detail">
+                                <Package className="h-4 w-4" />
+                              </Link>
+                              <DeleteOrderButton orderId={order.id} />
+                            </div>
+                          </td>
+                        </tr>
                      );
                  })}
                </tbody>
