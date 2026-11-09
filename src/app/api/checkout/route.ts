@@ -92,6 +92,7 @@ export async function POST(request: Request) {
   // No stock decrement here; stock will be decreased after successful Midtrans payment via webhook
 
   let midtransToken: string | null = null;
+  let redirectUrl: string | null = null;
 
   if (payment_method === 'midtrans') {
     try {
@@ -106,6 +107,7 @@ export async function POST(request: Request) {
         })),
       });
       midtransToken = transaction.token;
+      redirectUrl = transaction.redirectUrl;
     } catch (error) {
       await supabase.from('order_items').delete().eq('order_id', orderId);
       await supabase.from('orders').delete().eq('id', orderId);
@@ -125,8 +127,8 @@ export async function POST(request: Request) {
     redirect_url:
       payment_method === 'cod'
         ? `/checkout/success/${orderId}`
-        : midtransToken
-          ? getSnapUrl(midtransToken, orderId)
+      : midtransToken
+        ? redirectUrl ?? getSnapUrl(midtransToken, orderId)
           : null,
   });
 }

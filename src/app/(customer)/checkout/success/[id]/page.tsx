@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
-import { CheckCircle2, Home, Receipt, Package, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Home, Package, ArrowLeft, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
@@ -25,67 +25,52 @@ interface OrderItem {
   name_snapshot: string;
 }
 
-export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: string }> }) {
+interface OrderResponse {
+  order: OrderDetail;
+}
+
+export default function CheckoutSuccessPage({ params }: { params: { id: string } }) {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentFailed, setPaymentFailed] = useState(false);
-  const [items, setItems] = useState<OrderItem[]>([]);
+  const [attempts, setAttempts] = useState(0);
+  const MAX_ATTEMPTS = 40; // ~120s total with backoff
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const resolvedParams = await params;
-      const { id } = resolvedParams;
-      if (typeof window !== 'undefined' && window.location.search.includes('payment_failed=true')) {
+      const { search } = window.location;
+      if (search.includes('payment_failed=true')) {
         setPaymentFailed(true);
         setLoading(false);
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError('Sesi login tidak ditemukan');
+      const res = await fetch(`/api/orders/${params.id}`, { cache: 'no-store' });
+      const data = await res.json();
+
+      if (res.ok && data.order) {
+        setOrder(data.order);
         setLoading(false);
+
+        // Keep polling while still pending to catch webhook status change
+        if (data.order.payment_status === 'pending' && attempts < MAX_ATTEMPTS) {
+          const backoff = Math.min(2 ** attempts * 500, 3000);
+          const timer = setTimeout(() => {
+            setAttempts(a => a + 1);
+            fetchOrder();
+          }, backoff);
+          return () => clearTimeout(timer);
+        }
         return;
       }
 
-      const { data, error: supError } = await supabase
-        .from('orders')
-        .select('id, total, address, notes, status, payment_status, created_at')
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (supError) {
-        setError(supError.message);
-      } else if (data) {
-        setOrder({ ...data, order_items: [] } as OrderDetail);
-      }
+      setError(data.error || 'Pesanan tidak ditemukan');
       setLoading(false);
     };
 
     fetchOrder();
-  }, [params]);
-
-  useEffect(() => {
-    if (!order) return;
-
-    const fetchItems = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('order_items')
-        .select('product_id, qty, price_snapshot, name_snapshot')
-        .eq('order_id', order.id);
-
-      if (data) {
-        setItems(data);
-      }
-    };
-
-    fetchItems();
-  }, [order?.id]);
+  }, [params.id, attempts]);
 
   if (loading) {
     return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>;
@@ -97,7 +82,20 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
         <div className="flex-1 flex items-center justify-center text-center">
           <h1 className="font-display text-xl text-text mb-2">Pembayaran Gagal / Pending</h1>
           <p className="text-sm text-text-muted mb-4">Transaksi tidak berhasil diproses. Anda dapat mencobanya lagi.</p>
-          <Link href="/pesanan" className="text-primary hover:underline">Lihat Pesanan Saya</Link>
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href="/beranda"
+              className="py-3 rounded-lg bg-surface-variant text-text font-medium text-center hover:bg-surface-hover transition-colors"
+            >
+              <Home className="w-4 h-4 inline-block mr-1" /> Beranda
+            </Link>
+            <Link
+              href="/pesanan"
+              className="py-3 rounded-lg bg-primary text-white font-medium text-center hover:bg-primary-dark transition-colors"
+            >
+              <Package className="w-4 h-4 inline-block mr-1" /> Pesanan Saya
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -106,18 +104,23 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
   if (error || !order) {
     return (
       <main className="flex min-h-screen flex-col bg-surface px-4 pb-28 pt-safe pt-4">
-        <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
-          <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div className="text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
-            <h1 className="font-display text-lg leading-tight text-text">Struk Pembayaran</h1>
-          </div>
-        </header>
         <div className="flex-1 flex items-center justify-center text-center">
-          <p className="text-red-600">Pesanan tidak ditemukan</p>
-          <Link href="/pesanan" className="mt-4 inline-block text-primary hover:underline">Kembali ke Pesanan</Link>
+          <ArrowLeft className="h-5 w-5 text-text-muted mx-auto mb-3" />
+          <p className="text-red-600">{error}</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Link
+              href="/beranda"
+              className="py-3 rounded-lg bg-surface-variant text-text font-medium text-center hover:bg-surface-hover transition-colors"
+            >
+              <Home className="w-4 h-4 inline-block mr-1" /> Beranda
+            </Link>
+            <Link
+              href="/pesanan"
+              className="py-3 rounded-lg bg-primary text-white font-medium text-center hover:bg-primary-dark transition-colors"
+            >
+              <Package className="w-4 h-4 inline-block mr-1" /> Pesanan Saya
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -139,7 +142,6 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
       </header>
 
       <div className="flex-1 space-y-4">
-        {/* Success Badge */}
         <div className="bg-white rounded-lg p-4 border border-gray-100 text-center">
           <CheckCircle2 className={`w-12 h-12 mx-auto mb-3 ${isPaid ? 'text-success' : 'text-orange-500'}`} />
           <h2 className="font-display text-xl text-text">{statusLabel}</h2>
@@ -151,10 +153,9 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
           </span>
         </div>
 
-        {/* Order Details */}
         <div className="bg-white rounded-lg p-4 border border-gray-100">
           <h3 className="font-medium text-text mb-3 flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-text-muted" /> Detail Pesanan
+            <Package className="w-5 h-5 text-text-muted" /> Detail Pesanan
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -176,7 +177,7 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
           <div className="mt-4 border-t pt-4">
             <h4 className="font-medium text-text mb-2">Item Pesanan</h4>
             <div className="space-y-2">
-              {items.map((item, idx) => (
+              {order.order_items.map((item: OrderItem, idx: number) => (
                 <div key={idx} className="flex justify-between text-sm">
                   <div className="flex-1 mr-2">
                     <p className="font-medium text-text">{item.name_snapshot}</p>
@@ -193,7 +194,6 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        {/* Next Step Info */}
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <Package className="w-5 h-5 text-primary mt-0.5 shrink-0" />
@@ -209,7 +209,6 @@ export default function CheckoutSuccessPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      {/* Navigation Buttons */}
       <div className="bg-white border-t border-black/5 p-4 sticky bottom-0">
         <div className="grid grid-cols-2 gap-3">
           <Link

@@ -9,7 +9,7 @@ export function isMidtransProduction(): boolean {
 }
 
 export function getSnapUrl(token: string, orderId: string): string {
-  return `https://app.${isMidtransProduction() ? 'midtrans.com' : 'sandbox.midtrans.com'}/snap/v4/${token}?order_id=${encodeURIComponent(orderId)}`;
+  return `https://app.${isMidtransProduction() ? 'midtrans.com' : 'sandbox.midtrans.com'}/snap/v4/redirection/${token}?order_id=${encodeURIComponent(orderId)}`;
 }
 
 export function getAppUrl(): string {
@@ -109,5 +109,6 @@ export async function createMidtransTransaction(params: {
 
   return {
     token: data.token,
+    redirectUrl: data.redirect_url,
   };
 }
