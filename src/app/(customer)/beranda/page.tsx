@@ -35,7 +35,7 @@ function BerandaHeader({ user }: { user: { user_metadata?: { full_name?: string 
             <h1 className="text-base font-bold text-text">{(user.user_metadata as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0]}</h1>
           </div>
         </div>
-        <Link href="/notifikasi" className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+        <Link href="/notifikasi" prefetch={true} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
           <Bell className="w-5 h-5 text-white" />
         </Link>
       </header>

@@ -129,14 +129,14 @@ export default function ProdukContent() {
       <main className="flex min-h-screen flex-col bg-surface">
         <div className="px-4 pt-safe pt-6 pb-28">
           <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
-            <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+            <Link href="/beranda" prefetch={true} aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div className="text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
               <h1 className="font-display text-lg leading-tight text-text">Produk</h1>
             </div>
-            <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+            <Link href="/akun" prefetch={true} aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
               <UserRound className="h-4 w-4" />
             </Link>
           </header>

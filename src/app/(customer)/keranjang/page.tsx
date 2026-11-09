@@ -79,11 +79,11 @@ export default function KeranjangPage() {
       <div className="flex min-h-screen flex-col bg-surface">
         <header className="border-b border-black/5 bg-surface px-4 pb-4 pt-safe pt-5">
           <div className="flex items-center justify-between">
-            <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text hover:bg-surface-variant">
+            <Link href="/beranda" prefetch={true} aria-label="Kembali ke beranda" className="rounded-full p-2 text-text hover:bg-surface-variant">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <h1 className="font-display text-lg text-text">Keranjang Belanja</h1>
-            <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+            <Link href="/akun" prefetch={true} aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
               <UserRound className="h-4 w-4" />
             </Link>
           </div>
@@ -96,7 +96,7 @@ export default function KeranjangPage() {
           <p className="mt-1 max-w-xs text-sm leading-relaxed text-text-muted">
             Pilih menu yang ingin kamu nikmati, lalu kembali ke sini.
           </p>
-          <Link href="/produk" className="mt-5 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-dark">
+          <Link href="/produk" prefetch={true} className="mt-5 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-dark">
             Lihat menu
           </Link>
         </main>
@@ -104,18 +104,18 @@ export default function KeranjangPage() {
     );
   }
 
-  return (
+return (
     <div className="min-h-screen bg-surface text-text">
       <header className="sticky top-0 z-30 border-b border-black/5 bg-surface px-4 pb-3 pt-safe pt-4">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
-          <Link href="/produk" aria-label="Kembali ke produk" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+          <Link href="/produk" prefetch={true} aria-label="Kembali ke produk" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="text-center">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
             <h1 className="font-display text-lg leading-tight">Keranjang Belanja</h1>
           </div>
-          <Link href="/akun" aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
+          <Link href="/akun" prefetch={true} aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
             <UserRound className="h-4 w-4" />
           </Link>
         </div>
@@ -150,7 +150,7 @@ export default function KeranjangPage() {
               {allSelected ? <CheckSquare className="h-5 w-5 text-primary" /> : <Square className="h-5 w-5 text-text-muted" />}
               Pilih semua
             </label>
-            <Link href="/produk" className="text-xs font-semibold text-primary hover:underline">
+            <Link href="/produk" prefetch={true} className="text-xs font-semibold text-primary hover:underline">
               + Tambah menu
             </Link>
           </div>

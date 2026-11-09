@@ -134,7 +134,7 @@ function RegisterForm() {
 
         <div className="text-center text-sm text-text-muted">
           <span>Sudah punya akun? </span>
-          <Link href="/login" className="text-primary hover:underline">
+          <Link href="/login" prefetch={true} className="text-primary hover:underline">
             Masuk
           </Link>
         </div>

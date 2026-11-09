@@ -95,7 +95,7 @@ function LoginForm() {
 
         <div className="text-center text-sm text-text-muted">
           <span>Belum punya akun? </span>
-          <Link href="/register" className="text-primary hover:underline">
+          <Link href="/register" prefetch={true} className="text-primary hover:underline">
             Daftar
           </Link>
         </div>

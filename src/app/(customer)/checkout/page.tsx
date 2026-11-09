@@ -85,7 +85,7 @@ export default function CheckoutPage() {
       {/* Header */}
       <header className="p-4 border-b border-border bg-surface">
         <div className="flex items-center gap-2">
-          <Link href="/keranjang" className="p-2 rounded-lg hover:bg-surface-variant">
+          <Link href="/keranjang" prefetch={true} className="p-2 rounded-lg hover:bg-surface-variant">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="text-xl font-bold text-text">Checkout</h1>

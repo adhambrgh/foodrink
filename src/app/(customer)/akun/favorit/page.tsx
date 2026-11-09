@@ -73,7 +73,7 @@ export default function FavoritPage() {
   return (
     <main className="flex min-h-screen flex-col bg-surface px-4 pb-28 pt-safe pt-4">
       <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
-        <Link href="/akun" aria-label="Kembali ke akun" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+        <Link href="/akun" prefetch={true} aria-label="Kembali ke akun" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h14" />
           </svg>
@@ -82,7 +82,7 @@ export default function FavoritPage() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
           <h1 className="font-display text-lg leading-tight text-text">Favorit Saya</h1>
         </div>
-        <Link href="/notifikasi" aria-label="Buka notifikasi" className="rounded-full bg-primary p-2 text-white">
+        <Link href="/notifikasi" prefetch={true} aria-label="Buka notifikasi" className="rounded-full bg-primary p-2 text-white">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1" />
           </svg>

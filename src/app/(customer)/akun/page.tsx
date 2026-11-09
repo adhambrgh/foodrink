@@ -44,14 +44,14 @@ export default function AkunPage() {
   return (
     <main className="flex min-h-screen flex-col bg-surface px-4 pb-28 pt-safe pt-4">
       <header className="mb-5 flex items-center justify-between border-b border-black/5 pb-3">
-        <Link href="/beranda" aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
+        <Link href="/beranda" prefetch={true} aria-label="Kembali ke beranda" className="rounded-full p-2 text-text transition-colors hover:bg-surface-variant">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
           <h1 className="font-display text-lg leading-tight text-text">Akun Saya</h1>
         </div>
-        <Link href="/notifikasi" aria-label="Buka notifikasi" className="rounded-full bg-primary p-2 text-white">
+        <Link href="/notifikasi" prefetch={true} aria-label="Buka notifikasi" className="rounded-full bg-primary p-2 text-white">
           <Bell className="h-4 w-4" />
         </Link>
       </header>

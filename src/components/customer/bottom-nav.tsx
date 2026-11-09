@@ -46,6 +46,7 @@ export default function BottomNav() {
           <Link
             key={href}
             href={href}
+            prefetch={true}
             className={`relative flex min-w-14 flex-col items-center justify-center gap-0.5 text-xs ${raised ? '-top-4' : ''} ${pathname === href ? 'text-primary font-semibold' : 'text-text-muted'} z-10`}
           >
             <span className={raised ? 'flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg' : ''}>
