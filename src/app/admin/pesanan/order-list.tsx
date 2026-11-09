@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Clock, CreditCard, Filter, Package, Search, Truck } from 'lucide-react';
+import { CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Clock, CreditCard, Filter, Package, Search, Trash2, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
 import OrderStatusButton from './status-button';
+import DeleteOrderButton from '@/components/admin/delete-order-button';
 import { usePagination } from '@/components/admin/pagination';
 
 export interface Order {
@@ -17,7 +18,7 @@ export interface Order {
   address: string | null;
   notes: string | null;
   created_at: string;
-  profiles: { name?: string | null; email?: string | null } | { name?: string | null; email?: string | null }[] | null;
+  profiles: { name?: string | null; email?: string | null; role?: string | null } | { name?: string | null; email?: string | null; role?: string | null }[] | null;
   order_items: any[];
 }
 
@@ -125,35 +126,36 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
                 </tr>
               </thead>
               <tbody>
-                {pagedItems.map((order) => {
+{pagedItems.map((order) => {
                   const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles;
                   const isPaid = order.status === 'selesai' || order.payment_status === 'paid';
                   return (
-                    <tr key={order.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30">
-                      <td className="px-4 py-3 font-mono text-xs text-text-muted">#{order.id.slice(0, 8)}</td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-text">{profile?.name || '-'}</div>
-                        <div className="text-xs text-text-muted">{profile?.email || ''}</div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-text">{formatCurrency(order.total)}</td>
-                      <td className="px-4 py-3 text-center"><StatusBadge status={order.status} /></td>
-                      <td className="px-4 py-3 text-center">
-                        {isPaid ? <CheckCircle className="mx-auto h-5 w-5 text-success" /> : <Clock className="mx-auto h-5 w-5 text-yellow-500" />}
-                      </td>
-                      <td className="px-4 py-3 text-center"><PaymentBadge method={order.payment_method} /></td>
-                      <td className="whitespace-nowrap px-4 py-3 text-center text-xs text-text-muted">
-                        {new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex flex-wrap items-center justify-center gap-2">
-                          <OrderStatusButton orderId={order.id} currentStatus={order.status} />
-                          <Link href={`/admin/pesanan/${order.id}`} className="inline-flex rounded-lg p-1.5 text-primary hover:bg-primary/10" title="Detail">
-                            <Package className="h-4 w-4" />
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  );
+                      <tr key={order.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30">
+                        <td className="px-4 py-3 font-mono text-xs text-text-muted">#{order.id.slice(0, 8)}</td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-text">{profile?.name || '-'}</div>
+                          <div className="text-xs text-text-muted">{profile?.email || ''}</div>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-text">{formatCurrency(order.total)}</td>
+                        <td className="px-4 py-3 text-center"><StatusBadge status={order.status} /></td>
+                        <td className="px-4 py-3 text-center">
+                          {isPaid ? <CheckCircle className="mx-auto h-5 w-5 text-success" /> : <Clock className="mx-auto h-5 w-5 text-yellow-500" />}
+                        </td>
+                        <td className="px-4 py-3 text-center"><PaymentBadge method={order.payment_method} /></td>
+                        <td className="whitespace-nowrap px-4 py-3 text-center text-xs text-text-muted">
+                          {new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex flex-wrap items-center justify-center gap-2">
+                            <OrderStatusButton orderId={order.id} currentStatus={order.status} />
+                            <Link href={`/admin/pesanan/${order.id}`} className="inline-flex rounded-lg p-1.5 text-primary hover:bg-primary/10" title="Detail">
+                              <Package className="h-4 w-4" />
+                            </Link>
+                            <DeleteOrderButton orderId={order.id} />
+                          </div>
+                        </td>
+                      </tr>
+                    );
                 })}
               </tbody>
             </table>
@@ -218,7 +220,13 @@ function FilterButton({ active, onClick, children }: { active: boolean; onClick:
 }
 
 function StatusBadge({ status }: { status: string }) {
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${status === 'selesai' ? 'bg-success/10 text-success' : 'bg-blue-100 text-blue-700'}`}>{status === 'selesai' ? 'Selesai' : 'Diproses'}</span>;
+  const config = {
+    selesai: { label: 'Selesai', class: 'bg-success/10 text-success' },
+    dikirim: { label: 'Dikirim', class: 'bg-blue-100 text-blue-700' },
+    diproses: { label: 'Diproses', class: 'bg-yellow-100 text-yellow-700' },
+  };
+  const { label, class: cls } = config[status as keyof typeof config] || config.diproses;
+  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>{label}</span>;
 }
 
 function PaymentBadge({ method }: { method: string }) {

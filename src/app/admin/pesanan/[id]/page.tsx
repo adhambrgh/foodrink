@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CheckCircle, Clock, Package } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Package, Printer, Trash2 } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
+import DeleteOrderButton from '@/components/admin/delete-order-button';
 
 const statusConfig = {
   diproses: 'Sedang Diproses',
+  dikirim: 'Sedang Dikirim',
   selesai: 'Selesai',
 } as const;
 
@@ -13,7 +15,13 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const supabase = createAdminClient();
   const { data: orderData } = await supabase
     .from('orders')
-    .select('id, status, payment_status, payment_method, total, address, notes, created_at, profiles(name), order_items(name_snapshot, qty, price_snapshot, subtotal)')
+    .select(`
+      id, status, payment_status, payment_method, total, address, notes,
+      created_at, midtrans_payment_type, midtrans_fraud_status,
+      midtrans_status_message, midtrans_transaction_time,
+      profiles(name, role),
+      order_items(name_snapshot, qty, price_snapshot, subtotal)
+    `)
     .eq('id', params.id)
     .single();
 
@@ -22,20 +30,39 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const order = orderData as any;
   const isPaid = order.payment_status === 'paid';
   const isCod = order.payment_method === 'cod';
-  const profiles = order.profiles as { name?: string } | { name?: string }[] | null;
-  const customerName = Array.isArray(profiles) ? profiles[0]?.name : profiles?.name;
+  const profiles = order.profiles as { name?: string; role?: string } | { name?: string; role?: string }[] | null;
+  const profile = Array.isArray(profiles) ? profiles[0] : profiles;
+  const customerName = profile?.name;
+  const isAdmin = profile?.role === 'admin';
 
   return (
-    <div className="p-4 md:p-6 space-y-5">
-      <Link href="/admin/pesanan" className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary">
-        <ArrowLeft className="w-4 h-4" /> Kembali ke pesanan
-      </Link>
+    <div className="p-4 md:p-6 space-y-5 print:space-y-3 print:p-0">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/admin/pesanan" className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary no-print">
+          <ArrowLeft className="w-4 h-4" /> Kembali ke pesanan
+        </Link>
+        <div className="flex items-center gap-2 no-print">
+          <button
+            onClick={() => window.print()}
+            className="hidden print:inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
+          >
+            <Printer className="w-4 h-4" /> Cetak / Simpan PDF
+          </button>
+          {isAdmin && (
+            <DeleteOrderButton
+              orderId={order.id}
+              redirectTo="/admin/pesanan"
+              variant="icon"
+            />
+          )}
+        </div>
+      </div>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs text-text-muted font-mono">#{order.id}</p>
           <h1 className="text-xl font-bold text-text font-heading mt-1">Detail Pesanan</h1>
-          <p className="text-sm text-text-muted">{new Date(order.created_at).toLocaleString('id-ID')}</p>
+          <p className="text-sm text-text-muted">Dibuat: {new Date(order.created_at).toLocaleString('id-ID')}</p>
         </div>
         <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
           {statusConfig[order.status as keyof typeof statusConfig] || order.status}
@@ -57,6 +84,16 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
             {isPaid ? <CheckCircle className="h-4 w-4 text-success" /> : <Clock className="h-4 w-4 text-yellow-500" />}
             {isPaid ? 'Sudah dibayar' : isCod ? 'Bayar saat pesanan selesai' : 'Menunggu pembayaran Midtrans'}
           </p>
+          {order.midtrans_transaction_time && (
+            <p className="mt-2 text-xs text-text-muted">
+              Waktu verifikasi: {new Date(order.midtrans_transaction_time).toLocaleString('id-ID')}
+            </p>
+          )}
+          {order.midtrans_payment_type && (
+            <p className="mt-1 text-xs text-text-muted">
+              Jenis verifikasi: {order.midtrans_payment_type}
+            </p>
+          )}
         </section>
       </div>
 

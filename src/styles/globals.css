@@ -52,3 +52,25 @@
     animation-duration: 3s;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print\:space-y-3 {
+    space-y: 0.75rem;
+  }
+  .print\:p-0 {
+    padding: 0;
+  }
+  .print\:inline-flex {
+    display: inline-flex !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}

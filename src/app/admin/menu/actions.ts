@@ -4,6 +4,22 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { revalidatePath } from 'next/cache';
 
+function syncPaymentStatus(order: any, status: string) {
+  const supabase = createAdminClient();
+  const isPaidByMidtrans =
+    order.payment_method === 'midtrans' && order.payment_status !== 'paid';
+
+  const update = isPaidByMidtrans
+    ? supabase.from('orders').update({}).eq('id', order.id)
+    : null;
+
+  const hasError = Boolean(update && 'error' in update && update.error);
+  if (hasError) {
+    console.error('Error syncing payment status:', (update as any).error);
+  }
+  return hasError ? (update as any)?.error ?? null : null;
+}
+
 export async function createProduct(formData: FormData) {
   const supabase = createAdminClient();
 
@@ -179,7 +195,7 @@ export async function getOrders() {
       address,
       notes,
       created_at,
-      profiles (name),
+      profiles (name, role),
       order_items (product_id, name_snapshot, price_snapshot, qty, subtotal)
     `)
     .order('created_at', { ascending: false });
@@ -189,8 +205,7 @@ export async function getOrders() {
     return { error: error.message };
   }
 
-  // Filter out orders that are still pending payment (Midtrans not yet confirmed)
-  const orders = (data || []).filter((order: any) => order.payment_status !== 'pending');
+  const orders = data || [];
 
   const { data: usersData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
   const emailByUserId = new Map(
@@ -217,9 +232,13 @@ export async function updateOrderStatus(id: string, status: string) {
   // Get current order to check payment_method
   const { data: order } = await supabase
     .from('orders')
-    .select('payment_method, payment_status')
+    .select('payment_method, payment_status, created_at, status')
     .eq('id', id)
     .single();
+
+  if (!order) {
+    return { error: 'Pesanan tidak ditemukan' };
+  }
 
   const updateData: { status: string; payment_status?: string } = { status };
 
@@ -228,17 +247,27 @@ export async function updateOrderStatus(id: string, status: string) {
     updateData.payment_status = 'paid';
   }
 
+  // If order is paid (via webhook), disable manual override
+  if (status !== 'selesai' && order.payment_status === 'paid' && order.payment_method === 'midtrans') {
+    const syncError = syncPaymentStatus(order, status);
+    if (syncError) {
+      return { error: 'Tidak dapat mengubah status pesanan yang sudah dibayar' };
+    }
+    revalidatePath('/admin/pesanan');
+    revalidatePath(`/admin/pesanan/${id}`);
+    return { success: true };
+  }
+
   const { error } = await supabase
     .from('orders')
     .update(updateData)
     .eq('id', id);
 
   if (error) {
-    console.error('Error updating order status:', error);
     return { error: error.message };
   }
 
   revalidatePath('/admin/pesanan');
   revalidatePath(`/admin/pesanan/${id}`);
-  return { success: true, status: updateData.status };
+  return { success: true };
 }

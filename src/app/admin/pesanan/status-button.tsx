@@ -25,8 +25,8 @@ export default function OrderStatusButton({ orderId, currentStatus }: OrderStatu
     const result = await updateOrderStatus(orderId, next);
     if (result?.error) {
       setError(result.error);
-    } else {
-      setStatus(result.status || next);
+    } else if (result.success !== false) {
+      setStatus(next);
       router.refresh();
     }
     setBusy(false);
