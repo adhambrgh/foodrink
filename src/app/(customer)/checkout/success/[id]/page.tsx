@@ -115,7 +115,7 @@ export default function CheckoutSuccessPage({ params }: { params: { id: string }
               </svg>
             </div>
             <div>
-              <h1 className="font-display text-xl text-text mb-2">Pembayaran Gagal</h1>
+              <h1 className="font-sans text-xl text-text mb-2">Pembayaran Gagal</h1>
               <p className="text-sm text-text-muted mb-6">Transaksi tidak berhasil diproses. Anda dapat mencobanya lagi.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">

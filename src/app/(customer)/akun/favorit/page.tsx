@@ -80,7 +80,7 @@ export default function FavoritPage() {
         </Link>
         <div className="text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
-          <h1 className="font-display text-lg leading-tight text-text">Favorit Saya</h1>
+          <h1 className="font-sans text-lg leading-tight text-text">Favorit Saya</h1>
         </div>
         <Link href="/notifikasi" prefetch={true} aria-label="Buka notifikasi" className="rounded-full bg-primary p-2 text-white">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

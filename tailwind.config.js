@@ -36,7 +36,6 @@ module.exports = {
       },
       fontFamily: {
         sans: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'system-ui', 'serif'],
       },
       spacing: {
         'space-xs': '0.25rem',

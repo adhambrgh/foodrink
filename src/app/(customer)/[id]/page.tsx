@@ -225,7 +225,7 @@ export default function ProductDetailPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate font-display text-base font-bold">
+          <h1 className="truncate font-sans text-base font-bold">
             Detail menu
           </h1>
         </div>
@@ -283,7 +283,7 @@ export default function ProductDetailPage() {
         </div>
 
         <section className="-mt-2 relative mx-1 rounded-[1rem] bg-white px-5 py-5 shadow-[0_5px_18px_rgba(83,49,33,0.08)]">
-          <h2 className="font-display text-[1.45rem] font-bold leading-tight tracking-[-0.02em]">
+          <h2 className="font-sans text-[1.45rem] font-bold leading-tight tracking-[-0.02em]">
             {product.name}
           </h2>
           <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
@@ -416,7 +416,7 @@ export default function ProductDetailPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#a94716]">
                   Atur pesanan
                 </p>
-                <h3 className="mt-1 font-display text-xl font-bold text-[#3a2b25]">
+                <h3 className="mt-1 font-sans text-xl font-bold text-[#3a2b25]">
                   {quantityDialog === "cart"
                     ? "Tambah ke keranjang"
                     : "Beli"}

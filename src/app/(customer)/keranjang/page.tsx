@@ -82,7 +82,7 @@ export default function KeranjangPage() {
             <Link href="/beranda" prefetch={true} aria-label="Kembali ke beranda" className="rounded-full p-2 text-text hover:bg-surface-variant">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="font-display text-lg text-text">Keranjang Belanja</h1>
+            <h1 className="font-sans text-lg text-text">Keranjang Belanja</h1>
             <Link href="/akun" prefetch={true} aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
               <UserRound className="h-4 w-4" />
             </Link>
@@ -92,7 +92,7 @@ export default function KeranjangPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary">
             <ShoppingBag className="h-7 w-7" />
           </div>
-          <h2 className="font-display text-xl text-text">Belum ada yang dipesan</h2>
+          <h2 className="font-sans text-xl text-text">Belum ada yang dipesan</h2>
           <p className="mt-1 max-w-xs text-sm leading-relaxed text-text-muted">
             Pilih menu yang ingin kamu nikmati, lalu kembali ke sini.
           </p>
@@ -113,7 +113,7 @@ return (
           </Link>
           <div className="text-center">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
-            <h1 className="font-display text-lg leading-tight">Keranjang Belanja</h1>
+            <h1 className="font-sans text-lg leading-tight">Keranjang Belanja</h1>
           </div>
           <Link href="/akun" prefetch={true} aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
             <UserRound className="h-4 w-4" />

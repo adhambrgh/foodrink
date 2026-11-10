@@ -134,7 +134,7 @@ export default function ProdukContent() {
             </Link>
             <div className="text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
-              <h1 className="font-display text-lg leading-tight text-text">Produk</h1>
+              <h1 className="font-sans text-lg leading-tight text-text">Produk</h1>
             </div>
             <Link href="/akun" prefetch={true} aria-label="Buka akun" className="rounded-full bg-primary p-2 text-white">
               <UserRound className="h-4 w-4" />

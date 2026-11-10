@@ -73,7 +73,7 @@ export default function ReceiptHeroCard({ variant, orderId, total, className = '
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reducedMotion ? 0 : 0.3, delay: 0.2 }}
-        className="font-display text-2xl font-bold text-white mb-2"
+        className="font-sans text-2xl font-bold text-white mb-2"
       >
         {label}
       </motion.h2>
@@ -104,7 +104,7 @@ export default function ReceiptHeroCard({ variant, orderId, total, className = '
       >
         <p className="text-white/70 text-xs uppercase tracking-wider mb-1">Total Pembayaran</p>
         <motion.p
-          className="font-display text-3xl font-bold text-white tabular-nums"
+          className="font-sans text-3xl font-bold text-white tabular-nums"
           style={{ fontVariant: 'tabular-nums' }}
         >
           {formatCurrency(displayTotal)}
