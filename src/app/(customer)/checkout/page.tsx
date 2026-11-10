@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Send, MapPin } from 'lucide-react';
+import { ArrowLeft, Send, MapPin, CheckCircle2 } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { formatCurrency } from '@/lib/utils';
+import { supabase } from '@/lib/supabase/client';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
 interface CheckoutFormData {
@@ -22,6 +23,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, loading: cartLoading, selectedCartIds } = useCart();
   const [loading, setLoading] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [formData, setFormData] = useState<CheckoutFormData>({
     delivery_method: 'ambil_sendiri',
     recipient_name: '',
@@ -35,6 +37,31 @@ export default function CheckoutPage() {
   const filteredItems = items.filter(item => selectedCartIds.includes(item.cart_id));
   const subtotal = filteredItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
   const total = subtotal; // Delivery optional later
+
+  // Fetch user profile for pre-fill
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('name, grade, major, room')
+          .eq('id', user.id)
+          .single();
+        if (data) {
+          setFormData(prev => ({
+            ...prev,
+            recipient_name: data.name || '',
+            grade: data.grade || '',
+            major: data.major || '',
+            room: data.room || '',
+          }));
+        }
+      }
+      setLoadingProfile(false);
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     if (cartLoading || items.length === 0) {
@@ -79,6 +106,13 @@ export default function CheckoutPage() {
   if (cartLoading || items.length === 0) {
     return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>;
   }
+
+  if (loadingProfile) {
+    return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>;
+  }
+
+  const isPrefilled = (field: keyof CheckoutFormData) => 
+    ['recipient_name', 'grade', 'major', 'room'].includes(field) && formData[field].trim() !== '';
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
@@ -136,8 +170,14 @@ export default function CheckoutPage() {
             {formData.delivery_method === 'antar_ke_kelas' && (
               <div className="mt-4 space-y-4">
                 <div>
-                  <label htmlFor="recipient_name" className="block text-sm font-medium text-text mb-2">
-                    Nama *
+                  <label htmlFor="recipient_name" className="flex items-center justify-between text-sm font-medium text-text mb-2">
+                    <span>Nama *</span>
+                    {isPrefilled('recipient_name') && (
+                      <span className="flex items-center gap-1 text-xs text-success">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Diisi dari profil
+                      </span>
+                    )}
                   </label>
                   <input
                     type="text"
@@ -151,8 +191,14 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="grade" className="block text-sm font-medium text-text mb-2">
-                    Tingkat *
+                  <label htmlFor="grade" className="flex items-center justify-between text-sm font-medium text-text mb-2">
+                    <span>Tingkat *</span>
+                    {isPrefilled('grade') && (
+                      <span className="flex items-center gap-1 text-xs text-success">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Diisi dari profil
+                      </span>
+                    )}
                   </label>
                   <select
                     id="grade"
@@ -169,8 +215,14 @@ export default function CheckoutPage() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="major" className="block text-sm font-medium text-text mb-2">
-                    Jurusan *
+                  <label htmlFor="major" className="flex items-center justify-between text-sm font-medium text-text mb-2">
+                    <span>Jurusan *</span>
+                    {isPrefilled('major') && (
+                      <span className="flex items-center gap-1 text-xs text-success">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Diisi dari profil
+                      </span>
+                    )}
                   </label>
                   <select
                     id="major"
@@ -193,8 +245,14 @@ export default function CheckoutPage() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="room" className="block text-sm font-medium text-text mb-2">
-                    Ruangan *
+                  <label htmlFor="room" className="flex items-center justify-between text-sm font-medium text-text mb-2">
+                    <span>Ruangan *</span>
+                    {isPrefilled('room') && (
+                      <span className="flex items-center gap-1 text-xs text-success">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Diisi dari profil
+                      </span>
+                    )}
                   </label>
                   <input
                     type="text"
