@@ -53,8 +53,12 @@ export async function POST(request: Request) {
     });
   }
 
-  // Create order in database
+// Create order in database
   const orderId = generateOrderId();
+  const isCod = payment_method === 'cod';
+  const initialPaymentStatus = isCod ? 'paid' : 'pending';
+  const initialOrderStatus = isCod ? 'diproses' : 'pending';
+
   const { error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -63,8 +67,8 @@ export async function POST(request: Request) {
       total,
       address,
       notes,
-      status: 'pending', // pending until Midtrans confirms
-      payment_status: 'pending',
+      status: initialOrderStatus,
+      payment_status: initialPaymentStatus,
       payment_method,
     })
     .select()
@@ -89,7 +93,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: itemsError.message }, { status: 500 });
   }
 
-  // No stock decrement here; stock will be decreased after successful Midtrans payment via webhook
+  // For COD: decrease stock immediately (like webhook does for paid)
+  if (isCod) {
+    for (const item of orderItems) {
+      const { data: product } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('id', item.product_id)
+        .single();
+
+      if (product) {
+        await supabase
+          .from('products')
+          .update({ stock: product.stock - item.qty })
+          .eq('id', item.product_id);
+      }
+    }
+  }
 
   let midtransToken: string | null = null;
   let redirectUrl: string | null = null;
@@ -123,13 +143,14 @@ export async function POST(request: Request) {
     order_id: orderId,
     total,
     items: orderItems,
+    payment_method,
     midtrans_token: midtransToken,
     redirect_url:
       payment_method === 'cod'
         ? `/checkout/success/${orderId}`
-      : midtransToken
+        : midtransToken
         ? redirectUrl ?? getSnapUrl(midtransToken, orderId)
-          : null,
+        : null,
   });
 }
 

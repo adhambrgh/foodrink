@@ -87,7 +87,7 @@ export default function ProductCard({
     if (!user) return;
 
     setBusy(true);
-    const { addToCart: add } = await import('@/lib/supabase/cart');
+    const { addToCart: add } = await import('@/lib/supabase/cart-actions');
     const result = await add(product.id, quantity);
     setBusy(false);
 
@@ -119,6 +119,7 @@ export default function ProductCard({
               fill
               sizes="100%"
               className="object-cover transition-shadow duration-300 hover:scale-[1.03]"
+              priority
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-text-muted">

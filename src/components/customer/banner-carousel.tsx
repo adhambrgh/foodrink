@@ -31,11 +31,11 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${active * 100}%)` }}
         >
-          {slides.map((b) => (
+          {slides.map((b, index) => (
             <div key={b.id} className="w-full shrink-0">
               {b.link_url ? (
                 <Link href={b.link_url} className="block relative h-40 md:h-56 bg-surface-variant/60">
-                  <Image src={b.image_url} alt={b.title} fill className="object-cover" />
+                  <Image src={b.image_url} alt={b.title} fill className="object-cover" priority={index === 0} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                     <h2 className="text-lg md:text-xl font-bold">{b.title}</h2>
@@ -44,7 +44,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 </Link>
               ) : (
                 <div className="relative h-40 md:h-56">
-                  <Image src={b.image_url} alt={b.title} fill className="object-cover" />
+                  <Image src={b.image_url} alt={b.title} fill className="object-cover" priority={index === 0} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                     <h2 className="text-lg md:text-xl font-bold">{b.title}</h2>

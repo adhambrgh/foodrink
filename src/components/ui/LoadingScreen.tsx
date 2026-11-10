@@ -12,6 +12,7 @@ export default function LoadingScreen() {
           width={80}
           height={80}
           className="rounded-full animate-pulse"
+          priority
         />
         <svg
           className="animate-spin text-primary w-8 h-8"

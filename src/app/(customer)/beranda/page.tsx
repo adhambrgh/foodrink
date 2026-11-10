@@ -29,6 +29,7 @@ function BerandaHeader({ user }: { user: { user_metadata?: { full_name?: string 
             width={48}
             height={48}
             className="rounded-full object-cover"
+            priority
           />
           <div>
             <p className="text-text-muted text-xs">Halo,</p>

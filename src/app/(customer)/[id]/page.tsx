@@ -142,7 +142,7 @@ export default function ProductDetailPage() {
       return false;
     }
 
-    const { addToCart } = await import("@/lib/supabase/cart");
+    const { addToCart } = await import("@/lib/supabase/cart-actions");
     const result = await addToCart(id, quantity);
     if (result.error) {
       setNotice(result.error);
@@ -266,10 +266,13 @@ export default function ProductDetailPage() {
 
         <div className="relative aspect-[4/3] overflow-hidden rounded-[1.15rem] bg-[#eadbd3] shadow-[0_8px_24px_rgba(83,49,33,0.1)]">
           {product.image_url ? (
-            <img
+            <Image
               src={product.image_url}
               alt={product.name}
+              fill
               className="h-full w-full object-cover"
+              priority
+              sizes="100%"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-[#8a756b]">

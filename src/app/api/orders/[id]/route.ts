@@ -3,6 +3,46 @@ import { createServerClient } from '@supabase/ssr';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { cookies } from 'next/headers';
 
+export async function GET(
+  _request: Request,
+  { params }: { params: { id: string } }
+) {
+  const cookieStore = cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {
+          // Admin action from same origin — cookies persisted by middleware.
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Tidak diizinkan' }, { status: 401 });
+  }
+
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select('*, order_items(*)')
+    .eq('id', params.id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (error || !order) {
+    return NextResponse.json({ error: 'Pesanan tidak ditemukan' }, { status: 404 });
+  }
+
+  return NextResponse.json({ order });
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: { id: string } }
