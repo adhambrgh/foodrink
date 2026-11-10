@@ -63,18 +63,18 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Check if user is authenticated
-  if (!user) {
-    // Customer routes redirect to customer login
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirectTo', path);
-    return NextResponse.redirect(loginUrl);
-  }
-
   // Admin routes check
   const isAdminRoute = adminRoutes.some((route) =>
     path.startsWith(route)
   );
+
+  // Check if user is authenticated
+  if (!user) {
+    // Admin routes redirect to admin login, customer routes to customer login
+    const loginUrl = new URL(isAdminRoute ? '/admin/login' : '/login', request.url);
+    loginUrl.searchParams.set('redirectTo', path);
+    return NextResponse.redirect(loginUrl);
+  }
 
   if (isAdminRoute) {
     // Check if admin has a profile with admin role, or create one if missing

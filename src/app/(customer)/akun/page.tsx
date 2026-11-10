@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, User, Bell, Shield, Settings, CreditCard, Heart } from 'lucide-react';
+import { ArrowLeft, User, Bell, Shield, Settings, Heart } from 'lucide-react';
 import Link from 'next/link';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
@@ -82,15 +82,6 @@ export default function AkunPage() {
           <div className="flex items-center gap-3">
             <User className="w-5 h-5 text-text-muted" />
             <span className="text-text">Profil</span>
-          </div>
-        </Link>
-        <Link
-          href="/akun/alamat"
-          className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
-        >
-          <div className="flex items-center gap-3">
-            <CreditCard className="w-5 h-5 text-text-muted" />
-            <span className="text-text">Alamat</span>
           </div>
         </Link>
         <Link
