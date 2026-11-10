@@ -190,7 +190,7 @@ export default function PengaturanPage() {
         </Link>
         <div className="text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Foodrink</p>
-          <h1 className="font-heading text-lg leading-tight text-text">Pengaturan</h1>
+          <h1 className="font-semibold text-lg leading-tight text-text">Pengaturan</h1>
         </div>
         <div className="w-10" />
       </header>
@@ -199,7 +199,7 @@ export default function PengaturanPage() {
         <div className="mb-5 rounded-xl bg-emerald-50/80 border border-emerald-200/60 p-3.5" role="alert">
           <div className="flex items-center gap-2.5 text-emerald-700">
             <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
-            <span className="font-body text-sm font-medium">Perubahan disimpan</span>
+            <span className=" text-sm font-medium">Perubahan disimpan</span>
           </div>
         </div>
       )}
@@ -208,7 +208,7 @@ export default function PengaturanPage() {
         <div className="mb-5 rounded-xl bg-red-50/80 border border-red-200/60 p-3.5" role="alert">
           <div className="flex items-center gap-2.5 text-red-700">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
-            <span className="font-body text-sm">{error}</span>
+            <span className=" text-sm">{error}</span>
           </div>
         </div>
       )}
@@ -216,12 +216,12 @@ export default function PengaturanPage() {
       <form onSubmit={handleSaveProfile} className="space-y-7" noValidate>
         {/* SECTION 1: Informasi Akun — Card standar, warm */}
         <section aria-labelledby="account-heading" className="bg-white/90 backdrop-blur-sm rounded-2xl border border-neutral-200/60 p-5 md:p-6 space-y-5">
-          <h2 id="account-heading" className="font-heading text-lg font-semibold text-text tracking-tight">
+          <h2 id="account-heading" className="font-semibold text-lg font-semibold text-text tracking-tight">
             Informasi Akun
           </h2>
 
           <div className="space-y-1.5">
-            <label htmlFor="name" className="block font-body text-sm font-medium text-text mb-1">
+            <label htmlFor="name" className="block  text-sm font-medium text-text mb-1">
               Nama Lengkap
             </label>
             <input
@@ -230,7 +230,7 @@ export default function PengaturanPage() {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm  focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="Masukkan nama lengkap"
               autoComplete="name"
               disabled={saving}
@@ -238,7 +238,7 @@ export default function PengaturanPage() {
           </div>
 
           <div className="space-y-1.5 pt-1">
-            <label htmlFor="email" className="block font-body text-sm font-medium text-text mb-1">
+            <label htmlFor="email" className="block  text-sm font-medium text-text mb-1">
               Email
             </label>
             <input
@@ -246,14 +246,14 @@ export default function PengaturanPage() {
               id="email"
               value={profile?.email || ''}
               readOnly
-              className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-body text-text-muted focus:outline-none"
+              className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm  text-text-muted focus:outline-none"
               placeholder="Email tidak dapat diubah"
             />
-            <p className="font-body text-xs text-text-muted">Untuk mengubah email, silakan hubungi admin.</p>
+            <p className=" text-xs text-text-muted">Untuk mengubah email, silakan hubungi admin.</p>
           </div>
 
           <div className="space-y-1.5 pt-1">
-            <label htmlFor="phone" className="block font-body text-sm font-medium text-text mb-1">
+            <label htmlFor="phone" className="block  text-sm font-medium text-text mb-1">
               Nomor Telepon
             </label>
             <input
@@ -262,7 +262,7 @@ export default function PengaturanPage() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm  focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="Contoh: 081234567890"
               autoComplete="tel"
               disabled={saving}
@@ -272,7 +272,7 @@ export default function PengaturanPage() {
 
         {/* SECTION 2: Preferensi Notifikasi — Elevated, warm tint, NO border, noise overlay */}
         <section aria-labelledby="notif-heading" className="relative noise-overlay bg-amber-50/40 rounded-2xl p-5 md:p-6 space-y-4">
-          <h2 id="notif-heading" className="font-heading text-lg font-semibold text-text tracking-tight">
+          <h2 id="notif-heading" className="font-semibold text-lg font-semibold text-text tracking-tight">
             <div className="inline-flex items-center gap-2">
               <BellIcon />
               Preferensi Notifikasi
@@ -286,8 +286,8 @@ export default function PengaturanPage() {
                   <PromoIcon />
                 </span>
                 <div>
-                  <p className="font-body font-medium text-text">Promo & Diskon</p>
-                  <p className="font-body text-xs text-text-muted">Dapatkan info promo menarik</p>
+                  <p className=" font-medium text-text">Promo & Diskon</p>
+                  <p className=" text-xs text-text-muted">Dapatkan info promo menarik</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer" aria-label="Promo & Diskon">
@@ -310,8 +310,8 @@ export default function PengaturanPage() {
                   <OrderIcon />
                 </span>
                 <div>
-                  <p className="font-body font-medium text-text">Pesanan</p>
-                  <p className="font-body text-xs text-text-muted">Update status pesanan Anda</p>
+                  <p className=" font-medium text-text">Pesanan</p>
+                  <p className=" text-xs text-text-muted">Update status pesanan Anda</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer" aria-label="Pesanan">
@@ -334,8 +334,8 @@ export default function PengaturanPage() {
                   <SystemIcon />
                 </span>
                 <div>
-                  <p className="font-body font-medium text-text">Sistem</p>
-                  <p className="font-body text-xs text-text-muted">Pengumuman & info penting</p>
+                  <p className=" font-medium text-text">Sistem</p>
+                  <p className=" text-xs text-text-muted">Pengumuman & info penting</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer" aria-label="Sistem">
@@ -356,7 +356,7 @@ export default function PengaturanPage() {
 
         {/* SECTION 3: Keamanan — Minimal, no card, bordered list items */}
         <section aria-labelledby="security-heading" className="space-y-0 pt-1">
-          <h2 id="security-heading" className="font-heading text-lg font-semibold text-text tracking-tight mb-3.5">
+          <h2 id="security-heading" className="font-semibold text-lg font-semibold text-text tracking-tight mb-3.5">
             Keamanan
           </h2>
           <div className="bg-white/60 rounded-2xl border border-neutral-200/60 overflow-hidden">
@@ -369,8 +369,8 @@ export default function PengaturanPage() {
                   <LockIcon />
                 </span>
                 <div>
-                  <p className="font-body font-medium text-text">Ubah Password</p>
-                  <p className="font-body text-xs text-text-muted">Perbarui kata sandi akun</p>
+                  <p className=" font-medium text-text">Ubah Password</p>
+                  <p className=" text-xs text-text-muted">Perbarui kata sandi akun</p>
                 </div>
               </div>
               <ChevronRightIcon />
@@ -386,8 +386,8 @@ export default function PengaturanPage() {
                   <TrashIcon className="text-red-600" />
                 </span>
                 <div>
-                  <p className="font-body font-medium text-red-700">Hapus Akun</p>
-                  <p className="font-body text-xs text-red-500">Nonaktifkan permanen</p>
+                  <p className=" font-medium text-red-700">Hapus Akun</p>
+                  <p className=" text-xs text-red-500">Nonaktifkan permanen</p>
                 </div>
               </div>
               {deleting && <Loader2 className="h-5 w-5 animate-spin text-red-600" />}
@@ -399,7 +399,7 @@ export default function PengaturanPage() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full h-12 rounded-xl bg-primary text-white font-body font-semibold text-sm shadow-[0_4px_14px_rgba(161,64,0,0.18)] transition-all hover:bg-primary-dark hover:shadow-[0_6px_20px_rgba(161,64,0,0.22)] active:scale-[0.98] active:shadow-[0_2px_8px_rgba(161,64,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-[0_4px_14px_rgba(161,64,0,0.18)] disabled:hover:scale-100 flex items-center justify-center gap-2"
+          className="w-full h-12 rounded-xl bg-primary text-white  font-semibold text-sm shadow-[0_4px_14px_rgba(161,64,0,0.18)] transition-all hover:bg-primary-dark hover:shadow-[0_6px_20px_rgba(161,64,0,0.22)] active:scale-[0.98] active:shadow-[0_2px_8px_rgba(161,64,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-[0_4px_14px_rgba(161,64,0,0.18)] disabled:hover:scale-100 flex items-center justify-center gap-2"
         >
           {saving ? (
             <>
@@ -420,8 +420,8 @@ export default function PengaturanPage() {
               <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
                 <TrashIcon className="w-6 h-6 text-red-600" />
               </div>
-              <h3 className="font-heading text-lg font-semibold text-text">Hapus Akun?</h3>
-              <p className="font-body text-sm text-text-muted leading-relaxed">
+              <h3 className="font-semibold text-lg font-semibold text-text">Hapus Akun?</h3>
+              <p className=" text-sm text-text-muted leading-relaxed">
                 Akun akan dinonaktifkan permanen. Data tersimpan tapi tidak bisa login lagi.
                 Yakin lanjutkan?
               </p>
@@ -430,14 +430,14 @@ export default function PengaturanPage() {
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="flex-1 h-10 rounded-xl border border-neutral-300 bg-white font-body font-medium text-text hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                className="flex-1 h-10 rounded-xl border border-neutral-300 bg-white  font-medium text-text hover:bg-neutral-50 transition-colors disabled:opacity-50"
               >
                 Batal
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className="flex-1 h-10 rounded-xl bg-red-600 text-white font-body font-medium hover:bg-red-700 transition-colors disabled:opacity-50 relative overflow-hidden"
+                className="flex-1 h-10 rounded-xl bg-red-600 text-white  font-medium hover:bg-red-700 transition-colors disabled:opacity-50 relative overflow-hidden"
               >
                 {deleting ? 'Menghapus...' : 'Hapus Akun'}
               </button>

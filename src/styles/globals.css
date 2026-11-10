@@ -3,12 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --font-heading: 'Instrument Serif', Georgia, serif;
-    --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  .font-heading { font-family: var(--font-heading); }
-  .font-body { font-family: var(--font-body); }
   html, body {
     width: 100%;
     margin: 0;
