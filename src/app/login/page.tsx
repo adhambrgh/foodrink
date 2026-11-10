@@ -45,6 +45,12 @@ function LoginForm() {
           </div>
         )}
 
+        {searchParams.get('deleted') && (
+          <div className="p-3 rounded-lg bg-red-100 text-error text-sm">
+            Akun Anda telah dinonaktifkan. Hubungi admin jika ingin mengaktifkan kembali.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="p-3 rounded-lg bg-red-100 text-error text-sm">

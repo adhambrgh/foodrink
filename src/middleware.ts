@@ -76,6 +76,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Check if user account is soft deleted (non-admin routes only)
+  if (!isAdminRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('deleted_at')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.deleted_at) {
+      // Sign out and redirect to login with deleted message
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('deleted', 'true');
+      const response = NextResponse.redirect(loginUrl);
+      // Clear auth cookies
+      response.cookies.delete('sb-access-token');
+      response.cookies.delete('sb-refresh-token');
+      return response;
+    }
+  }
+
   if (isAdminRoute) {
     // Check if admin has a profile with admin role, or create one if missing
     const { data: profile, error } = await supabase

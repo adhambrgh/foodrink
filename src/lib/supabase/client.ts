@@ -7,8 +7,24 @@ export const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export const signIn = (email: string, password: string) =>
-  supabase.auth.signInWithPassword({ email, password });
+export const signIn = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('deleted_at')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profile?.deleted_at) {
+      await supabase.auth.signOut();
+      return { error: { message: 'Akun Anda telah dinonaktifkan. Hubungi admin jika ingin mengaktifkan kembali.' } };
+    }
+  }
+
+  return { data, error };
+};
 
 export const signUp = (email: string, password: string, name: string) =>
   supabase.auth.signUp({

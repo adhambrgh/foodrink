@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, User, Bell, Shield, Settings, Heart } from 'lucide-react';
+import { ArrowLeft, User, Bell, Settings, Heart } from 'lucide-react';
 import Link from 'next/link';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
@@ -85,12 +85,12 @@ export default function AkunPage() {
           </div>
         </Link>
         <Link
-          href="/akun/metode-pembayaran"
+          href="/akun/favorit"
           className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
         >
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-text-muted" />
-            <span className="text-text">Metode Pembayaran</span>
+            <Heart className="w-5 h-5 text-text-muted" />
+            <span className="text-text">Favorit Saya</span>
           </div>
         </Link>
         <Link
@@ -98,17 +98,8 @@ export default function AkunPage() {
           className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
         >
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-text-muted" />
-            <span className="text-text">Keamanan</span>
-          </div>
-        </Link>
-        <Link
-          href="/akun/favorit"
-          className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
-        >
-          <div className="flex items-center gap-3">
-            <Heart className="w-5 h-5 text-text-muted" />
-            <span className="text-text">Favorit Saya</span>
+            <Bell className="w-5 h-5 text-text-muted" />
+            <span className="text-text">Notifikasi</span>
           </div>
         </Link>
         <Link
