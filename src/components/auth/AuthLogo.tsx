@@ -13,7 +13,7 @@ export function AuthLogo({ className = '', alt = 'FoodDrink' }: AuthLogoProps) {
       <img
         src="/images/logo.jpeg"
         alt={alt}
-        className="w-[100px] h-[100px] object-cover rounded-[20px]"
+        className="h-[72px] w-[72px] rounded-full object-cover ring-2 ring-primary/20 shadow-sm"
         loading="eager"
         fetchPriority="high"
       />

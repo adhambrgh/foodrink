@@ -19,14 +19,12 @@ function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const hasContact = email.trim() || phone.trim();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!hasContact) {
-      setError('Isi email atau nomor telepon');
+    if (!email.trim()) {
+      setError('Email wajib diisi');
       return;
     }
 
@@ -42,16 +40,21 @@ function RegisterForm() {
 
     setLoading(true);
 
-    const contact = email.trim() ? email.trim() : phone.trim();
-
-    const { error } = await signUp(contact, password, name);
+    const { error } = await signUp(email.trim(), password, name, phone.trim() || undefined);
 
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      const msg = error.message || '';
+      if (msg.includes('User already registered')) {
+        setError('Email sudah terdaftar. Silakan masuk.');
+      } else if (msg.includes('Database error') && phone.trim()) {
+        setError('Nomor HP sudah terdaftar di akun lain');
+      } else {
+        setError(msg);
+      }
     } else {
-      router.push(`/verify?type=signup&contact=${encodeURIComponent(contact)}&redirectTo=${encodeURIComponent(redirectTo)}`);
+      router.push(`/verify?type=signup&contact=${encodeURIComponent(email.trim())}&redirectTo=${encodeURIComponent(redirectTo)}`);
     }
   };
 
@@ -91,21 +94,15 @@ function RegisterForm() {
             loading={loading}
           />
 
-          <div className="flex items-center gap-4 my-2">
-            <div className="flex-1 h-px bg-line" />
-            <span className="text-xs text-text-muted whitespace-nowrap">atau</span>
-            <div className="flex-1 h-px bg-line" />
-          </div>
-
           <AuthInput
-            label="Nomor telepon"
+            label="Nomor telepon (untuk login)"
             placeholder="+62 Masukkan nomor HP"
+            helperText="Nomor ini bisa dipakai untuk login selain email"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             type="tel"
             autoComplete="tel"
             inputMode="tel"
-            error={error}
             loading={loading}
           />
 

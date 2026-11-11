@@ -6,6 +6,14 @@ export function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+export function normalizePhone(input: string): string {
+  const trimmed = input.trim().replace(/[\s-()]/g, '');
+  if (trimmed.startsWith('+')) return trimmed;
+  if (trimmed.startsWith('0')) return '+62' + trimmed.slice(1);
+  if (trimmed.startsWith('62')) return '+' + trimmed;
+  return trimmed;
+}
+
 export function cn(...inputs: (string | undefined | null | false | Record<string, boolean>)[]) {
   return inputs
     .flatMap((input) => {
