@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
-import { ArrowLeft, History, UserRound } from 'lucide-react';
+import { ArrowLeft, History, UserRound, Eye } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { OrderDetailModal } from '@/components/ui';
 
 export default function PesananPage() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -44,7 +46,7 @@ export default function PesananPage() {
         <div className="flex-1 flex flex-col items-center justify-center">
           <History className="w-12 h-12 text-text-muted/30 mx-auto mb-4" />
           <p className="text-text-muted mb-2">Belum ada pesanan</p>
-          <button className="text-primary hover:underline">Lanjut belanja</button>
+          <Link href="/beranda" className="text-primary hover:underline">Lanjut belanja</Link>
         </div>
       ) : (
         <div className="space-y-4">
@@ -65,14 +67,28 @@ export default function PesananPage() {
                   <span>{formatCurrency(item.price_snapshot)} × {item.qty}</span>
                 </div>
               ))}
-              <div className="border-t pt-2 mt-2 flex justify-between font-bold">
-                <span>Total</span>
-                <span className="text-primary">{formatCurrency(order.total)}</span>
+              <div className="border-t pt-2 mt-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex justify-between font-bold w-full sm:w-auto">
+                  <span>Total</span>
+                  <span className="text-primary">{formatCurrency(order.total)}</span>
+                </div>
+                <button
+                  onClick={() => setSelectedOrderId(order.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-text hover:bg-neutral-100 rounded-lg transition-colors"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Lihat Detail
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <OrderDetailModal
+        orderId={selectedOrderId}
+        onClose={() => setSelectedOrderId(null)}
+      />
     </main>
   );
 }
