@@ -46,7 +46,7 @@ export default function PesananPage() {
         <div className="flex-1 flex flex-col items-center justify-center">
           <History className="w-12 h-12 text-text-muted/30 mx-auto mb-4" />
           <p className="text-text-muted mb-2">Belum ada pesanan</p>
-          <Link href="/beranda" className="text-primary hover:underline">Lanjut belanja</Link>
+          <Link href="/produk" className="text-primary hover:underline">Lanjut belanja</Link>
         </div>
       ) : (
         <div className="space-y-4">

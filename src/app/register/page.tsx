@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signUp } from '@/lib/supabase/client';
+import { AuthLayout, AuthInput, AuthButton, AuthLogo } from '@/components/auth';
 
 function RegisterForm() {
   const router = useRouter();
@@ -12,140 +13,150 @@ function RegisterForm() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const hasContact = email.trim() || phone.trim();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    if (!hasContact) {
+      setError('Isi email atau nomor telepon');
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError('Password tidak cocok');
+      setError('Kata sandi tidak cocok');
       return;
     }
 
     if (password.length < 6) {
-      setError('Password minimal 6 karakter');
+      setError('Kata sandi minimal 6 karakter');
       return;
     }
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, name);
+    const contact = email.trim() ? email.trim() : phone.trim();
+
+    const { error } = await signUp(contact, password, name);
 
     setLoading(false);
 
     if (error) {
       setError(error.message);
     } else {
-      router.push(`/login?registered=true&redirectTo=${encodeURIComponent(redirectTo)}`);
+      router.push(`/verify?type=signup&contact=${encodeURIComponent(contact)}&redirectTo=${encodeURIComponent(redirectTo)}`);
     }
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-surface p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-text">Daftar Akun</h1>
-          <p className="text-text-muted mt-2">Buat akun baru untuk memulai</p>
+    <AuthLayout>
+      <div className="space-y-6">
+        <AuthLogo className="mt-2 mb-3" />
+
+        <h1 className="text-center text-2xl font-bold text-text tracking-tight">Daftar</h1>
+
+        <div className="text-center space-y-1">
+          <h2 className="text-lg font-semibold text-text">Ayo Mulai</h2>
+          <p className="text-sm text-text-muted">Buat akun baru</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-100 text-error text-sm">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          <AuthInput
+            label="Nama lengkap"
+            placeholder="Contoh: Adham Baarigh"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            type="text"
+            autoComplete="name"
+            required
+            error={error}
+            loading={loading}
+          />
 
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-text mb-1">
-              Nama Lengkap
-            </label>
-            <input
-              id="name"
-              type="text"
-              placeholder="Nama lengkap"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
+          <AuthInput
+            label="Email"
+            placeholder="contoh@gmail.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            autoComplete="email"
+            error={error}
+            loading={loading}
+          />
+
+          <div className="flex items-center gap-4 my-2">
+            <div className="flex-1 h-px bg-line" />
+            <span className="text-xs text-text-muted whitespace-nowrap">atau</span>
+            <div className="flex-1 h-px bg-line" />
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="nama@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </div>
+          <AuthInput
+            label="Nomor telepon"
+            placeholder="+62 Masukkan nomor HP"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            error={error}
+            loading={loading}
+          />
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-text mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Minimal 6 karakter"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </div>
+          <AuthInput
+            label="Kata sandi"
+            placeholder="Minimal 6 karakter"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            autoComplete="new-password"
+            required
+            showPasswordToggle
+            error={error}
+            loading={loading}
+          />
 
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-text mb-1">
-              Konfirmasi Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="Ulangi password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </div>
+          <AuthInput
+            label="Konfirmasi kata sandi"
+            placeholder="Ulangi kata sandi"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            type="password"
+            autoComplete="new-password"
+            required
+            showPasswordToggle
+            error={error}
+            loading={loading}
+          />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-primary text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? 'Mendaftar...' : 'Daftar'}
-          </button>
+          <AuthButton type="submit" loading={loading}>
+            Daftar
+          </AuthButton>
         </form>
 
-        <div className="text-center text-sm text-text-muted">
-          <span>Sudah punya akun? </span>
-          <Link href="/login" prefetch={true} className="text-primary hover:underline">
+        <p className="text-center text-sm text-text-muted">
+          Sudah punya akun?{' '}
+          <Link
+            href={`/login?redirectTo=${encodeURIComponent(redirectTo)}`}
+            className="text-primary font-semibold hover:underline"
+          >
             Masuk
           </Link>
-        </div>
+        </p>
       </div>
-    </main>
+    </AuthLayout>
   );
 }
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-white">Memuat...</div>}>
       <RegisterForm />
     </Suspense>
   );

@@ -4,13 +4,14 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from '@/lib/supabase/client';
+import { AuthLayout, AuthInput, AuthButton, AuthLogo } from '@/components/auth';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '/';
+  const redirectTo = searchParams.get('redirectTo') || '/beranda';
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,99 +21,96 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(identifier, password);
 
     if (error) {
       setError(error.message);
     } else {
       router.push(decodeURIComponent(redirectTo));
+      router.refresh();
     }
 
     setLoading(false);
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-surface p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-text">Masuk Akun</h1>
-          <p className="text-text-muted mt-2">Masukkan email dan password untuk login</p>
+    <AuthLayout>
+      <div className="space-y-6">
+        <AuthLogo className="mt-2 mb-3" />
+
+        <h1 className="text-center text-2xl font-bold text-text tracking-tight">Masuk</h1>
+
+        <div className="text-center space-y-1">
+          <h2 className="text-lg font-semibold text-text">Selamat datang kembali</h2>
+          <p className="text-sm text-text-muted">Masuk ke akunmu untuk mulai memesan</p>
         </div>
 
         {searchParams.get('registered') && (
-          <div className="p-3 rounded-lg bg-green-100 text-success text-sm">
+          <div className="p-3 rounded-lg bg-success-light text-success text-sm text-center">
             Akun berhasil didaftarkan. Silakan cek email Anda untuk konfirmasi, lalu login.
           </div>
         )}
 
         {searchParams.get('deleted') && (
-          <div className="p-3 rounded-lg bg-red-100 text-error text-sm">
+          <div className="p-3 rounded-lg bg-error/10 text-error text-sm text-center">
             Akun Anda telah dinonaktifkan. Hubungi admin jika ingin mengaktifkan kembali.
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-100 text-error text-sm">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          <AuthInput
+            label="Email atau nomor HP"
+            placeholder="contoh@gmail.com"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            type="text"
+            autoComplete="username"
+            required
+            error={error}
+            loading={loading}
+          />
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="nama@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
+          <AuthInput
+            label="Kata sandi"
+            placeholder="Masukkan kata sandi"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            autoComplete="current-password"
+            required
+            showPasswordToggle
+            error={error}
+            loading={loading}
+          />
+
+          <div className="text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-text hover:underline"
+            >
+              Lupa kata sandi?
+            </Link>
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-text mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Masukkan password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-primary text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? 'Masuk...' : 'Masuk'}
-          </button>
+          <AuthButton type="submit" loading={loading}>
+            Masuk
+          </AuthButton>
         </form>
 
-        <div className="text-center text-sm text-text-muted">
-          <span>Belum punya akun? </span>
-          <Link href="/register" prefetch={true} className="text-primary hover:underline">
+        <p className="text-center text-sm text-text-muted">
+          Belum punya akun?{' '}
+          <Link href="/register" className="text-primary font-semibold hover:underline">
             Daftar
           </Link>
-        </div>
+        </p>
       </div>
-    </main>
+    </AuthLayout>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-white">Memuat...</div>}>
       <LoginForm />
     </Suspense>
   );

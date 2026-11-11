@@ -9,9 +9,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#F26B1D',
-        'primary-dark': '#A14000',
-        'primary-light': '#FFDBCC',
+        primary: '#F9951A',
+        'primary-dark': '#E5820A',
+        'primary-soft': '#FFF4E3',
         success: '#1F7A4D',
         'success-light': '#9BF2BB',
         surface: '#FAF8F5',
@@ -19,10 +19,12 @@ module.exports = {
         'surface-low': '#FAF2EE',
         'surface-mid': '#F4ECE8',
         'surface-variant': '#E9E1DD',
-        text: '#1C1917',
-        'text-muted': '#594237',
-        outline: '#8C7166',
+        text: '#0F1F2E',
+        'text-muted': '#7B8794',
+        outline: '#E4E7EB',
         error: '#BA1A1A',
+        field: '#F5F5F6',
+        line: '#E4E7EB',
         receipt: {
           hero: 'linear-gradient(135deg, #F26B1D 0%, #EA580C 100%)',
           heroText: '#FFFFFF',
