@@ -14,7 +14,7 @@ interface AuthInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'si
 }
 
 export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
-  ({ label, error, icon, showPasswordToggle, loading, helperText, className, id: providedId, ...props }, ref) => {
+  ({ label, error, icon, showPasswordToggle, loading, helperText, className, id: providedId, type = 'text', autoComplete, ...props }, ref) => {
     const generatedId = useId();
     const id = providedId || generatedId;
     const errorId = `${id}-error`;
@@ -23,80 +23,19 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
 
     const describedBy = [error && errorId, helperText && helperId].filter(Boolean).join(' ') || undefined;
 
-    const passwordInput = (
-      <input
-        ref={ref}
-        id={id}
-        type="password"
-        style={{ display: showPassword ? 'none' : 'block' }}
-        className={cn(
-          'w-full h-[52px] px-4 rounded-[14px] bg-field text-text text-base outline-none transition-colors',
-          'placeholder:text-[#A3ACB6]',
-          'focus:border-primary focus:bg-white',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          error ? 'border-2 border-error' : 'border-2 border-transparent',
-          icon ? 'pr-14' : undefined,
-          loading ? 'pr-14' : undefined,
-          className
-        )}
-        autoComplete="new-password"
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={describedBy}
-        aria-errormessage={error ? errorId : undefined}
-        aria-hidden={showPassword}
-        disabled={loading}
-        {...props}
-      />
-    );
+    const isPassword = type === 'password';
+    const shouldShowEye = isPassword && showPasswordToggle !== false;
+    const effectiveType = shouldShowEye && showPassword ? 'text' : type;
 
-    const visibleInput = (
-      <input
-        id={`${id}-visible`}
-        type="text"
-        style={{ display: showPassword ? 'block' : 'none' }}
-        className={cn(
-          'w-full h-[52px] px-4 rounded-[14px] bg-field text-text text-base outline-none transition-colors',
-          'placeholder:text-[#A3ACB6]',
-          'focus:border-primary focus:bg-white',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          error ? 'border-2 border-error' : 'border-2 border-transparent',
-          icon ? 'pr-14' : undefined,
-          loading ? 'pr-14' : undefined,
-          className
-        )}
-        autoComplete="new-password"
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={describedBy}
-        aria-errormessage={error ? errorId : undefined}
-        aria-hidden={!showPassword}
-        disabled={loading}
-        {...props}
-      />
-    );
+    const hasRightElement = icon || loading || shouldShowEye;
+    const rightPadding = hasRightElement ? 'pr-14' : undefined;
 
-    const defaultInput = (
-      <input
-        ref={ref}
-        id={id}
-        type={props.type}
-        className={cn(
-          'w-full h-[52px] px-4 rounded-[14px] bg-field text-text text-base outline-none transition-colors',
-          'placeholder:text-[#A3ACB6]',
-          'focus:border-primary focus:bg-white',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          error ? 'border-2 border-error' : 'border-2 border-transparent',
-          icon ? 'pr-14' : undefined,
-          loading ? 'pr-14' : undefined,
-          className
-        )}
-        autoComplete={props.autoComplete || 'new-password'}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={describedBy}
-        aria-errormessage={error ? errorId : undefined}
-        disabled={loading}
-        {...props}
-      />
-    );
+    const defaultAutoComplete = isPassword ? 'current-password' : undefined;
+    const effectiveAutoComplete = autoComplete ?? defaultAutoComplete;
+
+    const isDisabled = (props.disabled as boolean | undefined) || loading;
+
+    const { disabled: _disabled, ...restProps } = props;
 
     return (
       <div className="w-full">
@@ -104,23 +43,46 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
           {label}
         </label>
         <div className="relative">
-          {showPasswordToggle ? (
-            <>
-              {passwordInput}
-              {visibleInput}
-            </>
-          ) : (
-            defaultInput
-          )}
+          <input
+            ref={ref}
+            id={id}
+            type={effectiveType}
+            className={cn(
+              'w-full h-[52px] px-4 rounded-[14px] bg-field text-text text-base outline-none transition-colors',
+              'placeholder:text-[#A3ACB6]',
+              'focus:border-primary focus:bg-white',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              error ? 'border-2 border-error' : 'border-2 border-transparent',
+              rightPadding,
+              loading ? 'pr-14' : undefined,
+              className
+            )}
+            style={{
+              fontSize: '1rem !important',
+              lineHeight: '1.5 !important',
+            }}
+            autoComplete={autoComplete ?? (isPassword ? 'current-password' : undefined)}
+            aria-invalid={error ? 'true' : 'false'}
+            aria-describedby={describedBy}
+            aria-errormessage={error ? errorId : undefined}
+            disabled={loading || (props.disabled as boolean | undefined)}
+            {...props}
+          />
           {loading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
               <Loader2 className="h-5 w-5 text-primary animate-spin" aria-hidden="true" />
             </div>
           )}
-          {showPasswordToggle && (
+          {shouldShowEye && (
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-[10px] text-primary hover:bg-primary/10 transition-colors"
+              onMouseDown={e => e.preventDefault()}
+              onTouchStart={e => e.preventDefault()}
+              disabled={loading || (props.disabled as boolean | undefined)}
+              className={cn(
+                'absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors',
+                loading && 'opacity-50 cursor-not-allowed'
+              )}
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               aria-pressed={showPassword}
@@ -132,7 +94,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               )}
             </button>
           )}
-          {icon && !loading && !showPasswordToggle && (
+          {icon && !loading && !shouldShowEye && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-primary">{icon}</div>
           )}
         </div>

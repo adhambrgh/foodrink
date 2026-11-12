@@ -15,6 +15,10 @@ const nextConfig = {
     },
   },
   async headers() {
+    // Only apply CSP in production - dev needs unsafe-inline for Fast Refresh
+    if (process.env.NODE_ENV !== 'production') {
+      return [];
+    }
     return [
       {
         source: '/:path*',
@@ -23,13 +27,13 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.sandbox.midtrans.com/snap https://staging.midtrans.com https://www.midtrans.com https://docs.midtrans.com https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com 'unsafe-eval'",
-            "script-src-elem 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.sandbox.midtrans.com/snap 'unsafe-eval'",
-            "style-src 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://main.redirection.sandbox.midtrans.com",
-            "style-src-elem 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://main.redirection.sandbox.midtrans.com",
-            "img-src 'self' data: https:",
-            "font-src 'self' data:",
-            "connect-src 'self' https://bcmcubsthnqtzfamkhdy.supabase.co https://api.sandbox.midtrans.com https://app.sandbox.midtrans.com https://ws.sandbox.midtrans.com https://main.redirection.sandbox.midtrans.com",
+              "script-src 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.sandbox.midtrans.com/snap https://staging.midtrans.com https://www.midtrans.com https://docs.midtrans.com https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com 'unsafe-eval'",
+              "script-src-elem 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.sandbox.midtrans.com/snap 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://main.redirection.sandbox.midtrans.com",
+              "style-src-elem 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://main.redirection.sandbox.midtrans.com",
+              "img-src 'self' data: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://bcmcubsthnqtzfamkhdy.supabase.co https://api.sandbox.midtrans.com https://app.sandbox.midtrans.com https://ws.sandbox.midtrans.com https://main.redirection.sandbox.midtrans.com",
               "frame-src 'self' https://app.sandbox.midtrans.com https://app.sandbox.midtrans.com/snap",
               "frame-ancestors 'none'",
               "base-uri 'self'",

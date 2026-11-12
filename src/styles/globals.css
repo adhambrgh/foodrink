@@ -23,6 +23,14 @@
   main > :last-child {
     margin-bottom: 0 !important;
   }
+
+  /* Browser autofill: keep font size consistent with manual input */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: inherit;
+    box-shadow: 0 0 0 1000px #F5F5F6 inset;
+  }
 }
 
 ::-webkit-scrollbar {
