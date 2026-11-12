@@ -45,6 +45,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               loading ? 'pr-14' : undefined,
               className
             )}
+            autoComplete={showPasswordToggle ? 'off' : (props.autoComplete || 'new-password')}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={describedBy}
             aria-errormessage={error ? errorId : undefined}
