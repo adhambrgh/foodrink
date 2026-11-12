@@ -17,6 +17,12 @@ function VerifyForm() {
   const contact = searchParams.get('contact') || '';
   const redirectTo = searchParams.get('redirectTo') || '/beranda';
 
+  // Signup no longer uses email verification - redirect to home
+  if (type === 'signup') {
+    router.push(decodeURIComponent(redirectTo));
+    return null;
+  }
+
   const [otp, setOtp] = useState('');
   const [remaining, setRemaining] = useState(DURATION);
   const [loading, setLoading] = useState(false);

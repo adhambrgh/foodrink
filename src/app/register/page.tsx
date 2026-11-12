@@ -40,7 +40,7 @@ function RegisterForm() {
 
     setLoading(true);
 
-    const { error } = await signUp(email.trim(), password, name, phone.trim() || undefined);
+    const { data, error } = await signUp(email.trim(), password, name, phone.trim() || undefined);
 
     setLoading(false);
 
@@ -53,8 +53,13 @@ function RegisterForm() {
       } else {
         setError(msg);
       }
+    } else if (data.session) {
+      // Email confirmations disabled - user confirmed immediately
+      router.push(decodeURIComponent(redirectTo));
+      router.refresh();
     } else {
-      router.push(`/verify?type=signup&contact=${encodeURIComponent(email.trim())}&redirectTo=${encodeURIComponent(redirectTo)}`);
+      // Fallback (shouldn't happen with confirmations off)
+      router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
     }
   };
 

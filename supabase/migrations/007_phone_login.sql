@@ -1,17 +1,36 @@
 -- Phone login: nomor HP sebagai alias untuk mencari email akun
 -- Tidak memakai Supabase Phone Auth / SMS. Nomor HP disimpan di profiles.phone.
 
--- 1. Bersihkan duplikat phone existing (simpan row paling lama via ctid)
-WITH dup AS (
-  SELECT phone, min(ctid) as keep_ctid
-  FROM public.profiles
-  WHERE phone IS NOT NULL
-  GROUP BY phone
-  HAVING count(*) > 1
-)
-DELETE FROM public.profiles
-WHERE ctid NOT IN (SELECT keep_ctid FROM dup)
-  AND phone IS NOT NULL;
+-- 1. Jadikan nilai phone unik (append -dup1, -dup2, dst) agar bisa bikin unique index
+-- tanpa hapus baris yg masih punya FK (orders, dll)
+DO $$
+DECLARE
+  v_phone text;
+  r record;
+  dup_num integer;
+BEGIN
+  FOR v_phone IN (
+    SELECT phone
+    FROM public.profiles
+    WHERE phone IS NOT NULL
+    GROUP BY phone
+    HAVING count(*) > 1
+  ) LOOP
+    dup_num := 0;
+    FOR r IN (
+      SELECT id FROM public.profiles
+      WHERE phone = v_phone
+      ORDER BY ctid  -- keep oldest unchanged
+    ) LOOP
+      dup_num := dup_num + 1;
+      IF dup_num > 1 THEN
+        UPDATE public.profiles
+        SET phone = v_phone || '-dup' || (dup_num - 1)
+        WHERE id = r.id;
+      END IF;
+    END LOOP;
+  END LOOP;
+END $$;
 
 -- 2. Unique index: 1 nomor HP = 1 akun aktif
 create unique index if not exists profiles_phone_unique_idx
