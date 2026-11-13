@@ -4,7 +4,8 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signUp } from '@/lib/supabase/client';
-import { AuthLayout, AuthInput, AuthButton, AuthLogo } from '@/components/auth';
+import { AuthLayout, AuthButton, AuthLogo } from '@/components/auth';
+import { cn } from '@/lib/utils';
 
 function RegisterForm() {
   const router = useRouter();
@@ -16,52 +17,254 @@ function RegisterForm() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
+
+  const normalizePhone = (input: string) => {
+    const v = input.replace(/[\s\-()]/g, '');
+    if (!v) return null;
+    if (v.startsWith('+')) return v;
+    if (v.startsWith('0')) return '+62' + v.slice(1);
+    if (v.startsWith('62')) return '+' + v;
+    return v;
+  };
+
+  const validateName = (value: string) => {
+    if (!value.trim()) {
+      return 'Nama lengkap wajib diisi';
+    }
+    if (value.trim().length < 2) {
+      return 'Nama minimal 2 karakter';
+    }
+    return undefined;
+  };
+
+  const validateEmail = (value: string) => {
+    if (!value.trim()) {
+      return 'Email wajib diisi';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value.trim())) {
+      return 'Format email tidak valid';
+    }
+    return undefined;
+  };
+
+  const validatePhone = (value: string) => {
+    if (!value.trim()) return undefined;
+    const normalized = normalizePhone(value);
+    const phoneRegex = /^\+628\d{8,11}$/;
+    if (!phoneRegex.test(normalized || '')) {
+      return 'Format nomor HP tidak valid (contoh: +628123456789)';
+    }
+    return undefined;
+  };
+
+  const validatePassword = (value: string) => {
+    if (!value) {
+      return 'Kata sandi wajib diisi';
+    }
+    if (value.length < 6) {
+      return 'Kata sandi minimal 6 karakter';
+    }
+    return undefined;
+  };
+
+  const validateConfirmPassword = (value: string) => {
+    if (!value) {
+      return 'Konfirmasi kata sandi wajib diisi';
+    }
+    if (value !== password) {
+      return 'Kata sandi tidak cocok';
+    }
+    return undefined;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    if (errors.name) {
+      setErrors(prev => ({ ...prev, name: undefined }));
+    }
+  };
+
+  const handleNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const error = validateName(e.target.value);
+    if (error) {
+      setErrors(prev => ({ ...prev, name: error }));
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: undefined }));
+    }
+  };
+
+  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const error = validateEmail(e.target.value);
+    if (error) {
+      setErrors(prev => ({ ...prev, email: error }));
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPhone(value);
+    if (errors.phone) {
+      setErrors(prev => ({ ...prev, phone: undefined }));
+    }
+  };
+
+  const handlePhoneBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const error = validatePhone(e.target.value);
+    if (error) {
+      setErrors(prev => ({ ...prev, phone: error }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (errors.password) {
+      setErrors(prev => ({ ...prev, password: undefined }));
+    }
+    if (errors.confirmPassword && confirmPassword) {
+      const confirmError = validateConfirmPassword(confirmPassword);
+      setErrors(prev => ({ ...prev, confirmPassword: confirmError }));
+    }
+  };
+
+  const handlePasswordBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const error = validatePassword(e.target.value);
+    if (error) {
+      setErrors(prev => ({ ...prev, password: error }));
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
+    if (errors.confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: undefined }));
+    }
+  };
+
+  const handleConfirmPasswordBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const error = validateConfirmPassword(e.target.value);
+    if (error) {
+      setErrors(prev => ({ ...prev, confirmPassword: error }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (!email.trim()) {
-      setError('Email wajib diisi');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Kata sandi tidak cocok');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Kata sandi minimal 6 karakter');
-      return;
-    }
-
     setLoading(true);
 
-    const { data, error } = await signUp(email.trim(), password, name, phone.trim() || undefined);
+    const nameError = validateName(name);
+    const emailError = validateEmail(email);
+    const phoneError = validatePhone(phone);
+    const passwordError = validatePassword(password);
+    const confirmPasswordError = validateConfirmPassword(confirmPassword);
+
+    if (nameError || emailError || phoneError || passwordError || confirmPasswordError) {
+      setErrors({ name: nameError, email: emailError, phone: phoneError, password: passwordError, confirmPassword: confirmPasswordError });
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await signUp(email.trim(), password, name.trim(), phone.trim() || undefined);
 
     setLoading(false);
 
     if (error) {
       const msg = error.message || '';
       if (msg.includes('User already registered')) {
-        setError('Email sudah terdaftar. Silakan masuk.');
+        setErrors({ email: 'Email sudah terdaftar. Silakan masuk.' });
       } else if (msg.includes('Database error') && phone.trim()) {
-        setError('Nomor HP sudah terdaftar di akun lain');
+        setErrors({ phone: 'Nomor HP sudah terdaftar di akun lain' });
       } else {
-        setError(msg);
+        setErrors({ email: msg });
       }
     } else if (data.session) {
-      // Email confirmations disabled - user confirmed immediately
       router.push(decodeURIComponent(redirectTo));
       router.refresh();
     } else {
-      // Fallback (shouldn't happen with confirmations off)
       router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
     }
   };
+
+  const inputClasses = (error?: string) => cn(
+    'w-full h-[52px] px-4 rounded-[14px] bg-field text-text text-base outline-none transition-colors',
+    'placeholder:text-[#A3ACB6]',
+    'focus:border-primary focus:bg-white',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+    error ? 'border-2 border-error' : 'border-2 border-transparent'
+  );
+
+  const labelClasses = 'block text-sm font-semibold text-text mb-2';
+
+  const errorId = (field: string) => `${field}-error`;
+
+  const passwordInput = (props: {
+    id: string;
+    label: string;
+    placeholder: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+    error?: string;
+    autoComplete: string;
+  }) => (
+    <div className="w-full">
+      <label htmlFor={props.id} className={labelClasses}>
+        {props.label}
+      </label>
+      <div className="relative">
+        <input
+          id={props.id}
+          type="password"
+          className={cn(inputClasses(props.error), 'pr-14')}
+          style={{ fontSize: '1rem !important', lineHeight: '1.5 !important' }}
+          placeholder={props.placeholder}
+          value={props.value}
+          onChange={props.onChange}
+          onBlur={props.onBlur}
+          autoComplete={props.autoComplete}
+          required
+          disabled={loading}
+          aria-invalid={props.error ? 'true' : 'false'}
+          aria-describedby={props.error ? errorId(props.id) : undefined}
+        />
+        <button
+          type="button"
+          onMouseDown={e => e.preventDefault()}
+          onTouchStart={e => e.preventDefault()}
+          disabled={loading}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors"
+          aria-label="Tampilkan kata sandi"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+      </div>
+      {props.error && (
+        <p id={errorId(props.id)} className="mt-1.5 text-sm font-medium text-error" role="alert">
+          {props.error}
+        </p>
+      )}
+    </div>
+  );
 
   return (
     <AuthLayout>
@@ -76,66 +279,110 @@ function RegisterForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-          <AuthInput
-            label="Nama lengkap"
-            placeholder="Contoh: Adham Baarigh"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            type="text"
-            autoComplete="name"
-            required
-            error={error}
-            loading={loading}
-          />
+          <div className="w-full">
+            <label htmlFor="name" className={labelClasses}>
+              Nama lengkap
+            </label>
+            <input
+              id="name"
+              type="text"
+              className={inputClasses(errors.name)}
+              style={{ fontSize: '1rem !important', lineHeight: '1.5 !important' }}
+              placeholder="Contoh: Adham Baarigh"
+              value={name}
+              onChange={handleNameChange}
+              onBlur={handleNameBlur}
+              autoComplete="name"
+              required
+              disabled={loading}
+              aria-invalid={errors.name ? 'true' : 'false'}
+              aria-describedby={errors.name ? errorId('name') : undefined}
+            />
+            {errors.name && (
+              <p id={errorId('name')} className="mt-1.5 text-sm font-medium text-error" role="alert">
+                {errors.name}
+              </p>
+            )}
+          </div>
 
-          <AuthInput
-            label="Email"
-            placeholder="contoh@gmail.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            autoComplete="email"
-            error={error}
-            loading={loading}
-          />
+          <div className="w-full">
+            <label htmlFor="email" className={labelClasses}>
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              className={inputClasses(errors.email)}
+              style={{ fontSize: '1rem !important', lineHeight: '1.5 !important' }}
+              placeholder="contoh@gmail.com"
+              value={email}
+              onChange={handleEmailChange}
+              onBlur={handleEmailBlur}
+              autoComplete="email"
+              required
+              disabled={loading}
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? errorId('email') : undefined}
+            />
+            {errors.email && (
+              <p id={errorId('email')} className="mt-1.5 text-sm font-medium text-error" role="alert">
+                {errors.email}
+              </p>
+            )}
+          </div>
 
-          <AuthInput
-            label="Nomor telepon (untuk login)"
-            placeholder="+62 Masukkan nomor HP"
-            helperText="Nomor ini bisa dipakai untuk login selain email"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            type="tel"
-            autoComplete="tel"
-            inputMode="tel"
-            loading={loading}
-          />
+          <div className="w-full">
+            <label htmlFor="phone" className={labelClasses}>
+              Nomor telepon (untuk login)
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              className={inputClasses(errors.phone)}
+              style={{ fontSize: '1rem !important', lineHeight: '1.5 !important' }}
+              placeholder="+62 Masukkan nomor HP"
+              value={phone}
+              onChange={handlePhoneChange}
+              onBlur={handlePhoneBlur}
+              autoComplete="tel"
+              inputMode="tel"
+              disabled={loading}
+              aria-invalid={errors.phone ? 'true' : 'false'}
+              aria-describedby={errors.phone ? errorId('phone') : undefined}
+            />
+            {errors.phone && (
+              <p id={errorId('phone')} className="mt-1.5 text-sm font-medium text-error" role="alert">
+                {errors.phone}
+              </p>
+            )}
+            {!errors.phone && (
+              <p id="phone-helper" className="mt-1.5 text-sm text-text-muted">
+                Nomor ini bisa dipakai untuk login selain email
+              </p>
+            )}
+          </div>
 
-          <AuthInput
-            label="Kata sandi"
-            placeholder="Minimal 6 karakter"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            autoComplete="new-password"
-            required
-            showPasswordToggle
-            error={error}
-            loading={loading}
-          />
+          {passwordInput({
+            id: 'password',
+            label: 'Kata sandi',
+            placeholder: 'Minimal 6 karakter',
+            value: password,
+            onChange: handlePasswordChange,
+            onBlur: handlePasswordBlur,
+            error: errors.password,
+            autoComplete: 'new-password',
+          })}
 
-          <AuthInput
-            label="Konfirmasi kata sandi"
-            placeholder="Ulangi kata sandi"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            type="password"
-            autoComplete="new-password"
-            required
-            showPasswordToggle
-            error={error}
-            loading={loading}
-          />
+          {passwordInput({
+            id: 'confirmPassword',
+            label: 'Konfirmasi kata sandi',
+            placeholder: 'Ulangi kata sandi',
+            value: confirmPassword,
+            onChange: handleConfirmPasswordChange,
+            onBlur: handleConfirmPasswordBlur,
+            error: errors.confirmPassword,
+            autoComplete: 'new-password',
+          })}
 
           <AuthButton type="submit" loading={loading}>
             Daftar
