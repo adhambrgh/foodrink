@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { createMidtransTransaction, getAppUrl } from './midtrans';
+import { createMidtransTransaction, getAppUrl } from '../src/lib/midtrans';
 
 describe('getAppUrl', () => {
   it('normalize trailing slash', () => {
