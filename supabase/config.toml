@@ -1,0 +1,12 @@
+[auth]
+enable_email_confirmations = false
+rate_limit_email_sent = 60
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
