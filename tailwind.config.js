@@ -20,7 +20,7 @@ module.exports = {
         'surface-mid': '#F4ECE8',
         'surface-variant': '#E9E1DD',
         text: '#0F1F2E',
-        'text-muted': '#7B8794',
+        'text-muted': '#6B7684',
         outline: '#E4E7EB',
         error: '#BA1A1A',
         field: '#F5F5F6',

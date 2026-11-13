@@ -117,9 +117,8 @@ export default function ProductCard({
               src={product.image_url}
               alt={product.name}
               fill
-              sizes="100%"
+              sizes="(max-width: 640px) 50vw, 25vw"
               className="object-cover transition-shadow duration-300 hover:scale-[1.03]"
-              priority
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-text-muted">
@@ -155,15 +154,17 @@ export default function ProductCard({
               type="button"
               onClick={e => openQuantityPicker(e, 'cart')}
               disabled={busy || product.stock < 1}
+              aria-label={`Tambah ${product.name} ke keranjang`}
               className="flex h-9 min-w-0 w-full items-center justify-center gap-1 rounded-lg border border-primary bg-transparent px-1.5 text-[10px] font-semibold leading-none text-primary transition-colors hover:bg-primary/10 active:scale-[0.98] disabled:opacity-50"
             >
-              <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">Keranjang</span>
             </button>
             <button
               type="button"
               onClick={e => openQuantityPicker(e, 'buy')}
               disabled={busy || product.stock < 1}
+              aria-label={`Beli ${product.name} sekarang`}
               className="h-9 min-w-0 w-full rounded-lg bg-primary px-1.5 text-[10px] font-semibold leading-tight text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:opacity-50"
             >
               <span className="block truncate">Beli sekarang</span>

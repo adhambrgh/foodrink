@@ -16,7 +16,13 @@ export function AuthLayout({ children, className = '' }: AuthLayoutProps) {
         paddingBottom: 'env(safe-area-inset-bottom, 0)',
       }}
     >
-      <main className="px-6 pb-8 pt-7">{children}</main>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 px-4 py-2 bg-primary text-white rounded-md"
+      >
+        Lewati ke konten utama
+      </a>
+      <main id="main-content" className="px-6 pb-8 pt-7">{children}</main>
     </div>
   );
 }

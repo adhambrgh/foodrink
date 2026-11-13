@@ -3,18 +3,19 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateCategory } from '@/app/admin/menu/actions';
+import { Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream } from 'lucide-react';
 
 type Category = { id: string; name: string; icon?: string; active?: boolean };
 type IconKey = 'utensils' | 'coffee' | 'package' | 'pizza' | 'sandwich' | 'salad' | 'icecream';
 
-const iconMap: { value: IconKey; label: string }[] = [
-  { value: 'utensils', label: '📱 Makanan & Minuman' },
-  { value: 'coffee', label: '☕ Minuman' },
-  { value: 'package', label: '📦 Makanan Ringan' },
-  { value: 'pizza', label: '🍕 Fast Food' },
-  { value: 'sandwich', label: '🥪 Makanan Tengah' },
-  { value: 'salad', label: '🥗 Sehat' },
-  { value: 'icecream', label: '🍦 Jajanan' },
+const iconOptions = [
+  { value: 'utensils', label: 'Makanan & Minuman', icon: Utensils },
+  { value: 'coffee', label: 'Minuman', icon: Coffee },
+  { value: 'package', label: 'Makanan Ringan', icon: Package },
+  { value: 'pizza', label: 'Fast Food', icon: Pizza },
+  { value: 'sandwich', label: 'Makanan Tengah', icon: Sandwich },
+  { value: 'salad', label: 'Sehat', icon: Salad },
+  { value: 'icecream', label: 'Jajanan', icon: IceCream },
 ];
 
 type EditCategoryFormProps = {
@@ -67,17 +68,17 @@ export function EditCategoryForm({ category }: EditCategoryFormProps) {
         <div>
           <label className="block text-sm font-medium text-text mb-1.5">Ikon</label>
           <div className="grid grid-cols-4 gap-2">
-            {iconMap.map(({ value, label }) => (
+            {iconOptions.map(({ value, label, icon: Icon }) => (
               <button
                 type="button"
                 key={value}
-                onClick={() => setIcon(value)}
+                onClick={() => setIcon(value as IconKey)}
                 className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-colors ${
                   icon === value ? 'border-primary bg-primary/5' : 'border-border hover:bg-surface-variant'
                 }`}
               >
-                <span className="text-lg">{label}</span>
-                <span className="text-xs text-text-muted">{value}</span>
+                <Icon className="w-6 h-6" />
+                <span className="text-xs text-text-muted">{label}</span>
               </button>
             ))}
           </div>

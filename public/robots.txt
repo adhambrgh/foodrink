@@ -1,0 +1,18 @@
+# FoodDrink - Mobile-first food & drink ordering
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /verify
+Disallow: /checkout
+Disallow: /keranjang
+Disallow: /pesanan
+Disallow: /akun
+Disallow: /notifikasi
+
+# Sitemap
+Sitemap: https://foodrink.example.com/sitemap.xml

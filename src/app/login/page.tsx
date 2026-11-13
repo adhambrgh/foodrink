@@ -105,7 +105,7 @@ function LoginForm() {
 
   const inputClasses = (error?: string) => cn(
     'w-full h-[52px] px-4 rounded-[14px] bg-field text-text text-base outline-none transition-colors',
-    'placeholder:text-[#A3ACB6]',
+    'placeholder:text-text-muted',
     'focus:border-primary focus:bg-white',
     'disabled:opacity-50 disabled:cursor-not-allowed',
     error ? 'border-2 border-error' : 'border-2 border-transparent'

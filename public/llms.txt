@@ -1,0 +1,57 @@
+# FoodDrink
+Mobile-first food & drink ordering platform for students.
+
+## Key Pages
+- `/` — Redirects to beranda (home)
+- `/beranda` — Home page with banners, categories, popular products
+- `/produk` — Product listing with filters and search
+- `/keranjang` — Shopping cart with quantity management
+- `/checkout` — Checkout with delivery options and payment methods
+- `/checkout/success/[id]` — Order confirmation and receipt
+- `/pesanan` — Order history and tracking
+- `/akun` — User account management
+- `/akun/profil` — Profile settings
+- `/akun/favorit` — Favorite products
+- `/akun/notifikasi` — Notifications
+- `/akun/pengaturan` — App settings
+- `/notifikasi` — Notification center
+- `/login` — Login page (email/phone + password)
+- `/register` — Registration page
+- `/verify` — OTP verification
+- `/forgot-password` — Password reset
+
+## Admin Pages
+- `/admin` — Admin dashboard
+- `/admin/menu` — Menu management
+- `/admin/kategori` — Category management
+- `/admin/banner` — Banner management
+- `/admin/pesanan` — Order management
+- `/admin/reviews` — Review moderation
+- `/admin/notifikasi` — Notification management
+
+## API Endpoints
+- `POST /api/checkout` — Create order with Midtrans payment
+- `POST /api/midtrans/notification` — Midtrans webhook handler
+- `GET /api/orders/[id]` — Get order details
+- `POST /api/upload-image` — Upload product images
+- `POST /api/logout` — User logout
+
+## Features
+- User authentication (email/phone + password, OTP)
+- Product catalog with categories
+- Shopping cart with quantity picker
+- Multiple delivery methods (delivery to class, self-pickup)
+- Payment via Midtrans (online) or COD (cash on delivery)
+- Order tracking with real-time status
+- Product reviews and ratings
+- Favorites/wishlist
+- Push notifications
+- Receipt generation (print/share)
+
+## Technical Stack
+- Next.js 14 (App Router, Server Components)
+- React 18, TypeScript
+- Tailwind CSS
+- Supabase (PostgreSQL, Auth, Realtime)
+- Midtrans Payment Gateway
+- Framer Motion for animations

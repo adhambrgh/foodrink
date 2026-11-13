@@ -1,12 +1,26 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import ProductCard from '@/components/customer/product-card';
-import BannerCarousel from '@/components/customer/banner-carousel';
 import { Bell, Search, Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream } from 'lucide-react';
 import { getCategoriesWithCounts } from '@/lib/supabase/kategori';
 import { getBanners } from '@/app/admin/banner/actions';
+
+export const metadata = {
+  title: 'Beranda - FoodDrink',
+  description: 'Temukan makanan dan minuman favoritmu. Pesan online, antar ke kelas atau ambil sendiri. Cepat, praktis, dan hemat.',
+};
+
+const ProductCard = dynamic(() => import('@/components/customer/product-card'), {
+  ssr: false,
+  loading: () => <div className="h-64 animate-pulse bg-surface-variant rounded-2xl" />,
+});
+
+const BannerCarousel = dynamic(() => import('@/components/customer/banner-carousel'), {
+  ssr: false,
+  loading: () => <div className="h-40 md:h-56 animate-pulse bg-surface-variant rounded-xl" />,
+});
 
 const categoryIcons = {
   utensils: Utensils,
@@ -33,18 +47,20 @@ function BerandaHeader({ user }: { user: { user_metadata?: { full_name?: string 
           />
           <div>
             <p className="text-text-muted text-xs">Halo,</p>
-            <h1 className="text-base font-bold text-text">{(user.user_metadata as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0]}</h1>
+            <p className="text-base font-bold text-text">{(user.user_metadata as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0]}</p>
           </div>
         </div>
-        <Link href="/notifikasi" prefetch={true} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+        <Link href="/notifikasi" prefetch={true} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center" aria-label="Notifikasi">
           <Bell className="w-5 h-5 text-white" />
         </Link>
       </header>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <label htmlFor="search-input" className="sr-only">Cari makanan atau minuman</label>
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" aria-hidden="true" />
         <input
-          type="text"
+          id="search-input"
+          type="search"
           placeholder="Cari makanan atau minuman..."
           className="w-full rounded-full bg-white pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25"
         />
@@ -75,18 +91,21 @@ export default async function BerandaPage() {
 
   return (
     <>
-      <main className="flex min-h-screen flex-col bg-surface">
+      <main id="main-content" className="flex min-h-screen flex-col bg-surface">
         <div className="px-4 pt-safe pt-6 pb-28">
           <BerandaHeader user={user} />
 
+          <h1 className="sr-only">Beranda - FoodDrink</h1>
+
           {/* Banner */}
-          <section className="mb-6">
+          <section className="mb-6" aria-labelledby="banner-heading">
+            <h2 id="banner-heading" className="sr-only">Banner Promosi</h2>
             <BannerCarousel banners={banners || []} />
           </section>
 
           {/* Categories */}
-          <section className="mb-6">
-            <h2 className="text-lg font-bold text-text mb-3">Kategori</h2>
+          <section className="mb-6" aria-labelledby="categories-heading">
+            <h2 id="categories-heading" className="text-lg font-bold text-text mb-3">Kategori</h2>
             <div className="grid grid-cols-4 gap-2">
               {categories.map((cat) => {
                   const Icon = categoryIcons[cat.icon as keyof typeof categoryIcons] || categoryIcons.utensils;
@@ -107,9 +126,9 @@ export default async function BerandaPage() {
           </section>
 
           {/* Products */}
-          <section>
+          <section aria-labelledby="products-heading">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-text">Menu Terlaris</h2>
+              <h2 id="products-heading" className="text-lg font-bold text-text">Menu Terlaris</h2>
               <Link
                 href="/produk"
                 className="text-sm text-primary hover:underline"
