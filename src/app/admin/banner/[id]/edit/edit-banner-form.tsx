@@ -18,6 +18,7 @@ type Banner = {
 export function EditBannerForm({ banner }: { banner: Banner }) {
   const router = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -51,6 +52,7 @@ export function EditBannerForm({ banner }: { banner: Banner }) {
     const json = await resp.json();
     if (json.success && json.url) {
       setImagePreview(json.url);
+      setImageRemoved(false);
     } else {
       alert('Upload gagal: ' + (json.error ?? 'unknown'));
     }
@@ -66,7 +68,7 @@ export function EditBannerForm({ banner }: { banner: Banner }) {
     fd.set('link_url', data.link_url);
     fd.set('sort_order', data.sort_order);
     fd.set('is_active', data.is_active ? 'on' : 'off');
-    const image = imagePreview || banner.image_url;
+    const image = imageRemoved ? '' : (imagePreview || banner.image_url);
     fd.set('image_url', image);
     const result = await updateBanner(banner.id, fd);
     setLoading(false);
@@ -102,17 +104,46 @@ export function EditBannerForm({ banner }: { banner: Banner }) {
         </div>
         <div>
           <label className="block text-sm font-medium text-text mb-1.5">Gambar Banner</label>
-          {(imagePreview || banner.image_url) ? (
+          {(imagePreview || banner.image_url) && !imageRemoved ? (
             <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
               <img src={imagePreview || banner.image_url} alt="Preview" className="w-full h-full object-cover" />
-              <button type="button" onClick={() => setImagePreview(null)} className="absolute top-2 right-2 p-1.5 bg-error/80 text-white rounded-full">
+              <button
+                type="button"
+                onClick={() => { setImageRemoved(true); setImagePreview(null); }}
+                className="absolute top-2 left-2 p-1.5 bg-error/80 text-white rounded-full"
+                aria-label="Hapus gambar banner"
+              >
                 <Trash2 className="w-4 h-4" />
               </button>
+              {imagePreview && (
+                <button
+                  type="button"
+                  onClick={() => setImagePreview(null)}
+                  className="absolute top-2 right-2 p-1.5 bg-error/80 text-white rounded-full"
+                  aria-label="Batalkan upload baru"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ) : (
-            <div className="w-full h-48 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/40" onClick={() => document.getElementById('banner-img')?.click()}>
+            <div
+              className="w-full h-48 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/40"
+              onClick={() => { setImageRemoved(false); document.getElementById('banner-img')?.click(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setImageRemoved(false);
+                  document.getElementById('banner-img')?.click();
+                }
+              }}
+              tabIndex={0}
+              role="button"
+            >
               <Upload className="w-7 h-7 text-text-muted/50" />
-              <p className="text-xs text-text-muted">{uploading ? 'Mengupload...' : 'Klik untuk upload gambar'}</p>
+              <p className="text-xs text-text-muted">
+                {uploading ? 'Mengupload...' : imageRemoved ? 'Gambar dihapus. Klik untuk tambah gambar' : 'Klik untuk upload gambar'}
+              </p>
             </div>
           )}
           <input id="banner-img" type="file" accept="image/*" hidden onChange={handleImageUpload} />
