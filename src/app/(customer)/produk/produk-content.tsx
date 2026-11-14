@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import ProductCard from '@/components/customer/product-card';
 import Link from 'next/link';
-import { ArrowLeft, Filter, UserRound, Package } from 'lucide-react';
+import { ArrowLeft, UserRound, Package } from 'lucide-react';
 import FilterBar from './filter-bar';
 
 export default function ProdukContent() {
@@ -106,8 +106,6 @@ export default function ProdukContent() {
     fetchData();
   }, [router, search, category]);
 
-  const categoryName = categories?.find(c => c.id === category)?.name;
-
   if (error) {
     return (
       <main className="flex min-h-screen flex-col bg-surface items-center justify-center px-4">
@@ -140,7 +138,6 @@ export default function ProdukContent() {
               <UserRound className="h-4 w-4" />
             </Link>
           </header>
-          <p className="mb-4 text-sm text-text-muted">Semua menu makanan & minuman</p>
 
           <FilterBar
             categories={categories || []}

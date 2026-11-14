@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle } from 'lucide-react';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 interface OrderDetail {
   id: string;
@@ -41,8 +41,40 @@ export default function UploadBuktiQrisPage() {
   const [confirming, setConfirming] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [step, setStep] = useState<UploadStep>('upload');
+  const [step, setStep] = useState<UploadStep | string>('upload');
   const [qrisImageUrl, setQrisImageUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveAsImage = useCallback(async () => {
+    const element = receiptRef.current;
+    if (!element) return;
+
+    setSaving(true);
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#FAF8F5',
+        logging: false,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      const link = document.createElement('a');
+      link.download = `struk-${orderId.slice(0, 8)}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      alert('Struk disimpan ke galeri');
+    } catch (error) {
+      console.error('Save image error:', error);
+      alert('Gagal menyimpan gambar');
+    } finally {
+      setSaving(false);
+    }
+  }, [orderId]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -219,11 +251,10 @@ export default function UploadBuktiQrisPage() {
 
   const isPaid = order.payment_status === 'paid';
   const hasProof = !!order.qris_proof_url;
-  const isAwaitingConfirm = order.payment_status === 'awaiting_confirmation';
 
   return (
     <main className="flex min-h-screen flex-col bg-surface px-4 pt-safe pb-28">
-      <div className="flex-1 w-full max-w-md mx-auto py-6">
+      <div id="receipt-content" ref={receiptRef} className="flex-1 w-full max-w-md mx-auto py-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl font-bold text-text">
@@ -307,8 +338,26 @@ export default function UploadBuktiQrisPage() {
                   Belanja Lagi
                 </a>
               </div>
+              <button
+                type="button"
+                onClick={handleSaveAsImage}
+                disabled={saving}
+                className="mt-4 w-full py-3 border border-border bg-white text-text rounded-lg font-medium hover:bg-surface-variant transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto max-w-xs"
+              >
+                {saving ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    <span>Menyimpan...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Simpan Gambar Struk</span>
+                  </>
+                )}
+              </button>
             </div>
-          ) : step === 'confirm' || hasProof ? (
+          ) : (step === 'confirm' || hasProof) ? (
             // Confirmation step
             <div className="space-y-4">
               <h3 className="font-medium text-text mb-3 flex items-center gap-2">
@@ -362,6 +411,25 @@ export default function UploadBuktiQrisPage() {
                 </button>
               </div>
 
+              <button
+                type="button"
+                onClick={handleSaveAsImage}
+                disabled={saving}
+                className="w-full py-3 border border-border bg-white text-text rounded-lg font-medium hover:bg-surface-variant transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    <span>Menyimpan...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Simpan Gambar Bukti</span>
+                  </>
+                )}
+              </button>
+
               {error && (
                 <p className="text-sm text-error text-center">{error}</p>
               )}
@@ -374,20 +442,48 @@ export default function UploadBuktiQrisPage() {
                 Upload Bukti Pembayaran
               </h3>
 
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="proof-upload"
-                />
-                <div className="aspect-square rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                  <ImageIcon className="w-12 h-12 text-text-muted mb-2" />
-                  <p className="text-text-muted text-center">Klik atau drag untuk upload bukti pembayaran</p>
-                  <p className="text-xs text-text-muted mt-1">Max 5MB • JPG, PNG, WebP, HEIC</p>
+              {selectedFile && previewUrl ? (
+                // Preview selected file
+                <div className="space-y-3">
+                  <div className="aspect-square rounded-lg overflow-hidden border border-border bg-gray-50 relative">
+                    <img
+                      src={previewUrl}
+                      alt="Preview bukti pembayaran"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+                      aria-label="Hapus file"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-xs text-text-muted text-center">File dipilih: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
                 </div>
-              </label>
+              ) : (
+                // Upload drop zone
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="proof-upload"
+                  />
+                  <div className="aspect-square rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors">
+                    <ImageIcon className="w-12 h-12 text-text-muted mb-2" />
+                    <p className="text-text-muted text-center">Klik atau drag untuk upload bukti pembayaran</p>
+                    <p className="text-xs text-text-muted mt-1">Max 5MB • JPG, PNG, WebP, HEIC</p>
+                  </div>
+                </label>
+              )}
 
               {error && (
                 <p className="mt-3 text-sm text-error text-center">{error}</p>
@@ -418,10 +514,10 @@ export default function UploadBuktiQrisPage() {
         {/* Back Link */}
         <div className="mt-6 text-center">
           <a
-            href="/pesanan"
+            href="/checkout"
             className="text-sm text-primary hover:underline"
           >
-            ← Kembali ke Pesanan Saya
+            ← Kembali ke Checkout
           </a>
         </div>
       </div>
