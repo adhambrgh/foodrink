@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare } from 'lucide-react';
+import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare, QrCode } from 'lucide-react';
 import { useState } from 'react';
 
 import { Bell } from 'lucide-react';
@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/menu', label: 'Kelola Menu', icon: Menu },
   { href: '/admin/kategori', label: 'Kategori', icon: Tags },
   { href: '/admin/pesanan', label: 'Pesanan', icon: Receipt },
+  { href: '/admin/qris/upload', label: 'QRIS DANA', icon: QrCode },
   { href: '/admin/reviews', label: 'Review', icon: MessageSquare },
   { href: '/admin/banner', label: 'Banner', icon: MessageSquare },
   { href: '/admin/notifikasi', label: 'Notifikasi', icon: Bell },

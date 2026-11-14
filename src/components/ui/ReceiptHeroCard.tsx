@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import ReceiptCheckmark from './ReceiptCheckmark';
 
-type Variant = 'cod' | 'paid' | 'pending' | 'failed';
+type Variant = 'cod' | 'paid' | 'pending' | 'failed' | 'qris_pending' | 'qris_paid';
 
 interface ReceiptHeroCardProps {
   variant: Variant;
@@ -17,14 +17,18 @@ interface ReceiptHeroCardProps {
 const VARIANT_LABELS: Record<Variant, { label: string; badgeColor: string; statusColor: string }> = {
   cod: { label: 'Pesanan COD Dikonfirmasi', badgeColor: 'bg-amber-100 text-amber-800', statusColor: 'text-amber-600' },
   paid: { label: 'Pembayaran Berhasil', badgeColor: 'bg-success/10 text-success', statusColor: 'text-success' },
+  qris_paid: { label: 'Pembayaran QRIS Berhasil', badgeColor: 'bg-success/10 text-success', statusColor: 'text-success' },
   pending: { label: 'Menunggu Pembayaran', badgeColor: 'bg-primary/10 text-primary', statusColor: 'text-primary' },
+  qris_pending: { label: 'Menunggu Bukti Pembayaran', badgeColor: 'bg-primary/10 text-primary', statusColor: 'text-primary' },
   failed: { label: 'Pembayaran Gagal', badgeColor: 'bg-error/10 text-error', statusColor: 'text-error' },
 };
 
 const VARIANT_ICON: Record<Variant, 'success' | 'pending' | 'failed'> = {
   cod: 'success',
   paid: 'success',
+  qris_paid: 'success',
   pending: 'pending',
+  qris_pending: 'pending',
   failed: 'failed',
 };
 
@@ -35,7 +39,7 @@ export default function ReceiptHeroCard({ variant, orderId, total, className = '
   const iconVariant = VARIANT_ICON[variant];
 
   useEffect(() => {
-    if (reducedMotion || variant === 'pending' || variant === 'failed') {
+    if (reducedMotion || variant === 'pending' || variant === 'qris_pending' || variant === 'failed') {
       setDisplayTotal(total);
       return;
     }
@@ -51,6 +55,9 @@ export default function ReceiptHeroCard({ variant, orderId, total, className = '
     requestAnimationFrame(animate);
   }, [total, reducedMotion, variant]);
 
+  const isSuccess = variant === 'cod' || variant === 'paid' || variant === 'qris_paid';
+  const isPending = variant === 'pending' || variant === 'qris_pending';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -58,9 +65,9 @@ export default function ReceiptHeroCard({ variant, orderId, total, className = '
       transition={{ duration: reducedMotion ? 0 : 0.4, ease: 'easeOut' }}
       className={`relative overflow-hidden rounded-2xl p-6 text-center ${className}`}
       style={{
-        background: variant === 'cod' || variant === 'paid'
+        background: isSuccess
           ? 'linear-gradient(135deg, #F26B1D 0%, #EA580C 100%)'
-          : variant === 'pending'
+          : isPending
           ? 'linear-gradient(135deg, #F26B1D 0%, #F97316 100%)'
           : 'linear-gradient(135deg, #BA1A1A 0%, #DC2626 100%)',
       }}
@@ -93,7 +100,7 @@ export default function ReceiptHeroCard({ variant, orderId, total, className = '
         transition={{ duration: reducedMotion ? 0 : 0.3, delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
         className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${badgeColor}`}
       >
-        {variant === 'cod' ? 'Bayar di Tempat' : variant === 'paid' ? 'Lunas' : variant === 'pending' ? 'Menunggu Bayar' : 'Gagal'}
+        {isSuccess ? 'Lunas' : isPending ? 'Menunggu Bayar' : 'Gagal'}
       </motion.span>
 
       <motion.div

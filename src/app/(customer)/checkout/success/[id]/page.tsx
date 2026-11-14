@@ -32,7 +32,7 @@ interface OrderItem {
   name_snapshot: string;
 }
 
-type Variant = 'cod' | 'paid' | 'pending' | 'failed';
+type Variant = 'cod' | 'paid' | 'pending' | 'failed' | 'qris_pending' | 'qris_paid';
 
 export default function CheckoutSuccessPage({ params }: { params: { id: string } }) {
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -46,6 +46,10 @@ export default function CheckoutSuccessPage({ params }: { params: { id: string }
 
   const getVariant = (paymentMethod: string, paymentStatus: string): Variant => {
     if (paymentMethod === 'cod') return 'cod';
+    if (paymentMethod === 'qris') {
+      if (paymentStatus === 'paid') return 'qris_paid';
+      return 'qris_pending';
+    }
     if (paymentStatus === 'paid') return 'paid';
     if (paymentStatus === 'pending') return 'pending';
     return 'failed';
@@ -72,7 +76,8 @@ export default function CheckoutSuccessPage({ params }: { params: { id: string }
           setLoading(false);
 
           const isCod = fetchedOrder.payment_method === 'cod';
-          const shouldPoll = !isCod && fetchedOrder.payment_status === 'pending';
+          const isQris = fetchedOrder.payment_method === 'qris';
+          const shouldPoll = !isCod && !isQris && fetchedOrder.payment_status === 'pending';
 
           if (shouldPoll && attempts < MAX_ATTEMPTS) {
             const backoff = Math.min(1000 + attempts * 500, 3000);

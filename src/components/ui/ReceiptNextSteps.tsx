@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Truck, CheckCircle2, Clock, AlertCircle, Package } from 'lucide-react';
+import { Truck, CheckCircle2, Clock, AlertCircle, Package, Upload } from 'lucide-react';
 
-type Variant = 'cod' | 'paid' | 'pending' | 'failed';
+type Variant = 'cod' | 'paid' | 'pending' | 'failed' | 'qris_pending' | 'qris_paid';
 
 interface ReceiptNextStepsProps {
   variant: Variant;
@@ -25,10 +25,24 @@ const VARIANT_CONTENT: Record<Variant, { icon: React.ReactNode; title: string; m
     bg: 'bg-success/10',
     border: 'border-success/30',
   },
+  qris_paid: {
+    icon: <CheckCircle2 className="w-5 h-5 text-success" />,
+    title: 'Pembayaran QRIS Berhasil',
+    message: 'Bukti pembayaran Anda telah diterima. Pesanan akan segera diproses oleh admin.',
+    bg: 'bg-success/10',
+    border: 'border-success/30',
+  },
   pending: {
     icon: <Clock className="w-5 h-5 text-primary" />,
     title: 'Menunggu Pembayaran',
-    message: 'Selesaikan pembayaran di Midtrans untuk memproses pesanan Anda.',
+    message: 'Selesaikan pembayaran untuk memproses pesanan Anda.',
+    bg: 'bg-primary/10',
+    border: 'border-primary/30',
+  },
+  qris_pending: {
+    icon: <Upload className="w-5 h-5 text-primary" />,
+    title: 'Menunggu Bukti Pembayaran',
+    message: 'Silakan scan QR DANA, bayar, lalu upload bukti pembayaran untuk memproses pesanan.',
     bg: 'bg-primary/10',
     border: 'border-primary/30',
   },

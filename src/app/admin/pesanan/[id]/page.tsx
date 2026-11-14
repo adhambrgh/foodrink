@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CheckCircle, Clock, Package, Printer, Trash2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Package, Printer, Trash2, ImageIcon, QrCode } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
 import DeleteOrderButton from '@/components/admin/delete-order-button';
@@ -17,8 +17,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
     .from('orders')
     .select(`
       id, status, payment_status, payment_method, total, address, notes,
-      created_at, midtrans_payment_type, midtrans_fraud_status,
-      midtrans_status_message, midtrans_transaction_time,
+      created_at, qris_image_url, qris_proof_url, qris_proof_uploaded_at, qris_verified_at,
       profiles(name, role),
       order_items(name_snapshot, qty, price_snapshot, subtotal)
     `)
@@ -30,6 +29,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const order = orderData as any;
   const isPaid = order.payment_status === 'paid';
   const isCod = order.payment_method === 'cod';
+  const isQris = order.payment_method === 'qris';
   const profiles = order.profiles as { name?: string; role?: string } | { name?: string; role?: string }[] | null;
   const profile = Array.isArray(profiles) ? profiles[0] : profiles;
   const customerName = profile?.name;
@@ -79,20 +79,40 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
 
         <section className="rounded-xl border border-border bg-surface-card p-4">
           <h2 className="mb-3 font-semibold text-text">Pembayaran</h2>
-          <p className="text-sm text-text">Metode: <strong>{isCod ? 'COD' : 'Midtrans'}</strong></p>
+          <p className="text-sm text-text">Metode: <strong>{isCod ? 'COD' : isQris ? 'QRIS DANA' : 'Lainnya'}</strong></p>
           <p className="mt-2 flex items-center gap-2 text-sm text-text">
             {isPaid ? <CheckCircle className="h-4 w-4 text-success" /> : <Clock className="h-4 w-4 text-yellow-500" />}
-            {isPaid ? 'Sudah dibayar' : isCod ? 'Bayar saat pesanan selesai' : 'Menunggu pembayaran Midtrans'}
+            {isPaid ? 'Sudah dibayar' : isCod ? 'Bayar saat pesanan selesai' : isQris ? 'Menunggu bukti pembayaran' : 'Menunggu pembayaran'}
           </p>
-          {order.midtrans_transaction_time && (
+          {isQris && order.qris_proof_uploaded_at && (
             <p className="mt-2 text-xs text-text-muted">
-              Waktu verifikasi: {new Date(order.midtrans_transaction_time).toLocaleString('id-ID')}
+              Bukti diupload: {new Date(order.qris_proof_uploaded_at).toLocaleString('id-ID')}
             </p>
           )}
-          {order.midtrans_payment_type && (
+          {isQris && order.qris_verified_at && (
             <p className="mt-1 text-xs text-text-muted">
-              Jenis verifikasi: {order.midtrans_payment_type}
+              Diverifikasi: {new Date(order.qris_verified_at).toLocaleString('id-ID')}
             </p>
+          )}
+          {isQris && order.qris_image_url && (
+            <div className="mt-3">
+              <p className="text-xs text-text-muted mb-1">QRIS yang digunakan:</p>
+              <img
+                src={order.qris_image_url}
+                alt="QRIS DANA"
+                className="w-24 h-24 object-contain rounded border border-border"
+              />
+            </div>
+          )}
+          {isQris && order.qris_proof_url && (
+            <div className="mt-3">
+              <p className="text-xs text-text-muted mb-1">Bukti pembayaran user:</p>
+              <img
+                src={order.qris_proof_url}
+                alt="Bukti pembayaran"
+                className="w-32 h-32 object-contain rounded border border-border"
+              />
+            </div>
           )}
         </section>
       </div>

@@ -16,7 +16,7 @@ interface CheckoutFormData {
   major: string;
   room: string;
   notes: string;
-  payment_method: 'midtrans' | 'cod';
+  payment_method: 'qris' | 'cod';
 }
 
 export default function CheckoutPage() {
@@ -31,7 +31,7 @@ export default function CheckoutPage() {
     major: '',
     room: '',
     notes: '',
-    payment_method: 'midtrans',
+    payment_method: 'qris',
   });
 
   const filteredItems = items.filter(item => selectedCartIds.includes(item.cart_id));
@@ -292,14 +292,14 @@ export default function CheckoutPage() {
                 <input
                   type="radio"
                   name="payment_method"
-                  value="midtrans"
-                  checked={formData.payment_method === 'midtrans'}
+                  value="qris"
+                  checked={formData.payment_method === 'qris'}
                   onChange={handleChange}
                   className="w-4 h-4 text-primary"
                 />
                 <div>
-                  <span className="font-medium text-text">Midtrans</span>
-                  <p className="text-sm text-text-muted">Bayar online dengan metode yang tersedia di Midtrans</p>
+                  <span className="font-medium text-text">QRIS DANA</span>
+                  <p className="text-sm text-text-muted">Scan QR DANA, bayar, lalu upload bukti pembayaran</p>
                 </div>
               </label>
               <label className="flex items-center gap-3 p-3 border rounded-lg hover:bg-surface-variant cursor-pointer">

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createMidtransTransaction, generateOrderId, getSnapUrl } from '@/lib/midtrans';
+import { generateOrderId } from '@/lib/qris';
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -10,13 +10,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { items, address, notes, payment_method = 'midtrans' } = await request.json().catch(() => ({}));
+  const { items, address, notes, payment_method = 'qris' } = await request.json().catch(() => ({}));
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: 'Keranjang kosong' }, { status: 400 });
   }
 
-  if (!['midtrans', 'cod'].includes(payment_method)) {
+  if (!['qris', 'cod'].includes(payment_method)) {
     return NextResponse.json({ error: 'Metode pembayaran tidak valid' }, { status: 400 });
   }
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     });
   }
 
-// Create order in database
+  // Create order in database
   const orderId = generateOrderId();
   const isCod = payment_method === 'cod';
   const initialPaymentStatus = isCod ? 'paid' : 'pending';
@@ -74,7 +74,6 @@ export async function POST(request: Request) {
     .select()
     .single();
 
-
   if (orderError) {
     return NextResponse.json({ error: orderError.message }, { status: 500 });
   }
@@ -93,7 +92,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: itemsError.message }, { status: 500 });
   }
 
-  // For COD: decrease stock immediately (like webhook does for paid)
+  // For COD: decrease stock immediately
   if (isCod) {
     for (const item of orderItems) {
       const { data: product } = await supabase
@@ -111,31 +110,12 @@ export async function POST(request: Request) {
     }
   }
 
-  let midtransToken: string | null = null;
+  let qrisImageUrl: string | null = null;
   let redirectUrl: string | null = null;
 
-  if (payment_method === 'midtrans') {
-    try {
-      const transaction = await createMidtransTransaction({
-        orderId,
-        grossAmount: total,
-        items: orderItems.map(item => ({
-          id: item.product_id,
-          price: item.price_snapshot,
-          quantity: item.qty,
-          name: item.name_snapshot,
-        })),
-      });
-      midtransToken = transaction.token;
-      redirectUrl = transaction.redirectUrl;
-    } catch (error) {
-      await supabase.from('order_items').delete().eq('order_id', orderId);
-      await supabase.from('orders').delete().eq('id', orderId);
-      console.error('Midtrans create failed:', error);
-      return NextResponse.json({
-        error: error instanceof Error ? error.message : 'Gagal membuat pembayaran Midtrans',
-      }, { status: 502 });
-    }
+  if (payment_method === 'qris') {
+    qrisImageUrl = process.env.NEXT_PUBLIC_QRIS_IMAGE_URL?.trim() || null;
+    redirectUrl = `/upload-bukti-qris/${orderId}`;
   }
 
   return NextResponse.json({
@@ -144,13 +124,10 @@ export async function POST(request: Request) {
     total,
     items: orderItems,
     payment_method,
-    midtrans_token: midtransToken,
+    qris_image_url: qrisImageUrl,
     redirect_url:
       payment_method === 'cod'
         ? `/checkout/success/${orderId}`
-        : midtransToken
-        ? redirectUrl ?? getSnapUrl(midtransToken, orderId)
-        : null,
+        : redirectUrl,
   });
 }
-

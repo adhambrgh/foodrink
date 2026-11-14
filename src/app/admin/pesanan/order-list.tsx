@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Clock, CreditCard, Filter, Package, Search, Trash2, Truck } from 'lucide-react';
+import { CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Clock, CreditCard, Filter, Package, Search, Trash2, Truck, QrCode } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
 import OrderStatusButton from './status-button';
@@ -22,7 +22,7 @@ export interface Order {
   order_items: any[];
 }
 
-type PaymentMethod = 'all' | 'midtrans' | 'cod';
+type PaymentMethod = 'all' | 'qris' | 'cod';
 type DateFilter = 'today' | 'week' | 'month' | 'all';
 
 export default function OrderList({ orders: initialOrders }: { orders: Order[] }) {
@@ -91,9 +91,9 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
         <div className="rounded-xl border border-border bg-surface-card p-4">
           <div className="grid gap-4 md:grid-cols-2">
             <FilterGroup label="Metode Pembayaran">
-              {(['all', 'midtrans', 'cod'] as const).map((method) => (
+              {(['all', 'qris', 'cod'] as const).map((method) => (
                 <FilterButton key={method} active={paymentFilter === method} onClick={() => setPaymentFilter(method)}>
-                  {method === 'all' ? 'Semua' : method === 'midtrans' ? 'Midtrans' : 'COD'}
+                  {method === 'all' ? 'Semua' : method === 'qris' ? 'QRIS DANA' : 'COD'}
                 </FilterButton>
               ))}
             </FilterGroup>
@@ -131,10 +131,10 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
                   </tr>
                 </thead>
                <tbody>
-                 {pagedItems.map((order, i) => {
-                   const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles;
-                   const isPaid = order.status === 'selesai' || order.payment_status === 'paid';
-                   return (
+                  {pagedItems.map((order, i) => {
+                    const profile = Array.isArray(order.profiles) ? order.profiles[0] : order.profiles;
+                    const isPaid = order.status === 'selesai' || order.payment_status === 'paid';
+                    return (
 <tr key={order.id} className="border-b border-border/50 last:border-0 hover:bg-surface-variant/30">
                           <td className="px-4 py-3 text-center font-mono text-xs">{startIndex + i + 1}</td>
                           <td className="px-4 py-3 font-mono text-xs text-text-muted">#{order.id.slice(0, 8)}</td>
@@ -161,9 +161,9 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
                             </div>
                           </td>
                         </tr>
-                     );
-                 })}
-               </tbody>
+                      );
+                  })}
+                </tbody>
             </table>
           </div>
         </div>
@@ -237,5 +237,9 @@ function StatusBadge({ status }: { status: string }) {
 
 function PaymentBadge({ method }: { method: string }) {
   const isCod = method === 'cod';
-  return <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${isCod ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'}`}>{isCod ? <Truck className="mr-1 h-3 w-3" /> : <CreditCard className="mr-1 h-3 w-3" />}{isCod ? 'COD' : 'Midtrans'}</span>;
+  const isQris = method === 'qris';
+  return <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${isCod ? 'bg-orange-100 text-orange-700' : isQris ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
+    {isCod ? <Truck className="mr-1 h-3 w-3" /> : isQris ? <QrCode className="mr-1 h-3 w-3" /> : <CreditCard className="mr-1 h-3 w-3" />}
+    {isCod ? 'COD' : isQris ? 'QRIS' : method}
+  </span>;
 }

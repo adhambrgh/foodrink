@@ -4,22 +4,6 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { revalidatePath } from 'next/cache';
 
-function syncPaymentStatus(order: any, status: string) {
-  const supabase = createAdminClient();
-  const isPaidByMidtrans =
-    order.payment_method === 'midtrans' && order.payment_status !== 'paid';
-
-  const update = isPaidByMidtrans
-    ? supabase.from('orders').update({}).eq('id', order.id)
-    : null;
-
-  const hasError = Boolean(update && 'error' in update && update.error);
-  if (hasError) {
-    console.error('Error syncing payment status:', (update as any).error);
-  }
-  return hasError ? (update as any)?.error ?? null : null;
-}
-
 export async function createProduct(formData: FormData) {
   const supabase = createAdminClient();
 
@@ -247,16 +231,8 @@ export async function updateOrderStatus(id: string, status: string) {
     updateData.payment_status = 'paid';
   }
 
-  // If order is paid (via webhook), disable manual override
-  if (status !== 'selesai' && order.payment_status === 'paid' && order.payment_method === 'midtrans') {
-    const syncError = syncPaymentStatus(order, status);
-    if (syncError) {
-      return { error: 'Tidak dapat mengubah status pesanan yang sudah dibayar' };
-    }
-    revalidatePath('/admin/pesanan');
-    revalidatePath(`/admin/pesanan/${id}`);
-    return { success: true };
-  }
+  // If order is paid (via QRIS upload), allow manual override
+  // No longer blocking status changes for paid orders
 
   const { error } = await supabase
     .from('orders')

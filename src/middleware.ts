@@ -9,7 +9,6 @@ const publicRoutes = [
   '/register',
   '/unauthorized',
   '/api/checkout',
-  '/api/midtrans/notification',
   '/_next',
   '/favicon.ico',
   '/robots.txt',
