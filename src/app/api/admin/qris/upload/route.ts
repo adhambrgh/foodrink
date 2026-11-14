@@ -2,16 +2,26 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 
 const BUCKET = 'qris-images';
-const FILE_NAME = 'qris-dana.jpg';
+const BASE_NAME = 'qris-dana';
+
+function getPublicUrl(supabase: ReturnType<typeof createAdminClient>, ext: string) {
+  return supabase.storage.from(BUCKET).getPublicUrl(`${BASE_NAME}.${ext}`).data.publicUrl;
+}
 
 export async function GET() {
   const supabase = createAdminClient();
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(FILE_NAME);
+  const jpgUrl = getPublicUrl(supabase, 'jpg');
+  const jpegUrl = getPublicUrl(supabase, 'jpeg');
+
+  const { data: jpgExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpg' });
+  const { data: jpegExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpeg' });
+
+  const url = (jpegExists && jpegExists.length > 0) ? jpegUrl : jpgUrl;
 
   return NextResponse.json({
     success: true,
-    url: data.publicUrl,
+    url,
   });
 }
 
@@ -34,13 +44,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Tipe file tidak didukung (JPG, PNG, WebP)' }, { status: 400 });
   }
 
+  // Use original file extension
+  const ext = file.name.split('.').pop() || 'jpg';
+  const fileName = `${BASE_NAME}.${ext}`;
+
   // Upload to Supabase Storage (overwrite if exists)
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
-    .upload(FILE_NAME, buffer, {
+    .upload(fileName, buffer, {
       contentType: file.type,
       upsert: true,
     });
@@ -51,18 +65,18 @@ export async function POST(request: Request) {
   }
 
   // Get public URL
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(FILE_NAME);
+  const url = getPublicUrl(supabase, ext);
 
   return NextResponse.json({
     success: true,
-    url: data.publicUrl,
+    url,
   });
 }
 
 export async function DELETE() {
   const supabase = createAdminClient();
 
-  const { error } = await supabase.storage.from(BUCKET).remove([FILE_NAME]);
+  const { error } = await supabase.storage.from(BUCKET).remove(['qris-dana.jpg', 'qris-dana.jpeg']);
 
   if (error) {
     console.error('Delete error:', error);

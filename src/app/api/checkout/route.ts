@@ -110,11 +110,9 @@ export async function POST(request: Request) {
     }
   }
 
-  let qrisImageUrl: string | null = null;
   let redirectUrl: string | null = null;
 
   if (payment_method === 'qris') {
-    qrisImageUrl = process.env.NEXT_PUBLIC_QRIS_IMAGE_URL?.trim() || null;
     redirectUrl = `/upload-bukti-qris/${orderId}`;
   }
 
@@ -124,7 +122,6 @@ export async function POST(request: Request) {
     total,
     items: orderItems,
     payment_method,
-    qris_image_url: qrisImageUrl,
     redirect_url:
       payment_method === 'cod'
         ? `/checkout/success/${orderId}`

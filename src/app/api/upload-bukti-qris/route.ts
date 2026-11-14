@@ -75,13 +75,12 @@ export async function POST(request: Request) {
     .from('qris-proofs')
     .getPublicUrl(filePath);
 
-  // Update order: mark as paid, status diproses, save proof URL
+  // Update order: save proof URL, set status to awaiting_confirmation
   const now = new Date().toISOString();
   const { error: updateError } = await supabase
     .from('orders')
     .update({
-      payment_status: 'paid',
-      status: 'diproses',
+      payment_status: 'awaiting_confirmation',
       qris_proof_url: proofUrl,
       qris_proof_uploaded_at: now,
     })
@@ -90,27 +89,6 @@ export async function POST(request: Request) {
   if (updateError) {
     console.error('Update order error:', updateError);
     return NextResponse.json({ error: 'Gagal update status pesanan' }, { status: 500 });
-  }
-
-  // Decrease stock for QRIS paid orders (like COD)
-  const { data: orderItems } = await supabase
-    .from('order_items')
-    .select('product_id, qty')
-    .eq('order_id', orderId);
-
-  for (const item of orderItems || []) {
-    const { data: product } = await supabase
-      .from('products')
-      .select('stock')
-      .eq('id', item.product_id)
-      .single();
-
-    if (product) {
-      await supabase
-        .from('products')
-        .update({ stock: product.stock - item.qty })
-        .eq('id', item.product_id);
-    }
   }
 
   return NextResponse.json({

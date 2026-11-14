@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2 } from 'lucide-react';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -16,7 +16,7 @@ interface OrderDetail {
   payment_status: string;
   payment_method: string;
   created_at: string;
-  qris_image_url: string | null;
+  qris_proof_url: string | null;
   order_items: OrderItem[];
 }
 
@@ -27,6 +27,8 @@ interface OrderItem {
   name_snapshot: string;
 }
 
+type UploadStep = 'upload' | 'confirm' | 'success';
+
 export default function UploadBuktiQrisPage() {
   const router = useRouter();
   const params = useParams();
@@ -36,8 +38,11 @@ export default function UploadBuktiQrisPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [step, setStep] = useState<UploadStep>('upload');
+  const [qrisImageUrl, setQrisImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -46,8 +51,16 @@ export default function UploadBuktiQrisPage() {
         const data = await res.json();
 
         if (res.ok && data.order) {
-          setOrder(data.order);
+          const fetchedOrder = data.order;
+          setOrder(fetchedOrder);
           setLoading(false);
+
+          // Determine step based on order state
+          if (fetchedOrder.payment_status === 'paid') {
+            setStep('success');
+          } else if (fetchedOrder.qris_proof_url) {
+            setStep('confirm');
+          }
         } else {
           setError(data.error || 'Pesanan tidak ditemukan');
           setLoading(false);
@@ -58,7 +71,20 @@ export default function UploadBuktiQrisPage() {
       }
     };
 
+    const fetchQris = async () => {
+      try {
+        const res = await fetch('/api/qris/current', { cache: 'no-store' });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          setQrisImageUrl(data.url);
+        }
+      } catch {
+        // Silent fail - QRIS optional
+      }
+    };
+
     fetchOrder();
+    fetchQris();
   }, [orderId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +127,11 @@ export default function UploadBuktiQrisPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        router.replace(`/checkout/success/${orderId}`);
+        // Update local order state
+        setOrder(prev => prev ? { ...prev, qris_proof_url: data.proof_url, payment_status: 'awaiting_confirmation' } : null);
+        setStep('confirm');
+        setSelectedFile(null);
+        setPreviewUrl(null);
       } else {
         setError(data.error || 'Gagal upload bukti pembayaran');
       }
@@ -110,6 +140,40 @@ export default function UploadBuktiQrisPage() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleConfirm = async () => {
+    if (!order) return;
+
+    setConfirming(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/confirm-qris', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderId }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setStep('success');
+        router.replace(`/checkout/success/${orderId}`);
+      } else {
+        setError(data.error || 'Gagal konfirmasi pembayaran');
+      }
+    } catch {
+      setError('Terjadi kesalahan saat konfirmasi');
+    } finally {
+      setConfirming(false);
+    }
+  };
+
+  const handleChangeProof = () => {
+    setStep('upload');
+    setOrder(prev => prev ? { ...prev, qris_proof_url: null, payment_status: 'pending' } : null);
   };
 
   if (loading) {
@@ -153,13 +217,23 @@ export default function UploadBuktiQrisPage() {
     year: 'numeric',
   });
 
+  const isPaid = order.payment_status === 'paid';
+  const hasProof = !!order.qris_proof_url;
+  const isAwaitingConfirm = order.payment_status === 'awaiting_confirmation';
+
   return (
     <main className="flex min-h-screen flex-col bg-surface px-4 pt-safe pb-28">
       <div className="flex-1 w-full max-w-md mx-auto py-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-text">Upload Bukti Pembayaran</h1>
-          <p className="text-sm text-text-muted mt-1">Scan QR DANA, bayar sesuai nominal, lalu upload screenshotnya</p>
+          <h1 className="text-xl font-bold text-text">
+            {isPaid ? 'Pembayaran Berhasil' : hasProof ? 'Konfirmasi Pembayaran' : 'Upload Bukti Pembayaran'}
+          </h1>
+          <p className="text-sm text-text-muted mt-1">
+            {isPaid ? 'Pesanan Anda telah dikonfirmasi dan akan segera diproses.'
+              : hasProof ? 'Bukti pembayaran telah diupload. Tekan tombol konfirmasi untuk menyelesaikan.'
+              : 'Scan QR DANA, bayar sesuai nominal, lalu upload screenshotnya'}
+          </p>
         </div>
 
         {/* Order Summary */}
@@ -174,70 +248,155 @@ export default function UploadBuktiQrisPage() {
         </div>
 
         {/* QR Code Section */}
-        <div className="bg-white rounded-xl border border-border p-4 mb-6">
-          <h3 className="font-medium text-text mb-3 flex items-center gap-2">
-            <QrCode className="w-5 h-5 text-primary" />
-            QRIS DANA
-          </h3>
-          <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">
-            {order.qris_image_url ? (
-              <img
-                src={order.qris_image_url}
-                alt="QRIS DANA"
-                className="w-48 h-48 object-contain"
-              />
-            ) : (
-              <div className="w-48 h-48 flex items-center justify-center text-text-muted">
-                <p className="text-center">QRIS belum dikonfigurasi</p>
-              </div>
-            )}
-            <p className="mt-3 text-sm text-text-muted text-center">
-              Scan menggunakan aplikasi DANA
-            </p>
-          </div>
-          <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/20 text-sm">
-            <p className="font-medium text-primary">Instruksi:</p>
-            <ol className="list-decimal list-inside mt-1 space-y-1 text-text-muted text-xs">
-              <li>Buka aplikasi DANA</li>
-              <li>Pilih "Bayar" → Scan QR Code di atas</li>
-              <li>Masukkan nominal: <strong className="text-text">{formatCurrency(order.total)}</strong></li>
-              <li>Bayar & screenshot bukti transaksi</li>
-              <li>Upload di bawah ini</li>
-            </ol>
-          </div>
-        </div>
-
-        {/* Upload Section */}
-        <div className="bg-white rounded-xl border border-border p-4">
-          <h3 className="font-medium text-text mb-3 flex items-center gap-2">
-            <Upload className="w-5 h-5 text-primary" />
-            Upload Bukti Pembayaran
-          </h3>
-
-          {previewUrl ? (
-            <div className="space-y-3">
-              <div className="relative aspect-square rounded-lg overflow-hidden border border-border bg-gray-50">
+        {!isPaid && (
+          <div className="bg-white rounded-xl border border-border p-4 mb-6">
+            <h3 className="font-medium text-text mb-3 flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              QRIS DANA
+            </h3>
+            <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">
+              {qrisImageUrl ? (
                 <img
-                  src={previewUrl}
-                  alt="Preview bukti pembayaran"
-                  className="w-full h-full object-cover"
+                  src={qrisImageUrl}
+                  alt="QRIS DANA"
+                  className="w-48 h-48 object-contain"
                 />
+              ) : (
+                <div className="w-48 h-48 flex items-center justify-center text-text-muted">
+                  <p className="text-center">QRIS belum dikonfigurasi</p>
+                </div>
+              )}
+              <p className="mt-3 text-sm text-text-muted text-center">
+                Scan menggunakan aplikasi DANA
+              </p>
+            </div>
+            <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/20 text-sm">
+              <p className="font-medium text-primary">Instruksi:</p>
+              <ol className="list-decimal list-inside mt-1 space-y-1 text-text-muted text-xs">
+                <li>Buka aplikasi DANA</li>
+                <li>Pilih "Bayar" → Scan QR Code di atas</li>
+                <li>Masukkan nominal: <strong className="text-text">{formatCurrency(order.total)}</strong></li>
+                <li>Bayar & screenshot bukti transaksi</li>
+                {isPaid || hasProof ? <li>Upload bukti & konfirmasi pembayaran</li> : <li>Upload di bawah ini</li>}
+              </ol>
+            </div>
+          </div>
+        )}
+
+        {/* Upload / Confirm Section */}
+        <div className="bg-white rounded-xl border border-border p-4">
+          {isPaid ? (
+            // Success state
+            <div className="text-center py-8">
+              <div className="w-20 h-20 mx-auto rounded-full bg-success/10 flex items-center justify-center mb-4">
+                <CheckCircle2 className="w-10 h-10 text-success" />
+              </div>
+              <h3 className="text-lg font-bold text-text mb-2">Pembayaran Berhasil Dikonfirmasi</h3>
+              <p className="text-sm text-text-muted mb-6">Pesanan akan segera diproses oleh admin.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href="/pesanan"
+                  className="py-3 rounded-xl bg-primary text-white font-medium text-center hover:bg-primary-dark transition-colors"
+                >
+                  Lihat Pesanan
+                </a>
+                <a
+                  href="/produk"
+                  className="py-3 rounded-xl bg-surface-variant text-text font-medium text-center hover:bg-surface-hover transition-colors"
+                >
+                  Belanja Lagi
+                </a>
+              </div>
+            </div>
+          ) : step === 'confirm' || hasProof ? (
+            // Confirmation step
+            <div className="space-y-4">
+              <h3 className="font-medium text-text mb-3 flex items-center gap-2">
+                <Upload className="w-5 h-5 text-primary" />
+                Bukti Pembayaran
+              </h3>
+
+              <div className="relative aspect-square rounded-lg overflow-hidden border border-border bg-gray-50">
+                {order.qris_proof_url && (
+                  <img
+                    src={order.qris_proof_url}
+                    alt="Bukti pembayaran"
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
+              <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                <p className="font-medium flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  Menunggu Konfirmasi
+                </p>
+                <p className="mt-1">Tekan tombol di bawah setelah yakin pembayaran sudah berhasil untuk menyelesaikan order.</p>
+              </div>
+
+              <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedFile(null);
-                    setPreviewUrl(null);
-                  }}
-                  className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-                  aria-label="Hapus gambar"
+                  onClick={handleChangeProof}
+                  className="flex-1 py-3 rounded-lg border border-border bg-white text-text font-medium hover:bg-surface-variant transition-colors"
                 >
-                  <AlertCircle className="w-4 h-4" />
+                  Ganti Bukti
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={confirming}
+                  className="flex-1 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {confirming ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Mengkonfirmasi...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Konfirmasi Pembayaran
+                    </>
+                  )}
                 </button>
               </div>
+
+              {error && (
+                <p className="text-sm text-error text-center">{error}</p>
+              )}
+            </div>
+          ) : (
+            // Upload step
+            <div className="space-y-3">
+              <h3 className="font-medium text-text mb-3 flex items-center gap-2">
+                <Upload className="w-5 h-5 text-primary" />
+                Upload Bukti Pembayaran
+              </h3>
+
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="proof-upload"
+                />
+                <div className="aspect-square rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors">
+                  <ImageIcon className="w-12 h-12 text-text-muted mb-2" />
+                  <p className="text-text-muted text-center">Klik atau drag untuk upload bukti pembayaran</p>
+                  <p className="text-xs text-text-muted mt-1">Max 5MB • JPG, PNG, WebP, HEIC</p>
+                </div>
+              </label>
+
+              {error && (
+                <p className="mt-3 text-sm text-error text-center">{error}</p>
+              )}
+
               <button
                 type="button"
                 onClick={handleUpload}
-                disabled={uploading}
+                disabled={uploading || !selectedFile}
                 className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {uploading ? (
@@ -248,33 +407,14 @@ export default function UploadBuktiQrisPage() {
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    Konfirmasi & Lanjut ke Struk
+                    Upload & Lanjut ke Konfirmasi
                   </>
                 )}
               </button>
             </div>
-          ) : (
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-                id="proof-upload"
-              />
-              <div className="aspect-square rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors">
-                <ImageIcon className="w-12 h-12 text-text-muted mb-2" />
-                <p className="text-text-muted text-center">Klik atau drag untuk upload bukti pembayaran</p>
-                <p className="text-xs text-text-muted mt-1">Max 5MB • JPG, PNG, WebP, HEIC</p>
-              </div>
-            </label>
           )}
 
-          {error && (
-            <p className="mt-3 text-sm text-error text-center">{error}</p>
-          )}
         </div>
-
         {/* Back Link */}
         <div className="mt-6 text-center">
           <a

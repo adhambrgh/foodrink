@@ -11,13 +11,27 @@ const statusConfig = {
   selesai: 'Selesai',
 } as const;
 
+async function getCurrentQrisUrl(): Promise<string | null> {
+  const supabase = createAdminClient();
+  const BUCKET = 'qris-images';
+  const BASE_NAME = 'qris-dana';
+
+  const jpgUrl = supabase.storage.from(BUCKET).getPublicUrl(`${BASE_NAME}.jpg`).data.publicUrl;
+  const jpegUrl = supabase.storage.from(BUCKET).getPublicUrl(`${BASE_NAME}.jpeg`).data.publicUrl;
+
+  const { data: jpgExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpg' });
+  const { data: jpegExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpeg' });
+
+  return (jpegExists && jpegExists.length > 0) ? jpegUrl : jpgUrl;
+}
+
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = createAdminClient();
   const { data: orderData } = await supabase
     .from('orders')
     .select(`
       id, status, payment_status, payment_method, total, address, notes,
-      created_at, qris_image_url, qris_proof_url, qris_proof_uploaded_at, qris_verified_at,
+      created_at, qris_proof_url, qris_proof_uploaded_at, qris_verified_at,
       profiles(name, role),
       order_items(name_snapshot, qty, price_snapshot, subtotal)
     `)
@@ -30,6 +44,8 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const isPaid = order.payment_status === 'paid';
   const isCod = order.payment_method === 'cod';
   const isQris = order.payment_method === 'qris';
+
+  const qrisImageUrl = isQris ? await getCurrentQrisUrl() : null;
   const profiles = order.profiles as { name?: string; role?: string } | { name?: string; role?: string }[] | null;
   const profile = Array.isArray(profiles) ? profiles[0] : profiles;
   const customerName = profile?.name;
@@ -94,11 +110,11 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
               Diverifikasi: {new Date(order.qris_verified_at).toLocaleString('id-ID')}
             </p>
           )}
-          {isQris && order.qris_image_url && (
+          {isQris && qrisImageUrl && (
             <div className="mt-3">
               <p className="text-xs text-text-muted mb-1">QRIS yang digunakan:</p>
               <img
-                src={order.qris_image_url}
+                src={qrisImageUrl}
                 alt="QRIS DANA"
                 className="w-24 h-24 object-contain rounded border border-border"
               />

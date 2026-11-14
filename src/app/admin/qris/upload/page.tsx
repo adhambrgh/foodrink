@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Upload, ImageIcon, Loader2, CheckCircle2, Trash2 } from 'lucide-react';
@@ -107,8 +107,9 @@ export default function AdminQrisUploadPage() {
     }
   };
 
-  // We'll use useEffect in a real implementation, but for simplicity we'll skip it
-  // The URL will be passed from server component or fetched via useEffect
+  useEffect(() => {
+    fetchCurrentQris();
+  }, []);
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 md:p-6 space-y-6">
