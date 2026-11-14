@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
   if (uploadError) {
     console.error('Upload error:', uploadError);
-    return NextResponse.json({ error: 'Gagal upload bukti pembayaran' }, { status: 500 });
+    return NextResponse.json({ error: uploadError.message || 'Gagal upload bukti pembayaran' }, { status: 500 });
   }
 
   // Get public URL for the proof
