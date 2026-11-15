@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Heart, ShoppingBag, Star, X } from 'lucide-react';
 import { useState } from 'react';
 import { Product } from '@/lib/types';
+import { formatCurrency } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
 
 interface ProductCardProps {
@@ -148,6 +149,10 @@ export default function ProductCard({
           <div>
             <h3 className="line-clamp-1 font-semibold text-gray-800">{product.name}</h3>
             <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{product.description}</p>
+            <div className="mt-1 flex items-baseline gap-1">
+              <span className="font-semibold text-[#a94716]">{formatCurrency(product.price)}</span>
+              <span className="text-xs text-gray-500">/item</span>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2 pt-2">
