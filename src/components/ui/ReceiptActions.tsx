@@ -3,7 +3,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useRef, useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import { Home, Package, Download, Share2, Check, X } from 'lucide-react';
 
@@ -20,6 +20,7 @@ interface ReceiptActionsProps {
 
 export default function ReceiptActions({ orderId, receiptRef, className = '' }: ReceiptActionsProps) {
   const reducedMotion = useReducedMotion();
+  const router = useRouter();
   const [toast, setToast] = useState<ToastState | null>(null);
   const [saving, setSaving] = useState(false);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -82,8 +83,8 @@ export default function ReceiptActions({ orderId, receiptRef, className = '' }: 
   }, [orderId, showToast]);
 
   const actions = [
-    { label: 'Beranda', href: '/beranda', variant: 'ghost' as const, icon: Home, onClick: undefined },
-    { label: 'Pesanan Saya', href: '/pesanan', variant: 'primary' as const, icon: Package, onClick: undefined },
+    { label: 'Beranda', href: '/beranda', variant: 'ghost' as const, icon: Home, onClick: () => router.push('/beranda') },
+    { label: 'Pesanan Saya', href: '/pesanan', variant: 'primary' as const, icon: Package, onClick: () => router.push('/pesanan') },
     { label: 'Simpan Gambar', href: undefined, variant: 'outline' as const, icon: Download, onClick: handleSaveAsImage },
     { label: 'Bagikan', href: undefined, variant: 'outline' as const, icon: Share2, onClick: handleShare },
   ];
