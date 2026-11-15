@@ -150,7 +150,7 @@ export default function CheckoutPage() {
       </header>
 
       <form onSubmit={handleSubmit}>
-        <main className="flex-1 p-4 space-y-6">
+        <main className="flex-1 p-4 space-y-6 pb-20">
           {/* Delivery Selection */}
           <div className="bg-white rounded-lg p-4 border border-border">
             <h2 className="text-lg font-semibold text-text mb-3">Pilih Pengiriman</h2>
@@ -359,8 +359,8 @@ export default function CheckoutPage() {
           </div>
         </main>
 
-        {/* Pay Button */}
-        <div className="bg-white p-4 border-t border-border">
+        {/* Pay Button - Sticky Bottom */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-10 pb-safe">
           <button
             type="submit"
             disabled={loading || (formData.delivery_method === 'antar_ke_kelas' && (!formData.recipient_name.trim() || !formData.grade || !formData.major || !formData.room))}
