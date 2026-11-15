@@ -150,15 +150,15 @@ export default function ProductCard({
             <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{product.description}</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5 pt-2">
+          <div className="flex flex-col gap-2 pt-2">
             <button
               type="button"
               onClick={e => openQuantityPicker(e, 'cart')}
               disabled={busy || product.stock < 1}
               aria-label={`Tambah ${product.name} ke keranjang`}
-              className="flex h-9 min-w-0 w-full items-center justify-center gap-1 rounded-lg border border-primary bg-transparent px-1.5 text-[10px] font-semibold leading-none text-primary transition-colors hover:bg-primary/10 active:scale-[0.98] disabled:opacity-50"
+              className="flex h-10 min-w-0 w-full items-center justify-center gap-2 rounded-lg border border-primary bg-transparent px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 active:scale-[0.98] disabled:opacity-50"
             >
-              <ShoppingBag className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <ShoppingBag className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span className="truncate">Keranjang</span>
             </button>
             <button
@@ -166,7 +166,7 @@ export default function ProductCard({
               onClick={e => openQuantityPicker(e, 'buy')}
               disabled={busy || product.stock < 1}
               aria-label={`Beli ${product.name} sekarang`}
-              className="h-9 min-w-0 w-full rounded-lg bg-primary px-1.5 text-[10px] font-semibold leading-tight text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:opacity-50"
+              className="h-10 min-w-0 w-full rounded-lg bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:opacity-50"
             >
               <span className="block truncate">Beli sekarang</span>
             </button>
