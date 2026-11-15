@@ -53,7 +53,7 @@ export async function POST(request: Request) {
   // Upload to Supabase Storage
   const fileExt = file.name.split('.').pop() || 'jpg';
   const fileName = `${orderId}-${Date.now()}.${fileExt}`;
-  const filePath = `qris-proofs/${user.id}/${fileName}`;
+  const filePath = `${user.id}/${fileName}`;
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
