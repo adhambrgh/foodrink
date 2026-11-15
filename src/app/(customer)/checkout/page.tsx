@@ -112,6 +112,11 @@ function CheckoutContent() {
     const data = await res.json();
 
     if (data.success) {
+      // Simpan cart_ids yang akan dipesan agar dapat dihapus di halaman sukses
+      const cartIdsToRemove = filteredItems.map(i => i.cart_id);
+      if (cartIdsToRemove.length > 0) {
+        sessionStorage.setItem('pending_cart_ids', JSON.stringify(cartIdsToRemove));
+      }
       window.location.href = data.redirect_url;
     } else {
       alert(data.error || 'Gagal memproses order');

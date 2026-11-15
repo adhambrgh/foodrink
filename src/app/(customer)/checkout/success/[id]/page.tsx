@@ -12,6 +12,7 @@ import {
   ReceiptNextSteps,
   ReceiptActions,
 } from '@/components/ui';
+import { useCart } from '@/hooks/use-cart';
 
 interface OrderDetail {
   id: string;
@@ -41,6 +42,7 @@ export default function CheckoutSuccessPage({ params }: { params: { id: string }
   const [paymentFailed, setPaymentFailed] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const MAX_ATTEMPTS = 20;
+  const { remove } = useCart();
 
   const receiptRef = useRef<HTMLDivElement>(null);
 
@@ -77,7 +79,25 @@ export default function CheckoutSuccessPage({ params }: { params: { id: string }
 
           const isCod = fetchedOrder.payment_method === 'cod';
           const isQris = fetchedOrder.payment_method === 'qris';
+          const isPaid = fetchedOrder.payment_status === 'paid';
           const shouldPoll = !isCod && !isQris && fetchedOrder.payment_status === 'pending';
+
+          // Hapus item dari keranjang setelah order berhasil dan pembayaran lunas
+          if (isPaid) {
+            const pendingCartIdsRaw = sessionStorage.getItem('pending_cart_ids');
+            if (pendingCartIdsRaw) {
+              try {
+                const pendingCartIds: string[] = JSON.parse(pendingCartIdsRaw);
+                pendingCartIds.forEach(cartId => {
+                  remove(cartId);
+                });
+              } catch {
+                // ignore parse error
+              } finally {
+                sessionStorage.removeItem('pending_cart_ids');
+              }
+            }
+          }
 
           if (shouldPoll && attempts < MAX_ATTEMPTS) {
             const backoff = Math.min(1000 + attempts * 500, 3000);
