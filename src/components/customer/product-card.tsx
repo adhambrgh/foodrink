@@ -210,7 +210,7 @@ export default function ProductCard({
               disabled={busy}
               className="mt-4 h-12 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
             >
-              {busy ? 'Menyimpan...' : action === 'buy' ? 'Lanjut ke keranjang' : 'Tambah ke keranjang'}
+              {busy ? 'Menyimpan...' : 'Lanjut'}
             </button>
           </div>
         </div>
