@@ -183,7 +183,37 @@ export default function ProductDetailPage() {
             height={80}
             className="rounded-full animate-pulse"
           />
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <div className="relative w-12 h-12">
+            <svg
+              className="absolute inset-0 w-full h-full animate-[spin_1s_linear_infinite]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              role="status"
+              aria-label="Memuat"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div
+              className={`absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-[spin_1s_linear_infinite]`}
+            />
+          </div>
+          <p className="text-xs text-[#8a756b] font-medium">Memuat...</p>
         </div>
       </div>
     );

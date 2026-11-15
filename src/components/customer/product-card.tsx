@@ -151,7 +151,7 @@ export default function ProductCard({
             <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{product.description}</p>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="font-semibold text-[#a94716]">{formatCurrency(product.price)}</span>
-              <span className="text-xs text-gray-500">/item</span>
+              <span className="text-xs text-gray-500"></span>
             </div>
           </div>
 
