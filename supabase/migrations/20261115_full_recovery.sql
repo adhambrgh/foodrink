@@ -197,6 +197,13 @@ alter table public.order_items enable row level security;
 drop policy if exists "user select own" on public.order_items;
 create policy "user select own" on public.order_items for select using (exists (select 1 from public.orders where id = order_id and user_id = auth.uid()));
 
+-- Allow users to insert order_items for their own orders
+drop policy if exists "user insert own" on public.order_items;
+create policy "user insert own" on public.order_items
+for insert with check (
+  exists (select 1 from public.orders where id = order_id and user_id = auth.uid())
+);
+
 drop policy if exists "admin full" on public.order_items;
 create policy "admin full" on public.order_items for all using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
 
