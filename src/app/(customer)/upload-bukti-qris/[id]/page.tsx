@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Trash2 } from 'lucide-react';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -364,11 +364,11 @@ export default function UploadBuktiQrisPage() {
                 <p className="mt-1">Tekan tombol di bawah setelah yakin pembayaran sudah berhasil untuk menyelesaikan order.</p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3">
                 <button
                   type="button"
                   onClick={handleChangeProof}
-                  className="flex-1 py-3 rounded-lg border border-border bg-white text-text font-medium hover:bg-surface-variant transition-colors"
+                  className="py-3 rounded-lg border border-border bg-white text-text font-medium hover:bg-surface-variant transition-colors"
                 >
                   Ganti Bukti
                 </button>
@@ -376,7 +376,7 @@ export default function UploadBuktiQrisPage() {
                   type="button"
                   onClick={handleCancel}
                   disabled={cancelling}
-                  className="flex-1 py-3 rounded-lg border border-error bg-white text-error font-medium hover:bg-error/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="py-3 rounded-lg border border-error bg-white text-error font-medium hover:bg-error/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {cancelling ? (
                     <>
@@ -394,7 +394,7 @@ export default function UploadBuktiQrisPage() {
                   type="button"
                   onClick={handleConfirm}
                   disabled={confirming}
-                  className="flex-1 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {confirming ? (
                     <>
@@ -469,12 +469,12 @@ export default function UploadBuktiQrisPage() {
                 <p className="mt-3 text-sm text-error text-center">{error}</p>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3">
                 <button
                   type="button"
                   onClick={handleCancel}
                   disabled={cancelling}
-                  className="flex-1 py-3 rounded-lg border border-error bg-white text-error font-medium hover:bg-error/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="py-3 rounded-lg border border-error bg-white text-error font-medium hover:bg-error/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {cancelling ? (
                     <>
@@ -492,7 +492,7 @@ export default function UploadBuktiQrisPage() {
                   type="button"
                   onClick={handleUpload}
                   disabled={uploading || !selectedFile}
-                  className="flex-1 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {uploading ? (
                     <>
