@@ -3,15 +3,14 @@ import { createServerClient } from '@supabase/ssr';
 
 type CookieSetting = { name: string; value: string; options?: Record<string, unknown> };
 
-const publicRoutes = [
-  '/',
-  '/login',
-  '/register',
-  '/unauthorized',
-  '/api/checkout',
-  '/_next',
-  '/favicon.ico',
-  '/robots.txt',
+// Routes that require a logged-in customer. Everything else is publicly browsable.
+const protectedRoutes = [
+  '/keranjang',
+  '/checkout',
+  '/akun',
+  '/pesanan',
+  '/notifikasi',
+  '/upload-bukti-qris',
 ];
 
 const adminPublicRoutes = ['/admin/login'];
@@ -44,71 +43,67 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Check if route is public (for customers)
-  const isPublic = publicRoutes.some((route) =>
-    path === route || path.startsWith(route)
-  );
-
-  if (isPublic) {
-    return response;
-  }
-
-  // Check if route is admin public (login page)
-  const isAdminPublic = adminPublicRoutes.some((route) =>
-    path === route || path.startsWith(route)
+  // Admin login page is public
+  const isAdminPublic = adminPublicRoutes.some(
+    (route) => path === route || path.startsWith(route)
   );
 
   if (isAdminPublic) {
     return response;
   }
 
-  // Admin routes check
-  const isAdminRoute = adminRoutes.some((route) =>
-    path.startsWith(route)
-  );
+  const isAdminRoute = adminRoutes.some((route) => path.startsWith(route));
 
-  // Check if user is authenticated
-  if (!user) {
-    // Admin routes redirect to admin login, customer routes to customer login
-    const loginUrl = new URL(isAdminRoute ? '/admin/login' : '/login', request.url);
-    loginUrl.searchParams.set('redirectTo', path);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Check if user account is soft deleted (non-admin routes only)
-  if (!isAdminRoute) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('deleted_at')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.deleted_at) {
-      // Sign out and redirect to login with deleted message
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('deleted', 'true');
-      const response = NextResponse.redirect(loginUrl);
-      // Clear auth cookies
-      response.cookies.delete('sb-access-token');
-      response.cookies.delete('sb-refresh-token');
-      return response;
-    }
-  }
-
+  // Admin area
   if (isAdminRoute) {
-    // Check if admin has a profile with admin role, or create one if missing
-    const { data: profile, error } = await supabase
+    if (!user) {
+      const loginUrl = new URL('/admin/login', request.url);
+      loginUrl.searchParams.set('redirectTo', path);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    // If profile doesn't exist or role is admin, allow access
-    const isAdmin = profile?.role === 'admin';
-
-    if (!isAdmin) {
+    if (profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
+
+    return response;
+  }
+
+  // Customer routes
+  const isProtected = protectedRoutes.some(
+    (route) => path === route || path.startsWith(route)
+  );
+
+  if (!user) {
+    // Guests may browse public catalog pages; protected pages require login.
+    if (isProtected) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirectTo', path);
+      return NextResponse.redirect(loginUrl);
+    }
+    return response;
+  }
+
+  // Signed-in user: check soft-deleted account
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('deleted_at')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.deleted_at) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('deleted', 'true');
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    redirectResponse.cookies.delete('sb-access-token');
+    redirectResponse.cookies.delete('sb-refresh-token');
+    return redirectResponse;
   }
 
   return response;

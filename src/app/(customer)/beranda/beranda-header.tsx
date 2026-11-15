@@ -6,7 +6,7 @@ import { useState, FormEvent } from 'react';
 import { Bell, Search } from 'lucide-react';
 
 interface BerandaHeaderProps {
-  user: { user_metadata?: { full_name?: string }; email?: string };
+  user: { user_metadata?: { full_name?: string }; email?: string } | null;
 }
 
 export default function BerandaHeader({ user }: BerandaHeaderProps) {
@@ -19,6 +19,10 @@ export default function BerandaHeader({ user }: BerandaHeaderProps) {
       window.location.href = `/produk?search=${encodeURIComponent(query)}`;
     }
   };
+
+  const displayName = user
+    ? ((user.user_metadata as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0])
+    : 'Tamu';
 
   return (
     <>
@@ -34,12 +38,26 @@ export default function BerandaHeader({ user }: BerandaHeaderProps) {
           />
           <div>
             <p className="text-text-muted text-xs">Halo,</p>
-            <p className="text-base font-bold text-text">{(user.user_metadata as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0]}</p>
+            <p className="text-base font-bold text-text">{displayName}</p>
           </div>
         </div>
-        <Link href="/notifikasi" prefetch={true} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center" aria-label="Notifikasi">
-          <Bell className="w-5 h-5 text-white" />
-        </Link>
+        {user ? (
+          <Link
+            href="/notifikasi"
+            prefetch={true}
+            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center"
+            aria-label="Notifikasi"
+          >
+            <Bell className="w-5 h-5 text-white" />
+          </Link>
+        ) : (
+          <Link
+            href="/login?redirectTo=/beranda"
+            className="h-10 px-4 rounded-full border border-primary text-primary text-sm font-semibold flex items-center justify-center hover:bg-primary/10 transition-colors"
+          >
+            Masuk
+          </Link>
+        )}
       </header>
 
       <form onSubmit={handleSearch} className="relative mb-4">

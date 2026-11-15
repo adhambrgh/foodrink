@@ -34,8 +34,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const load = async () => {
     setLoading(true);
     const res = await getCart();
-    if (res.error) setError(res.error);
-    else setItems(res.items);
+    if (res.error && res.error !== 'Unauthorized') {
+      setError(res.error);
+    } else {
+      setError(undefined);
+      setItems(res.items);
+    }
     setLoading(false);
   };
 

@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { Product } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
+import { useSession } from '@/components/providers/supabase-provider';
+import { AuthPrompt } from '@/components/auth';
 
 interface ProductCardProps {
   product: Product;
@@ -23,11 +25,13 @@ export default function ProductCard({
   onFavoriteChange,
 }: ProductCardProps) {
   const router = useRouter();
+  const { session, loading: sessionLoading } = useSession();
   const [favorite, setFavorite] = useState(isFavorite);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [action, setAction] = useState<'cart' | 'buy' | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
 
   const stopCardNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,7 +49,12 @@ export default function ProductCard({
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     stopCardNavigation(e);
-    if (busy) return;
+    if (busy || sessionLoading) return;
+
+    if (!session) {
+      setAuthOpen(true);
+      return;
+    }
 
     const user = await requireUser();
     if (!user) return;
@@ -75,7 +84,11 @@ export default function ProductCard({
 
   const openQuantityPicker = (e: React.MouseEvent, nextAction: 'cart' | 'buy') => {
     stopCardNavigation(e);
-    if (busy || product.stock < 1) return;
+    if (busy || product.stock < 1 || sessionLoading) return;
+    if (!session) {
+      setAuthOpen(true);
+      return;
+    }
     setQuantity(1);
     setAction(nextAction);
     setMsg(null);
@@ -271,6 +284,12 @@ export default function ProductCard({
           {msg}
         </div>
       )}
+
+      <AuthPrompt
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        message="Tambah ke keranjang, simpan favorit, dan beli sekarang perlu akun."
+      />
     </>
   );
 }

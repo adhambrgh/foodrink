@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import { Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream } from 'lucide-react';
 import { getCategoriesWithCounts } from '@/lib/supabase/kategori';
 import { getBanners } from '@/app/admin/(dashboard)/banner/actions';
@@ -36,10 +35,6 @@ export default async function BerandaPage() {
   const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login?redirectTo=/beranda');
-  }
 
   const [categories, banners, { data: products }] = await Promise.all([
     getCategoriesWithCounts(),

@@ -16,6 +16,8 @@ import ReviewList from "@/components/customer/review-list";
 import StarRating from "@/components/customer/star-rating";
 import { formatCurrency } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
+import { useSession } from "@/components/providers/supabase-provider";
+import { AuthPrompt } from "@/components/auth";
 
 type ActionMode = "cart" | "buy";
 
@@ -32,6 +34,7 @@ type Product = {
 export default function ProductDetailPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const { session, loading: sessionLoading } = useSession();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +49,7 @@ export default function ProductDetailPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
     const checkFavorite = async () => {
@@ -65,11 +69,16 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const toggleFavorite = async () => {
-    if (favLoading) return;
+    if (favLoading || sessionLoading) return;
+
+    if (!session) {
+      setAuthOpen(true);
+      return;
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      router.push(`/login?redirectTo=/${id}`);
+      setAuthOpen(true);
       return;
     }
 
@@ -131,6 +140,15 @@ export default function ProductDetailPage() {
   const closeQuantityDialog = () => {
     setQuantityDialog(null);
     setQuantityInput("1");
+  };
+
+  const openQuantity = (mode: ActionMode) => {
+    if (sessionLoading) return;
+    if (!session) {
+      setAuthOpen(true);
+      return;
+    }
+    setQuantityDialog(mode);
   };
 
   const handleAddToCart = async (quantity: number) => {
@@ -384,14 +402,14 @@ export default function ProductDetailPage() {
       <div className="fixed inset-x-0 bottom-16 z-20 border-t border-[#eadbd3] bg-[#fff8f5]/95 px-4 py-3 shadow-[0_-8px_22px_rgba(83,49,33,0.08)] backdrop-blur-sm">
         <div className="mx-auto flex max-w-xl gap-3">
           <button
-            onClick={() => setQuantityDialog("cart")}
+            onClick={() => openQuantity("cart")}
             disabled={product.stock <= 0}
             className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-white transition hover:bg-primary-dark active:scale-[0.98] disabled:opacity-50"
           >
             <ShoppingBag className="h-4 w-4" /> Keranjang
           </button>
           <button
-            onClick={() => setQuantityDialog("buy")}
+            onClick={() => openQuantity("buy")}
             disabled={product.stock <= 0}
             className="h-11 flex-1 rounded-xl bg-[#2b211d] text-sm font-bold text-white shadow-[0_4px_12px_rgba(43,33,29,0.3)] transition hover:bg-[#1a1210] active:scale-[0.98] disabled:opacity-50"
           >
@@ -501,6 +519,11 @@ export default function ProductDetailPage() {
           </div>
         </div>
       )}
+      <AuthPrompt
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        message="Simpan favorit, tambah ke keranjang, dan beli sekarang perlu akun."
+      />
     </main>
   );
 }

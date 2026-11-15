@@ -24,12 +24,7 @@ export default function ProdukContent() {
     const fetchData = async () => {
       try {
         setError(null);
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError) throw authError;
-        if (!user) {
-          router.replace('/login?redirectTo=/produk');
-          return;
-        }
+        const { data: { user } } = await supabase.auth.getUser();
 
         const [categoriesRes, productsRes] = await Promise.all([
           supabase.from('categories').select('id, name, icon').eq('active', true).order('name'),
@@ -86,16 +81,18 @@ export default function ProdukContent() {
           }
 
           // Fetch favorites for current user
-          const { data: favData } = await supabase
-            .from('favorites')
-            .select('product_id')
-            .eq('user_id', user.id)
-            .in('product_id', productIds);
+          if (user) {
+            const { data: favData } = await supabase
+              .from('favorites')
+              .select('product_id')
+              .eq('user_id', user.id)
+              .in('product_id', productIds);
 
-          if (favData) {
-            const favMap: Record<string, boolean> = {};
-            favData.forEach(f => { favMap[f.product_id] = true; });
-            setFavorites(favMap);
+            if (favData) {
+              const favMap: Record<string, boolean> = {};
+              favData.forEach(f => { favMap[f.product_id] = true; });
+              setFavorites(favMap);
+            }
           }
         }
       } catch (err) {

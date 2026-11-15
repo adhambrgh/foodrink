@@ -3,3 +3,4 @@ export { AuthInput } from './AuthInput';
 export { AuthButton } from './AuthButton';
 export { OtpInput } from './OtpInput';
 export { AuthLogo } from './AuthLogo';
+export { AuthPrompt } from './AuthPrompt';
