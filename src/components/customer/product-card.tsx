@@ -230,6 +230,7 @@ export default function ProductCard({
                   // Replace leading 0 when typing
                   const input = event.target as HTMLInputElement;
                   if (input.value === '0' && event.key >= '1' && event.key <= '9') {
+                    event.preventDefault();
                     input.value = event.key;
                     setQuantity(Number(event.key));
                   }
