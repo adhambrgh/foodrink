@@ -194,15 +194,59 @@ export default function ProductCard({
             </div>
 
             <label htmlFor={`quantity-${product.id}`} className="text-sm font-medium text-text">Jumlah</label>
-            <input
-              id={`quantity-${product.id}`}
-              type="number"
-              min={1}
-              max={product.stock}
-              value={quantity}
-              onChange={event => setQuantity(Math.min(product.stock, Math.max(1, Number(event.target.value) || 1)))}
-              className="mt-2 h-12 w-full rounded-lg border border-black/10 bg-white px-3 text-center text-lg font-semibold text-text outline-none focus:border-primary"
-            />
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                disabled={busy || quantity <= 1}
+                aria-label="Kurangi jumlah"
+                className="h-12 w-12 rounded-lg border border-black/10 bg-white text-text font-semibold text-xl transition-colors hover:bg-surface-variant disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <input
+                id={`quantity-${product.id}`}
+                type="number"
+                min={1}
+                max={product.stock}
+                value={quantity}
+                onChange={event => {
+                  const raw = (event.target as HTMLInputElement).value;
+                  // Allow empty or 0 temporarily while typing
+                  if (raw === '' || raw === '0') {
+                    setQuantity(0);
+                    return;
+                  }
+                  const num = Math.min(product.stock, Math.max(1, Number(raw) || 1));
+                  setQuantity(num);
+                }}
+                onBlur={event => {
+                  // On blur, enforce min 1
+                  const raw = (event.target as HTMLInputElement).value;
+                  const num = Math.min(product.stock, Math.max(1, Number(raw) || 1));
+                  setQuantity(num);
+                }}
+                onKeyDown={event => {
+                  // Replace leading 0 when typing
+                  const input = event.target as HTMLInputElement;
+                  if (input.value === '0' && event.key >= '1' && event.key <= '9') {
+                    input.value = event.key;
+                    setQuantity(Number(event.key));
+                  }
+                }}
+                className="h-12 w-20 rounded-lg border border-black/10 bg-white px-3 text-center text-lg font-semibold text-text outline-none focus:border-primary"
+                inputMode="numeric"
+              />
+              <button
+                type="button"
+                onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                disabled={busy || quantity >= product.stock}
+                aria-label="Tambah jumlah"
+                className="h-12 w-12 rounded-lg border border-black/10 bg-white text-text font-semibold text-xl transition-colors hover:bg-surface-variant disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                +
+              </button>
+            </div>
 
             <button
               type="button"

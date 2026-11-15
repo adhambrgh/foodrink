@@ -436,16 +436,58 @@ export default function ProductDetailPage() {
             >
               Jumlah menu
             </label>
-            <input
-              id="quantity"
-              type="number"
-              value={quantityInput}
-              onChange={(event) => setQuantityInput(event.target.value)}
-              min="1"
-              max={product.stock}
-              autoFocus
-              className="mt-2 h-12 w-full rounded-lg border border-[#d9c5ba] bg-white px-4 text-center text-lg font-bold text-[#3a2b25] outline-none focus:border-[#a94716] focus:ring-2 focus:ring-[#a94716]/15"
-            />
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setQuantityInput(q => Math.max(1, Number(q) - 1).toString())}
+                disabled={Number(quantityInput) <= 1}
+                aria-label="Kurangi jumlah"
+                className="h-12 w-12 rounded-lg border border-[#d9c5ba] bg-white text-[#3a2b25] font-bold text-xl transition-colors hover:bg-[#f5efe8] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <input
+                id="quantity"
+                type="number"
+                value={quantityInput}
+                onChange={(event) => {
+                  const raw = (event.target as HTMLInputElement).value;
+                  // Allow empty or 0 temporarily while typing
+                  if (raw === '' || raw === '0') {
+                    setQuantityInput('0');
+                    return;
+                  }
+                  const num = Math.min(product.stock, Math.max(1, Number(raw) || 1));
+                  setQuantityInput(num.toString());
+                }}
+                onBlur={(event) => {
+                  // On blur, enforce min 1
+                  const raw = (event.target as HTMLInputElement).value;
+                  const num = Math.min(product.stock, Math.max(1, Number(raw) || 1));
+                  setQuantityInput(num.toString());
+                }}
+                onKeyDown={(event) => {
+                  // Replace leading 0 when typing
+                  const input = event.target as HTMLInputElement;
+                  if (input.value === '0' && event.key >= '1' && event.key <= '9') {
+                    input.value = event.key;
+                    setQuantityInput(event.key);
+                  }
+                }}
+                className="h-12 w-20 rounded-lg border border-[#d9c5ba] bg-white px-4 text-center text-lg font-bold text-[#3a2b25] outline-none focus:border-[#a94716] focus:ring-2 focus:ring-[#a94716]/15"
+                inputMode="numeric"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setQuantityInput(q => Math.min(product.stock, Number(q) + 1).toString())}
+                disabled={Number(quantityInput) >= product.stock}
+                aria-label="Tambah jumlah"
+                className="h-12 w-12 rounded-lg border border-[#d9c5ba] bg-white text-[#3a2b25] font-bold text-xl transition-colors hover:bg-[#f5efe8] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                +
+              </button>
+            </div>
             <p className="mt-2 text-xs text-[#8a756b]">
               Stok tersedia: {product.stock}
             </p>
