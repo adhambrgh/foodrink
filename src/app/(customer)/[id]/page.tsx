@@ -183,7 +183,7 @@ export default function ProductDetailPage() {
             height={80}
             className="rounded-full animate-pulse"
           />
-          <div className="w-12 h-12 rounded-full border-4 border-orange-500 border-t-transparent animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
         </div>
       </div>
     );
