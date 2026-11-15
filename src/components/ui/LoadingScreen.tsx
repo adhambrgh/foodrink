@@ -6,13 +6,17 @@ export default function LoadingScreen() {
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Image
-          src="/images/logo.jpeg"
-          alt="Foodrink"
-          width={80}
-          height={80}
-          className="rounded-full animate-pulse"
-        />
+        <div className="relative">
+          <div className="absolute inset-0 border-4 border-primary/20 rounded-full animate-spin-slow" />
+          <div className="absolute inset-0 border-4 border-primary/40 rounded-full border-t-transparent animate-spin" />
+          <Image
+            src="/images/logo.jpeg"
+            alt="Foodrink"
+            width={80}
+            height={80}
+            className="rounded-full relative z-10"
+          />
+        </div>
         <svg
           className="animate-spin text-primary w-8 h-8"
           xmlns="http://www.w3.org/2000/svg"
