@@ -36,25 +36,17 @@ function CheckoutContent() {
     payment_method: 'qris',
   });
 
-  // Auto-select buy_now item on load
+  // Auto-select buy_now item after cart loads
   useEffect(() => {
-    if (buyNowCartId) {
-      const item = items.find(i => i.cart_id === buyNowCartId);
-      if (item) {
-        setSelectedCartIds([buyNowCartId]);
-      } else {
-        // Item not loaded yet, wait for cart to load
-        const checkAndSelect = setInterval(() => {
-          const found = items.find(i => i.cart_id === buyNowCartId);
-          if (found) {
-            setSelectedCartIds([buyNowCartId]);
-            clearInterval(checkAndSelect);
-          }
-        }, 200);
-        return () => clearInterval(checkAndSelect);
-      }
+    if (!buyNowCartId) return;
+    if (cartLoading) return; // wait for cart to load
+
+    const item = items.find(i => i.cart_id === buyNowCartId);
+    if (item) {
+      setSelectedCartIds([buyNowCartId]);
     }
-  }, [buyNowCartId, items, setSelectedCartIds]);
+    // If item not found after cart loads, it might be a stale cart_id - let user select manually
+  }, [buyNowCartId, cartLoading, items, setSelectedCartIds]);
 
   const filteredItems = items.filter(item => selectedCartIds.includes(item.cart_id));
   const subtotal = filteredItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
@@ -85,6 +77,7 @@ function CheckoutContent() {
     fetchProfile();
   }, []);
 
+  // Only redirect to keranjang if no buy_now item AND cart is empty after loading
   useEffect(() => {
     if (cartLoading) return;
     if (items.length === 0 && !buyNowCartId) {
