@@ -150,7 +150,7 @@ export default function ProductDetailPage() {
     }
 
     setNotice(`${quantity} menu masuk ke keranjang.`);
-    return true;
+    return result.cart_id || false;
   };
 
   const submitQuantity = async () => {
@@ -167,9 +167,9 @@ export default function ProductDetailPage() {
     }
 
     const mode = quantityDialog;
-    const added = await handleAddToCart(quantity);
+    const cartId = await handleAddToCart(quantity);
     closeQuantityDialog();
-    if (added && mode === "buy") router.push("/keranjang");
+    if (cartId && mode === "buy") router.push(`/checkout?buy_now=${cartId}`);
   };
 
   if (loading) {
