@@ -99,7 +99,8 @@ export default function ProductCard({
 
     setAction(null);
     if (action === 'buy') {
-      router.push('/keranjang');
+      // Redirect to checkout with the new cart item
+      router.push(`/checkout?buy_now=${result.cart_id}`);
     } else {
       setMsg('Produk ditambahkan ke keranjang.');
     }

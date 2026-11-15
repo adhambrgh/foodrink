@@ -52,17 +52,19 @@ export async function addToCart(productId: string, qty: number = 1) {
     return { error: 'Stok tidak mencukupi' };
   }
 
-  const { error } = await supabase
+  const { data: upserted, error } = await supabase
     .from('carts')
     .upsert(
       { user_id: user.id, product_id: productId, qty },
       { onConflict: 'user_id,product_id' }
-    );
+    )
+    .select('id')
+    .single();
 
   if (error) return { error: error.message };
 
   revalidatePath('/keranjang');
-  return { success: true };
+  return { success: true, cart_id: upserted?.id };
 }
 
 export async function updateCartQty(cartId: string, qty: number) {

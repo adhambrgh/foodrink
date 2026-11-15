@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Send, MapPin, CheckCircle2 } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
@@ -21,7 +21,9 @@ interface CheckoutFormData {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, loading: cartLoading, selectedCartIds } = useCart();
+  const searchParams = useSearchParams();
+  const buyNowCartId = searchParams.get('buy_now');
+  const { items, loading: cartLoading, selectedCartIds, setSelectedCartIds } = useCart();
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -33,6 +35,26 @@ export default function CheckoutPage() {
     notes: '',
     payment_method: 'qris',
   });
+
+  // Auto-select buy_now item on load
+  useEffect(() => {
+    if (buyNowCartId) {
+      const item = items.find(i => i.cart_id === buyNowCartId);
+      if (item) {
+        setSelectedCartIds([buyNowCartId]);
+      } else {
+        // Item not loaded yet, wait for cart to load
+        const checkAndSelect = setInterval(() => {
+          const found = items.find(i => i.cart_id === buyNowCartId);
+          if (found) {
+            setSelectedCartIds([buyNowCartId]);
+            clearInterval(checkAndSelect);
+          }
+        }, 200);
+        return () => clearInterval(checkAndSelect);
+      }
+    }
+  }, [buyNowCartId, items, setSelectedCartIds]);
 
   const filteredItems = items.filter(item => selectedCartIds.includes(item.cart_id));
   const subtotal = filteredItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
@@ -64,10 +86,11 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (cartLoading || items.length === 0) {
+    if (cartLoading) return;
+    if (items.length === 0 && !buyNowCartId) {
       router.replace('/keranjang');
     }
-  }, [cartLoading, items, router]);
+  }, [cartLoading, items, router, buyNowCartId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
