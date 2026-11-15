@@ -103,7 +103,13 @@ export default function UploadBuktiQrisPage() {
     }
 
     setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    // HEIC/HEIF tidak bisa di-preview di browser mobile, hanya buat object URL untuk upload
+    const canPreview = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    if (canPreview) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null); // HEIC/HEIF - tidak preview, tapi tetap upload
+    }
     setError(null);
   };
 
@@ -348,11 +354,27 @@ export default function UploadBuktiQrisPage() {
 
               <div className="relative aspect-square rounded-lg overflow-hidden border border-border bg-gray-50">
                 {order.qris_proof_url && (
-                  <img
-                    src={order.qris_proof_url}
-                    alt="Bukti pembayaran"
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    <img
+                      src={order.qris_proof_url}
+                      alt="Bukti pembayaran"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // HEIC/HEIF files fail to load - show fallback
+                        e.currentTarget.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-full h-full flex flex-col items-center justify-center p-4 text-center';
+                        fallback.innerHTML = `
+                          <svg class="w-16 h-16 text-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p class="text-sm text-text-muted">Pratinjau tidak tersedia</p>
+                          <p class="text-xs text-text-muted">Format HEIC/HEIF tidak bisa ditampilkan</p>
+                        `;
+                        e.currentTarget.parentNode?.appendChild(fallback);
+                      }}
+                    />
+                  </>
                 )}
               </div>
 
@@ -422,15 +444,27 @@ export default function UploadBuktiQrisPage() {
                 Upload Bukti Pembayaran
               </h3>
 
-              {selectedFile && previewUrl ? (
+              {selectedFile ? (
                 // Preview selected file
                 <div className="space-y-3">
                   <div className="aspect-square rounded-lg overflow-hidden border border-border bg-gray-50 relative">
-                    <img
-                      src={previewUrl}
-                      alt="Preview bukti pembayaran"
-                      className="w-full h-full object-cover"
-                    />
+                    {previewUrl ? (
+                      <>
+                        <img
+                          src={previewUrl}
+                          alt="Preview bukti pembayaran"
+                          className="w-full h-full object-cover"
+                        />
+                      </>
+                    ) : (
+                      // Fallback for HEIC/HEIF files
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                        <ImageIcon className="w-16 h-16 text-text-muted mb-2" />
+                        <p className="text-sm text-text-muted">Pratinjau tidak tersedia</p>
+                        <p className="text-xs text-text-muted">Format HEIC/HEIF tidak bisa ditampilkan</p>
+                        <p className="text-xs text-text-muted mt-1">File tetap akan diupload</p>
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
