@@ -27,6 +27,11 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   const profile = await getProfile(user.id);
 
+  // Double protection: redirect non-admins to unauthorized page
+  if (profile?.role !== 'admin') {
+    redirect('/unauthorized');
+  }
+
   return (
     <div className={`${inter.variable} ${jakarta.variable} grid min-h-screen grid-cols-1 bg-surface text-foreground md:grid-cols-[14rem_minmax(0,1fr)]`}>
       {/* Sidebar kiri */}

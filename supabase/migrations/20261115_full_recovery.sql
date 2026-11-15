@@ -176,6 +176,18 @@ create policy "user select own" on public.orders for select using (auth.uid() = 
 drop policy if exists "user insert own" on public.orders;
 create policy "user insert own" on public.orders for insert with check (auth.uid() = user_id);
 
+-- Allow users to confirm their own QRIS payments (update payment_status to 'paid' and status to 'diproses')
+drop policy if exists "user update own qris" on public.orders;
+create policy "user update own qris" on public.orders
+for update using (auth.uid() = user_id)
+with check (
+  auth.uid() = user_id
+  and payment_method = 'qris'
+  and payment_status = 'paid'
+  and status = 'diproses'
+  and qris_verified_at is not null
+);
+
 drop policy if exists "admin full" on public.orders;
 create policy "admin full" on public.orders for all using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
 
