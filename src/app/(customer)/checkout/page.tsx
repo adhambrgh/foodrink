@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Send, MapPin, CheckCircle2 } from 'lucide-react';
@@ -19,7 +19,7 @@ interface CheckoutFormData {
   payment_method: 'qris' | 'cod';
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const buyNowCartId = searchParams.get('buy_now');
@@ -371,5 +371,13 @@ export default function CheckoutPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
