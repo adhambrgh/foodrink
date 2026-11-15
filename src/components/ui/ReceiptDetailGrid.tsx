@@ -10,7 +10,7 @@ interface ReceiptDetailGridProps {
 
 const METODE_LABELS: Record<string, { label: string; color: string }> = {
   cod: { label: 'Bayar di Tempat (COD)', color: 'bg-amber-100 text-amber-800' },
-  qris: { label: 'QRIS DANA', color: 'bg-blue-100 text-blue-800' },
+  qris: { label: 'QRIS', color: 'bg-blue-100 text-blue-800' },
 };
 
 export default function ReceiptDetailGrid({

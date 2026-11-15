@@ -11,24 +11,44 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient();
-  const thresholdMinutes = 15;
-  const thresholdTime = new Date(Date.now() - thresholdMinutes * 60 * 1000).toISOString();
+  const now = new Date();
+  
+  // Threshold 1: 15 minutes for orders with no proof uploaded (payment_status = 'pending')
+  const thresholdPending = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+  // Threshold 2: 30 minutes for orders with proof but no confirmation (payment_status = 'awaiting_confirmation')
+  const thresholdAwaiting = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
 
   try {
-    // Find abandoned awaiting_confirmation orders older than threshold
-    const { data: abandonedOrders, error: fetchError } = await supabase
+    // Find abandoned orders: 
+    // 1. status = 'menunggu_pembayaran' AND payment_status = 'pending' AND created_at > 15 min ago (no proof uploaded)
+    // 2. status = 'menunggu_pembayaran' AND payment_status = 'awaiting_confirmation' AND qris_proof_uploaded_at > 30 min ago (proof uploaded but not confirmed)
+    const { data: abandonedOrdersPending, error: fetchError1 } = await supabase
       .from('orders')
       .select('id, qris_proof_url, order_items(product_id, qty)')
       .eq('payment_method', 'qris')
-      .eq('payment_status', 'awaiting_confirmation')
-      .lt('qris_proof_uploaded_at', thresholdTime);
+      .eq('status', 'menunggu_pembayaran')
+      .eq('payment_status', 'pending')
+      .lt('created_at', thresholdPending);
 
-    if (fetchError) {
-      console.error('Fetch abandoned orders error:', fetchError);
+    const { data: abandonedOrdersAwaiting, error: fetchError2 } = await supabase
+      .from('orders')
+      .select('id, qris_proof_url, order_items(product_id, qty)')
+      .eq('payment_method', 'qris')
+      .eq('status', 'menunggu_pembayaran')
+      .eq('payment_status', 'awaiting_confirmation')
+      .lt('qris_proof_uploaded_at', thresholdAwaiting);
+
+    if (fetchError1 || fetchError2) {
+      console.error('Fetch abandoned orders error:', fetchError1 || fetchError2);
       return NextResponse.json({ error: 'Gagal mengambil data' }, { status: 500 });
     }
 
-    if (!abandonedOrders || abandonedOrders.length === 0) {
+    const abandonedOrders = [
+      ...(abandonedOrdersPending || []),
+      ...(abandonedOrdersAwaiting || [])
+    ];
+
+    if (abandonedOrders.length === 0) {
       return NextResponse.json({ 
         success: true, 
         cleaned: 0, 

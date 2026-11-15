@@ -95,7 +95,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
 
         <section className="rounded-xl border border-border bg-surface-card p-4">
           <h2 className="mb-3 font-semibold text-text">Pembayaran</h2>
-          <p className="text-sm text-text">Metode: <strong>{isCod ? 'COD' : isQris ? 'QRIS DANA' : 'Lainnya'}</strong></p>
+          <p className="text-sm text-text">Metode: <strong>{isCod ? 'COD' : isQris ? 'QRIS' : 'Lainnya'}</strong></p>
           <p className="mt-2 flex items-center gap-2 text-sm text-text">
             {isPaid ? <CheckCircle className="h-4 w-4 text-success" /> : <Clock className="h-4 w-4 text-yellow-500" />}
             {isPaid ? 'Sudah dibayar' : isCod ? 'Bayar saat pesanan selesai' : isQris ? 'Menunggu bukti pembayaran' : 'Menunggu pembayaran'}
@@ -115,7 +115,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
               <p className="text-xs text-text-muted mb-1">QRIS yang digunakan:</p>
               <img
                 src={qrisImageUrl}
-                alt="QRIS DANA"
+                alt="QRIS"
                 className="w-24 h-24 object-contain rounded border border-border"
               />
             </div>

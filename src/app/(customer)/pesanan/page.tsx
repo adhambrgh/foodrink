@@ -20,6 +20,7 @@ export default function PesananPage() {
         .from('orders')
         .select('id, total, status, payment_status, created_at, order_items (product_id, qty, price_snapshot)')
         .eq('user_id', user.id)
+        .neq('status', 'menunggu_pembayaran')
         .order('created_at', { ascending: false });
 
       setOrders(data || []);

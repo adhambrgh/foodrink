@@ -93,7 +93,7 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
             <FilterGroup label="Metode Pembayaran">
               {(['all', 'qris', 'cod'] as const).map((method) => (
                 <FilterButton key={method} active={paymentFilter === method} onClick={() => setPaymentFilter(method)}>
-                  {method === 'all' ? 'Semua' : method === 'qris' ? 'QRIS DANA' : 'COD'}
+                  {method === 'all' ? 'Semua' : method === 'qris' ? 'QRIS' : 'COD'}
                 </FilterButton>
               ))}
             </FilterGroup>

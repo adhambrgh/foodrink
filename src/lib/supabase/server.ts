@@ -12,8 +12,15 @@ export function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        // setAll removed — cookies cannot be set in Server Components in Next.js 14
-        // Use a Server Action or Route Handler if cookies need to be written
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch {
+            // Ignore if cookies cannot be set (e.g., Server Components)
+          }
+        },
       },
     }
   );

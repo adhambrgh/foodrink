@@ -182,6 +182,7 @@ export async function getOrders() {
       profiles (name, role),
       order_items (product_id, name_snapshot, price_snapshot, qty, subtotal)
     `)
+    .neq('status', 'menunggu_pembayaran')
     .order('created_at', { ascending: false });
 
   if (error) {

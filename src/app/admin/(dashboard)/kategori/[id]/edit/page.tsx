@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server-admin';
-import { getCategories as getActiveCategories } from '@/app/admin/menu/actions';
+import { getCategories as getActiveCategories } from '@/app/admin/(dashboard)/menu/actions';
 import { EditCategoryForm } from './edit-category-form';
 import { notFound } from 'next/navigation';
 

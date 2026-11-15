@@ -13,7 +13,7 @@ const navItems = [
   { href: '/admin/menu', label: 'Kelola Menu', icon: Menu },
   { href: '/admin/kategori', label: 'Kategori', icon: Tags },
   { href: '/admin/pesanan', label: 'Pesanan', icon: Receipt },
-  { href: '/admin/qris/upload', label: 'QRIS DANA', icon: QrCode },
+  { href: '/admin/qris/upload', label: 'QRIS', icon: QrCode },
   { href: '/admin/reviews', label: 'Review', icon: MessageSquare },
   { href: '/admin/banner', label: 'Banner', icon: MessageSquare },
   { href: '/admin/notifikasi', label: 'Notifikasi', icon: Bell },

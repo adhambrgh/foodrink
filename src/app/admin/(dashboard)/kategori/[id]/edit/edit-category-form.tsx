@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateCategory } from '@/app/admin/menu/actions';
+import { updateCategory } from '@/app/admin/(dashboard)/menu/actions';
 import { Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream } from 'lucide-react';
 
 type Category = { id: string; name: string; icon?: string; active?: boolean };

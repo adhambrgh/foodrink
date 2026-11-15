@@ -298,8 +298,8 @@ export default function CheckoutPage() {
                   className="w-4 h-4 text-primary"
                 />
                 <div>
-                  <span className="font-medium text-text">QRIS DANA</span>
-                  <p className="text-sm text-text-muted">Scan QR DANA, bayar, lalu upload bukti pembayaran</p>
+                  <span className="font-medium text-text">QRIS</span>
+                  <p className="text-sm text-text-muted">Scan QRIS, bayar, lalu upload bukti pembayaran</p>
                 </div>
               </label>
               <label className="flex items-center gap-3 p-3 border rounded-lg hover:bg-surface-variant cursor-pointer">

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Trash2 } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -39,42 +38,11 @@ export default function UploadBuktiQrisPage() {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [step, setStep] = useState<UploadStep | string>('upload');
   const [qrisImageUrl, setQrisImageUrl] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const receiptRef = useRef<HTMLDivElement>(null);
-
-  const handleSaveAsImage = useCallback(async () => {
-    const element = receiptRef.current;
-    if (!element) return;
-
-    setSaving(true);
-
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#FAF8F5',
-        logging: false,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-      });
-
-      const link = document.createElement('a');
-      link.download = `struk-${orderId.slice(0, 8)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-
-      alert('Struk disimpan ke galeri');
-    } catch (error) {
-      console.error('Save image error:', error);
-      alert('Gagal menyimpan gambar');
-    } finally {
-      setSaving(false);
-    }
-  }, [orderId]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -208,6 +176,37 @@ export default function UploadBuktiQrisPage() {
     setOrder(prev => prev ? { ...prev, qris_proof_url: null, payment_status: 'pending' } : null);
   };
 
+  const handleCancel = async () => {
+    if (!order) return;
+
+    const confirmCancel = window.confirm('Yakin ingin membatalkan pesanan ini? Pembayaran yang sudah dilakukan tidak bisa dikembalikan otomatis.');
+    if (!confirmCancel) return;
+
+    setCancelling(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/cancel-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderId }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        router.replace('/pesanan');
+      } else {
+        setError(data.error || 'Gagal membatalkan pesanan');
+      }
+    } catch {
+      setError('Terjadi kesalahan saat membatalkan');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -254,7 +253,7 @@ export default function UploadBuktiQrisPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-surface px-4 pt-safe pb-28">
-      <div id="receipt-content" ref={receiptRef} className="flex-1 w-full max-w-md mx-auto py-6">
+      <div id="receipt-content" className="flex-1 w-full max-w-md mx-auto py-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl font-bold text-text">
@@ -283,13 +282,13 @@ export default function UploadBuktiQrisPage() {
           <div className="bg-white rounded-xl border border-border p-4 mb-6">
             <h3 className="font-medium text-text mb-3 flex items-center gap-2">
               <QrCode className="w-5 h-5 text-primary" />
-              QRIS DANA
+              QRIS
             </h3>
             <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">
               {qrisImageUrl ? (
                 <img
                   src={qrisImageUrl}
-                  alt="QRIS DANA"
+                  alt="QRIS"
                   className="w-48 h-48 object-contain"
                 />
               ) : (
@@ -338,24 +337,6 @@ export default function UploadBuktiQrisPage() {
                   Belanja Lagi
                 </a>
               </div>
-              <button
-                type="button"
-                onClick={handleSaveAsImage}
-                disabled={saving}
-                className="mt-4 w-full py-3 border border-border bg-white text-text rounded-lg font-medium hover:bg-surface-variant transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto max-w-xs"
-              >
-                {saving ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                    <span>Menyimpan...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Simpan Gambar Struk</span>
-                  </>
-                )}
-              </button>
             </div>
           ) : (step === 'confirm' || hasProof) ? (
             // Confirmation step
@@ -393,6 +374,24 @@ export default function UploadBuktiQrisPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="flex-1 py-3 rounded-lg border border-error bg-white text-error font-medium hover:bg-error/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {cancelling ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Membatalkan...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      Batalkan Pesanan
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
                   onClick={handleConfirm}
                   disabled={confirming}
                   className="flex-1 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -410,25 +409,6 @@ export default function UploadBuktiQrisPage() {
                   )}
                 </button>
               </div>
-
-              <button
-                type="button"
-                onClick={handleSaveAsImage}
-                disabled={saving}
-                className="w-full py-3 border border-border bg-white text-text rounded-lg font-medium hover:bg-surface-variant transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {saving ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                    <span>Menyimpan...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Simpan Gambar Bukti</span>
-                  </>
-                )}
-              </button>
 
               {error && (
                 <p className="text-sm text-error text-center">{error}</p>
@@ -489,24 +469,44 @@ export default function UploadBuktiQrisPage() {
                 <p className="mt-3 text-sm text-error text-center">{error}</p>
               )}
 
-              <button
-                type="button"
-                onClick={handleUpload}
-                disabled={uploading || !selectedFile}
-                className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Mengupload...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    Upload & Lanjut ke Konfirmasi
-                  </>
-                )}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="flex-1 py-3 rounded-lg border border-error bg-white text-error font-medium hover:bg-error/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {cancelling ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Membatalkan...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      Batalkan Pesanan
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={uploading || !selectedFile}
+                  className="flex-1 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Mengupload...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Upload & Lanjut ke Konfirmasi
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
 

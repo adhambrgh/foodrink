@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Utensils, Coffee, Package, Pizza, Sandwich, Salad, IceCream } from 'lucide-react';
 import { getCategoriesWithCounts } from '@/lib/supabase/kategori';
-import { getBanners } from '@/app/admin/banner/actions';
+import { getBanners } from '@/app/admin/(dashboard)/banner/actions';
 import BerandaHeader from './beranda-header';
 
 export const metadata = {

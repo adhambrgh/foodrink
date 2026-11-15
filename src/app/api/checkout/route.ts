@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const orderId = generateOrderId();
   const isCod = payment_method === 'cod';
   const initialPaymentStatus = isCod ? 'paid' : 'pending';
-  const initialOrderStatus = isCod ? 'diproses' : 'pending';
+  const initialOrderStatus = isCod ? 'diproses' : 'menunggu_pembayaran';
 
   const { error: orderError } = await supabase
     .from('orders')

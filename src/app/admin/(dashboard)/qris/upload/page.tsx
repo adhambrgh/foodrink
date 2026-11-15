@@ -55,7 +55,7 @@ export default function AdminQrisUploadPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setSuccess('QRIS DANA berhasil diupload!');
+        setSuccess('QRIS berhasil diupload!');
         setCurrentQrisUrl(data.url);
         setSelectedFile(null);
         setPreviewUrl(null);
@@ -70,7 +70,7 @@ export default function AdminQrisUploadPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Hapus QRIS DANA saat ini?')) return;
+    if (!confirm('Hapus QRIS saat ini?')) return;
 
     setError(null);
     setSuccess(null);
@@ -84,7 +84,7 @@ export default function AdminQrisUploadPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setSuccess('QRIS DANA berhasil dihapus');
+        setSuccess('QRIS berhasil dihapus');
         setCurrentQrisUrl(null);
       } else {
         setError(data.error || 'Gagal hapus QRIS');
@@ -121,9 +121,9 @@ export default function AdminQrisUploadPage() {
       </Link>
 
       <div>
-        <h1 className="text-xl font-bold text-text">Upload QRIS DANA</h1>
+        <h1 className="text-xl font-bold text-text">Upload QRIS</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Upload gambar QR Code DANA Merchant (statis, digunakan untuk semua order QRIS).
+          Upload gambar QR Code Merchant (statis, digunakan untuk semua order QRIS).
           Hanya perlu diupload sekali.
         </p>
       </div>
@@ -133,12 +133,12 @@ export default function AdminQrisUploadPage() {
         <div className="bg-white rounded-xl border border-border p-4">
           <h3 className="font-medium text-text mb-3 flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-primary" />
-            QRIS DANA Saat Ini
+            QRIS Saat Ini
           </h3>
           <div className="flex items-center gap-4">
             <img
               src={currentQrisUrl}
-              alt="QRIS DANA"
+              alt="QRIS"
               className="w-32 h-32 object-contain rounded-lg border border-border"
             />
             <div className="flex-1">
@@ -213,7 +213,7 @@ export default function AdminQrisUploadPage() {
             />
             <div className="aspect-square max-w-xs rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors">
               <ImageIcon className="w-12 h-12 text-text-muted mb-2" />
-              <p className="text-text-muted text-center">Klik atau drag untuk upload QRIS DANA</p>
+              <p className="text-text-muted text-center">Klik atau drag untuk upload QRIS</p>
               <p className="text-xs text-text-muted mt-1">Max 5MB • JPG, PNG, WebP</p>
             </div>
           </label>
