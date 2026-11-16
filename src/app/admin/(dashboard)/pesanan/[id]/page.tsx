@@ -25,7 +25,8 @@ async function getCurrentQrisUrl(): Promise<string | null> {
   return (jpegExists && jpegExists.length > 0) ? jpegUrl : jpgUrl;
 }
 
-export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = createAdminClient();
   const { data: orderData } = await supabase
     .from('orders')
@@ -35,7 +36,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
       profiles(name, role),
       order_items(name_snapshot, qty, price_snapshot, subtotal)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!orderData) notFound();
