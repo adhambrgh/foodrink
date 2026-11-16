@@ -213,3 +213,6 @@ export async function getProductWithOptions(id: string) {
 
   return { ...product, options: options || [] };
 }
+
+// Alias untuk kompatibilitas hook
+export const addToCartWithOption = addToCart;
