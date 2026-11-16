@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Camera } from 'lucide-react';
+import heic2any from 'heic2any';
 
 interface OrderDetail {
   id: string;
@@ -90,7 +91,7 @@ export default function UploadBuktiQrisPage() {
     fetchQris();
   }, [orderId]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const file = input.files?.[0];
     if (!file) return;
@@ -114,10 +115,26 @@ export default function UploadBuktiQrisPage() {
     }
 
     setSelectedFile(file);
-    // Selalu coba buat preview URL - biarkan browser yang handle rendering
-    // Jika browser tidak bisa render (HEIC), onError di <img> akan handle fallback
-    setPreviewUrl(URL.createObjectURL(file));
     setError(null);
+
+    // Convert HEIC/HEIF to JPEG for preview
+    const isHeic = type === 'image/heic' || type === 'image/heif' || ext === 'heic' || ext === 'heif';
+    if (isHeic) {
+      try {
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.8,
+        });
+        const convertedFile = convertedBlob instanceof Array ? convertedBlob[0] : convertedBlob;
+        setPreviewUrl(URL.createObjectURL(convertedFile));
+      } catch {
+        // Fallback to original if conversion fails
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+    } else {
+      setPreviewUrl(URL.createObjectURL(file));
+    }
 
     // Reset agar memilih file yang sama lagi tetap memicu onChange
     input.value = '';
