@@ -380,12 +380,14 @@ export default function UploadBuktiQrisPage() {
                         e.currentTarget.style.display = 'none';
                         const fallback = document.createElement('div');
                         fallback.className = 'w-full h-full flex flex-col items-center justify-center p-4 text-center';
+                        const url = order.qris_proof_url || '';
+                        const isHeicUrl = url.includes('.heic') || url.includes('.heif') || url.includes('heic') || url.includes('heif');
                         fallback.innerHTML = `
                           <svg class="w-16 h-16 text-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2-2v12a2 2 0 002 2z" />
                           </svg>
-                          <p class="text-sm text-text-muted">Pratinjau tidak tersedia</p>
-                          <p class="text-xs text-text-muted">Format HEIC/HEIF tidak bisa ditampilkan</p>
+                          <p class="text-sm text-text-muted">${isHeicUrl ? 'Format HEIC/HEIF - silakan refresh halaman' : 'Pratinjau tidak tersedia'}</p>
+                          ${isHeicUrl ? '<p class="text-xs text-primary mt-1">Server sudah konversi ke JPEG, refresh untuk melihat preview</p>' : ''}
                         `;
                         e.currentTarget.parentNode?.appendChild(fallback);
                       }}
