@@ -90,7 +90,24 @@ export default function UploadBuktiQrisPage() {
     fetchQris();
   }, [orderId]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Detect HEIC/HEIF from magic bytes (file content)
+const detectHeicFromBytes = async (file: File): Promise<boolean> => {
+  const buffer = await file.slice(0, 12).arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  const toAscii = (start: number, end: number) =>
+    Array.from(bytes.slice(start, end)).map((b) => String.fromCharCode(b)).join('');
+  // HEIC/HEIF: "ftyp" at offset 4, brand at offset 8
+  if (bytes.length >= 12) {
+    const ftyp = toAscii(4, 8);
+    if (ftyp === 'ftyp') {
+      const brand = toAscii(8, 12);
+      return ['heic', 'heif', 'heix', 'hevc', 'mif1', 'msf1'].includes(brand);
+    }
+  }
+  return false;
+};
+
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const file = input.files?.[0];
     if (!file) return;
@@ -113,7 +130,8 @@ export default function UploadBuktiQrisPage() {
       return;
     }
 
-    const isHeic = type === 'image/heic' || type === 'image/heif' || ext === 'heic' || ext === 'heif';
+    // Detect HEIC from magic bytes (more reliable than MIME/extension)
+    const isHeic = await detectHeicFromBytes(file);
 
     setSelectedFile(file);
     setError(null);
