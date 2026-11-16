@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle } from 'lucide-react';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Camera } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -43,6 +43,9 @@ export default function UploadBuktiQrisPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [step, setStep] = useState<UploadStep | string>('upload');
   const [qrisImageUrl, setQrisImageUrl] = useState<string | null>(null);
+
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -88,29 +91,40 @@ export default function UploadBuktiQrisPage() {
   }, [orderId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
       setError('Ukuran file maksimal 5MB');
+      input.value = '';
       return;
     }
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
-    if (!validTypes.includes(file.type)) {
+    // Toleran terhadap mobile: cek MIME atau ekstensi (HEIC dari iOS, type bisa kosong)
+    const type = (file.type || '').toLowerCase();
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const validExt = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+    const isImage = type.startsWith('image/') || validExt.includes(ext);
+
+    if (!isImage) {
       setError('Tipe file tidak didukung (JPG, PNG, WebP, HEIC)');
+      input.value = '';
       return;
     }
 
     setSelectedFile(file);
-    // HEIC/HEIF tidak bisa di-preview di browser mobile, hanya buat object URL untuk upload
-    const canPreview = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    // HEIC/HEIF tidak bisa di-preview di banyak browser mobile, tetap upload
+    const canPreview = type === 'image/jpeg' || type === 'image/jpg' || type === 'image/png' || type === 'image/webp';
     if (canPreview) {
       setPreviewUrl(URL.createObjectURL(file));
     } else {
-      setPreviewUrl(null); // HEIC/HEIF - tidak preview, tapi tetap upload
+      setPreviewUrl(null);
     }
     setError(null);
+
+    // Reset agar memilih file yang sama lagi tetap memicu onChange
+    input.value = '';
   };
 
   const handleUpload = async () => {
@@ -482,21 +496,47 @@ export default function UploadBuktiQrisPage() {
                   <p className="text-xs text-text-muted text-center">File dipilih: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
                 </div>
               ) : (
-                // Upload drop zone
-                <label className="cursor-pointer">
+                // Upload picker (mobile friendly)
+                <div className="space-y-3">
                   <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <input
+                    ref={galleryInputRef}
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
                     className="hidden"
-                    id="proof-upload"
                   />
-                  <div className="aspect-square rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors">
+                  <div className="aspect-square rounded-lg border-2 border-dashed border-border bg-gray-50 flex flex-col items-center justify-center p-4 text-center">
                     <ImageIcon className="w-12 h-12 text-text-muted mb-2" />
-                    <p className="text-text-muted text-center">Klik atau drag untuk upload bukti pembayaran</p>
+                    <p className="text-text-muted">Upload bukti pembayaran</p>
                     <p className="text-xs text-text-muted mt-1">Max 5MB • JPG, PNG, WebP, HEIC</p>
+                    <div className="mt-4 flex w-full max-w-[220px] flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
+                      >
+                        <Camera className="h-4 w-4" />
+                        Ambil Foto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => galleryInputRef.current?.click()}
+                        className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-border bg-white text-sm font-semibold text-text transition-colors hover:bg-surface"
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                        Pilih dari Galeri
+                      </button>
+                    </div>
                   </div>
-                </label>
+                </div>
               )}
 
               {error && (
