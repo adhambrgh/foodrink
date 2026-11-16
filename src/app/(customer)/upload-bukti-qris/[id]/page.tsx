@@ -101,7 +101,7 @@ export default function UploadBuktiQrisPage() {
       return;
     }
 
-    // Toleran terhadap mobile: cek MIME atau ekstensi (HEIC dari iOS, type bisa kosong)
+    // Toleran terhadap mobile: cek MIME atau ekstensi
     const type = (file.type || '').toLowerCase();
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
     const validExt = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
@@ -114,13 +114,9 @@ export default function UploadBuktiQrisPage() {
     }
 
     setSelectedFile(file);
-    // HEIC/HEIF tidak bisa di-preview di banyak browser mobile, tetap upload
-    const canPreview = type === 'image/jpeg' || type === 'image/jpg' || type === 'image/png' || type === 'image/webp';
-    if (canPreview) {
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setPreviewUrl(null);
-    }
+    // Selalu coba buat preview URL - biarkan browser yang handle rendering
+    // Jika browser tidak bisa render (HEIC), onError di <img> akan handle fallback
+    setPreviewUrl(URL.createObjectURL(file));
     setError(null);
 
     // Reset agar memilih file yang sama lagi tetap memicu onChange
@@ -468,6 +464,25 @@ export default function UploadBuktiQrisPage() {
                           src={previewUrl}
                           alt="Preview bukti pembayaran"
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // HEIC/HEIF tidak bisa di-render di browser mobile
+                            // Prevent duplicate fallback
+                            if (e.currentTarget.dataset.fallbackShown === 'true') return;
+                            e.currentTarget.dataset.fallbackShown = 'true';
+
+                            e.currentTarget.style.display = 'none';
+                            const fallback = document.createElement('div');
+                            fallback.className = 'w-full h-full flex flex-col items-center justify-center p-4 text-center';
+                            fallback.innerHTML = `
+                              <svg class="w-16 h-16 text-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <p class="text-sm text-text-muted">Pratinjau tidak tersedia</p>
+                              <p class="text-xs text-text-muted">Format HEIC/HEIF tidak bisa ditampilkan</p>
+                              <p class="text-xs text-text-muted mt-1">File tetap akan diupload</p>
+                            `;
+                            e.currentTarget.parentNode?.appendChild(fallback);
+                          }}
                         />
                       </>
                     ) : (
