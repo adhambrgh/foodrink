@@ -481,98 +481,31 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
               </h3>
 
               {selectedFile ? (
-                // Preview selected file with HEIC handling
+                // Selected file info (list style - no preview)
                 <div className="space-y-3">
-                  {(() => {
-                    const type = (selectedFile.type || '').toLowerCase();
-                    const ext = selectedFile.name.split('.').pop()?.toLowerCase() || '';
-                    const isHeic = type === 'image/heic' || type === 'image/heif' || ext === 'heic' || ext === 'heif';
-
-                    if (isHeic) {
-                      // HEIC/HEIF - show info card, no preview attempt
-                      return (
-                        <div className="space-y-3">
-                          <div className="aspect-square rounded-lg border border-border bg-gray-50 flex flex-col items-center justify-center p-4 text-center">
-                            <ImageIcon className="w-16 h-16 text-text-muted mb-2" />
-                            <p className="text-sm text-text-muted">Format HEIC/HEIF</p>
-                            <p className="text-xs text-primary mt-1">Preview akan muncul setelah upload (server konversi ke JPEG)</p>
-                          </div>
-                          <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-gray-50">
-                            <ImageIcon className="w-12 h-12 text-text-muted flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-text truncate">{selectedFile.name}</p>
-                              <p className="text-xs text-text-muted mt-0.5">
-                                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • HEIC/HEIF
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedFile(null);
-                                setPreviewUrl(null);
-                              }}
-                              className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                              aria-label="Hapus file"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // JPG/PNG/WebP - show preview
-                    return (
-                      <div className="space-y-3">
-                        <div className="aspect-square rounded-lg overflow-hidden border border-border bg-gray-50 relative">
-                          {previewUrl ? (
-                            <>
-                              <img
-                                src={previewUrl}
-                                alt="Preview bukti pembayaran"
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  const fallback = document.createElement('div');
-                                  fallback.className = 'w-full h-full flex flex-col items-center justify-center p-4 text-center';
-                                  const ext = selectedFile.name.split('.').pop()?.toUpperCase() || 'FILE';
-                                  fallback.innerHTML = `
-                                    <svg class="w-16 h-16 text-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2-2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <p class="text-sm text-text-muted">Gagal memuat pratinjau ${ext}</p>
-                                    <p class="text-xs text-primary mt-1">Coba pilih file lain atau lanjutkan upload</p>
-                                  `;
-                                  e.currentTarget.parentNode?.appendChild(fallback);
-                                }}
-                              />
-                            </>
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
-                              <ImageIcon className="w-16 h-16 text-text-muted mb-2" />
-                              <p className="text-sm text-text-muted">Pratinjau tidak tersedia</p>
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedFile(null);
-                              setPreviewUrl(null);
-                            }}
-                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
-                            aria-label="Hapus file"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                        <p className="text-xs text-text-muted text-center">File dipilih: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
-                      </div>
-                    );
-                  })()}
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-gray-50">
+                    <ImageIcon className="w-12 h-12 text-text-muted flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text truncate">{selectedFile.name}</p>
+                      <p className="text-xs text-text-muted mt-0.5">
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                        {selectedFile.type && ` • ${selectedFile.type}`}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                      className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                      aria-label="Hapus file"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 // Upload picker (mobile friendly)
