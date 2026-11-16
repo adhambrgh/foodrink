@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingBag, Star, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Product } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
@@ -32,6 +32,26 @@ export default function ProductCard({
   const [quantity, setQuantity] = useState(1);
   const [action, setAction] = useState<'cart' | 'buy' | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [productOptions, setProductOptions] = useState<any[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+  // Fetch flavor options
+  useEffect(() => {
+    const fetchOptions = async () => {
+      const { data } = await supabase
+        .from('product_options')
+        .select('id, name, is_available, is_default')
+        .eq('product_id', product.id)
+        .eq('is_available', true)
+        .order('sort_order');
+      if (data && data.length > 0) {
+        setProductOptions(data);
+        const defaultOpt = data.find((o) => o.is_default) || data[0];
+        setSelectedOption(defaultOpt.id);
+      }
+    };
+    fetchOptions();
+  }, [product.id]);
 
   const stopCardNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -102,7 +122,7 @@ export default function ProductCard({
 
     setBusy(true);
     const { addToCart: add } = await import('@/lib/supabase/cart-actions');
-    const result = await add(product.id, quantity);
+    const result = await add(product.id, quantity, selectedOption || undefined);
     setBusy(false);
 
     if (result.error) {
@@ -210,6 +230,34 @@ export default function ProductCard({
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {/* Flavor Options */}
+            {productOptions.length > 0 && (
+              <div className="mb-4 space-y-2">
+                <label className="text-sm font-medium text-text">Pilih Rasa</label>
+                <div className="flex flex-wrap gap-2">
+                  {productOptions.map((opt: any) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setSelectedOption(opt.id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 text-sm font-medium transition ${
+                        selectedOption === opt.id
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-gray-200 text-text hover:border-primary/50'
+                      }`}
+                    >
+                      {opt.name}
+                      {opt.is_default && (
+                        <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                          Default
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <label htmlFor={`quantity-${product.id}`} className="text-sm font-medium text-text">Jumlah</label>
             <div className="mt-2 flex items-center justify-center gap-2">

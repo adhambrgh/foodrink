@@ -182,7 +182,7 @@ export default function ProductDetailPage() {
     }
 
     const { addToCart } = await import("@/lib/supabase/cart-actions");
-    const result = await addToCart(id, quantity);
+    const result = await addToCart(id, quantity, selectedOption || undefined);
     if (result.error) {
       setNotice(result.error);
       return false;
@@ -469,6 +469,37 @@ export default function ProductDetailPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {/* Flavor Options */}
+            {productOptions.length > 0 && (
+              <div className="mb-4 space-y-3">
+                <label className="text-xs font-bold uppercase tracking-[0.12em] text-[#8a756b]">
+                  Pilih Rasa
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {productOptions.map((opt: any) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setSelectedOption(opt.id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 text-sm font-medium transition ${
+                        selectedOption === opt.id
+                          ? 'border-[#a94716] bg-[#fff8f5] text-[#a94716]'
+                          : 'border-[#eadbd3] text-[#725e54] hover:border-[#a94716]/50'
+                      }`}
+                    >
+                      {opt.name}
+                      {opt.is_default && (
+                        <span className="text-xs bg-[#a94716]/10 text-[#a94716] px-1.5 py-0.5 rounded">
+                          Default
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <label
               className="text-xs font-bold uppercase tracking-[0.12em] text-[#8a756b]"
               htmlFor="quantity"
