@@ -4,6 +4,7 @@ import { useState, useRef, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, Trash2, Save } from 'lucide-react';
 import { createProduct } from '../actions';
+import { getCategories } from '../actions';
 
 type Category = { id: string; name: string };
 
@@ -14,7 +15,6 @@ type NewProductFormProps = {
 export function NewProductForm({ categories }: NewProductFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [data, setData] = useState({
     name: '',
     description: '',
@@ -22,11 +22,13 @@ export function NewProductForm({ categories }: NewProductFormProps) {
     stock: '',
     category_id: '',
     image_url: '',
+    options: '[]',
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [optionsError, setOptionsError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -42,12 +44,12 @@ export function NewProductForm({ categories }: NewProductFormProps) {
 
     try {
       const response = await fetch('/api/upload-image', { method: 'POST', body: uploadData });
-if (!response.ok) {
-  const err = await response.json();
-  alert('Upload gagal: ' + (err.error ?? 'unknown'));
-  setUploading(false);
-  return;
-}
+      if (!response.ok) {
+        const err = await response.json();
+        alert('Upload gagal: ' + (err.error ?? 'unknown'));
+        setUploading(false);
+        return;
+      }
       const result = await response.json();
 
       if (result.success && result.url) {
@@ -59,13 +61,41 @@ if (!response.ok) {
     } catch {
       alert('Gagal upload gambar');
     }
-
     setUploading(false);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setOptionsError(null);
+
+    // Parse options JSON
+    let options: any[] = [];
+    try {
+      options = JSON.parse(data.options || '[]');
+      // Validate: each option must have name
+      const valid = options.filter((o: any) => o && o.name && o.name.trim().length > 0);
+      if (valid.length !== options.length) {
+        setOptionsError('Setiap opsi harus memiliki nama.');
+        setLoading(false);
+        return;
+      }
+      // Only keep one default
+      let defaultUsed = false;
+      const validOptions = options.map((o: any) => {
+        if (o.is_default && !defaultUsed) {
+          defaultUsed = true;
+          return o;
+        }
+        return { ...o, is_default: false };
+      });
+      // Stringify back to JSON for state
+      data.options = JSON.stringify(validOptions);
+    } catch (e) {
+      setOptionsError('Format JSON opsi tidak valid.');
+      setLoading(false);
+      return;
+    }
 
     const fd = new FormData();
     fd.set('name', data.name);
@@ -74,6 +104,7 @@ if (!response.ok) {
     fd.set('stock', data.stock);
     fd.set('category_id', data.category_id);
     fd.set('image_url', data.image_url);
+    fd.set('options', data.options);
 
     const result = await createProduct(fd);
     setLoading(false);
@@ -101,6 +132,16 @@ if (!response.ok) {
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
             placeholder="Contoh: Nasi Goreng"
           />
+          {data.options && data.options.length > 0 && (
+            <p className="mt-1 text-xs text-text-muted">
+              Opsi saat ini: {data.options.length} rasa
+            </p>
+          )}
+          {optionsError && (
+            <p id="options-error" className="mt-1 text-sm font-medium text-error" role="alert">
+              {optionsError}
+            </p>
+          )}
         </div>
 
         <div>
@@ -145,7 +186,7 @@ if (!response.ok) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text mb-1.5">Gambar Produk</label>
+          <label htmlFor="image_url" className="block text-sm font-medium text-text mb-1.5">Gambar Produk</label>
           {imagePreview ? (
             <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
               <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -169,14 +210,28 @@ if (!response.ok) {
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
         </div>
 
+        <div>
+          <label htmlFor="options" className="block text-sm font-medium text-text mb-1.5">Rasa/Varian (JSON)</label>
+          <textarea
+            id="options" name="options" rows={4} value={data.options} onChange={handleChange}
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+            placeholder='[{"name":"Coklat","is_default":true,"is_available":true,"sort_order":0},{"name":"Vanila","is_default":false,"is_available":true,"sort_order":1}]'
+          />
+          {optionsError && (
+            <p id="options-error" className="mt-1 text-sm font-medium text-error" role="alert">
+              {optionsError}
+            </p>
+          )}
+        </div>
+
         <button
-          type="submit" disabled={loading || uploading}
+          type="submit" disabled={loading || uploading || !!optionsError}
           className="w-full bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
         >
           {loading || uploading ? (
             <span className="flex items-center gap-2">
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
-              {uploading ? 'Mengupload...' : 'Menyimpan...'}
+              {loading ? 'Menyimpan...' : 'Mengupload...'}
             </span>
           ) : 'Simpan'}
         </button>

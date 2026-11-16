@@ -50,6 +50,8 @@ export default function ProductDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [productOptions, setProductOptions] = useState<any[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   useEffect(() => {
     const checkFavorite = async () => {
@@ -136,6 +138,25 @@ export default function ProductDetailPage() {
       active = false;
     };
   }, [id]);
+
+  // Fetch flavor options after product loads
+  useEffect(() => {
+    if (!product) return;
+    const fetchOptions = async () => {
+      const { data } = await supabase
+        .from('product_options')
+        .select('id, name, is_available, is_default')
+        .eq('product_id', id)
+        .eq('is_available', true)
+        .order('sort_order');
+      if (data && data.length > 0) {
+        setProductOptions(data);
+        const defaultOpt = data.find((o) => o.is_default) || data[0];
+        setSelectedOption(defaultOpt.id);
+      }
+    };
+    fetchOptions();
+  }, [product, id]);
 
   const closeQuantityDialog = () => {
     setQuantityDialog(null);

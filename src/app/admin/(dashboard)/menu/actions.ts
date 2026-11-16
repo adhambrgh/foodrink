@@ -4,6 +4,46 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { revalidatePath } from 'next/cache';
 
+type OptionInput = { name: string; is_available: boolean; is_default: boolean };
+
+function parseOptions(formData: FormData): OptionInput[] {
+  const raw = formData.get('options');
+  if (!raw || typeof raw !== 'string') return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const options = parsed
+      .map((o: any) => ({
+        name: typeof o?.name === 'string' ? o.name.trim() : '',
+        is_available: o?.is_available !== false,
+        is_default: !!o?.is_default,
+      }))
+      .filter((o) => o.name.length > 0);
+
+    // Only allow a single default option
+    let defaultUsed = false;
+    return options.map((o) => {
+      if (o.is_default && !defaultUsed) {
+        defaultUsed = true;
+        return o;
+      }
+      return { ...o, is_default: false };
+    });
+  } catch {
+    return [];
+  }
+}
+
+function buildOptionRows(productId: string, options: OptionInput[]) {
+  return options.map((o, index) => ({
+    product_id: productId,
+    name: o.name,
+    is_available: o.is_available,
+    is_default: o.is_default,
+    sort_order: index,
+  }));
+}
+
 export async function createProduct(formData: FormData) {
   const supabase = createAdminClient();
 
@@ -13,26 +53,43 @@ export async function createProduct(formData: FormData) {
   const stock = parseInt(formData.get('stock') as string);
   const category_id = formData.get('category_id') as string;
   const image_url = formData.get('image_url') as string | null;
+  const options = parseOptions(formData);
 
   if (!name || !price || !stock || !category_id) {
     return { error: 'Nama, harga, stok, dan kategori wajib diisi' };
   }
 
-  const { error } = await supabase.from('products').insert({
-    name,
-    description,
-    price,
-    stock,
-    category_id,
-    image_url,
-    is_active: true,
-  });
+  const { data: created, error } = await supabase
+    .from('products')
+    .insert({
+      name,
+      description,
+      price,
+      stock,
+      category_id,
+      image_url,
+      is_active: true,
+    })
+    .select('id')
+    .single();
 
-  if (error) {
-    return { error: error.message };
+  if (error || !created) {
+    return { error: error?.message || 'Gagal membuat produk' };
+  }
+
+  if (options.length > 0) {
+    const { error: optError } = await supabase
+      .from('product_options')
+      .insert(buildOptionRows(created.id, options));
+
+    if (optError) {
+      return { error: optError.message };
+    }
   }
 
   revalidatePath('/admin/menu');
+  revalidatePath('/produk');
+  revalidatePath('/beranda');
   return { success: true };
 }
 
@@ -45,6 +102,7 @@ export async function updateProduct(formData: FormData, id: string) {
   const stock = parseInt(formData.get('stock') as string);
   const category_id = formData.get('category_id') as string;
   const image_url = formData.get('image_url') as string | null;
+  const options = parseOptions(formData);
 
   if (!name || !price || !stock || !category_id) {
     return { error: 'Nama, harga, stok, dan kategori wajib diisi' };
@@ -59,8 +117,23 @@ export async function updateProduct(formData: FormData, id: string) {
     return { error: error.message };
   }
 
+  // Replace flavor options
+  await supabase.from('product_options').delete().eq('product_id', id);
+  if (options.length > 0) {
+    const { error: optError } = await supabase
+      .from('product_options')
+      .insert(buildOptionRows(id, options));
+
+    if (optError) {
+      return { error: optError.message };
+    }
+  }
+
   revalidatePath('/admin/menu');
   revalidatePath(`/admin/menu/${id}/edit`);
+  revalidatePath('/produk');
+  revalidatePath('/beranda');
+  revalidatePath(`/${id}`);
   return { success: true };
 }
 
@@ -117,7 +190,15 @@ export async function getProduct(id: string) {
     .eq('id', id)
     .single();
 
-  return product;
+  if (!product) return product;
+
+  const { data: options } = await supabase
+    .from('product_options')
+    .select('id, name, is_available, is_default, sort_order')
+    .eq('product_id', id)
+    .order('sort_order');
+
+  return { ...product, options: options || [] };
 }
 
 export async function createCategory(formData: FormData) {
