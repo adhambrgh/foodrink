@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import sharp from 'sharp';
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -50,18 +51,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Tipe file tidak didukung' }, { status: 400 });
   }
 
-  // Upload to Supabase Storage
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const fileName = `${orderId}-${Date.now()}.${fileExt}`;
-  const filePath = `${user.id}/${fileName}`;
+  // Convert HEIC/HEIF to JPEG server-side for universal preview
+  let processedBuffer: Buffer;
+  let finalContentType: string;
+  let finalExt: string;
 
   const arrayBuffer = await file.arrayBuffer();
-  const buffer = new Uint8Array(arrayBuffer);
+  const inputBuffer = Buffer.from(arrayBuffer);
+
+  const isHeic = file.type === 'image/heic' || file.type === 'image/heif';
+
+  if (isHeic) {
+    try {
+      processedBuffer = await sharp(inputBuffer)
+        .jpeg({ quality: 85, mozjpeg: true })
+        .toBuffer();
+      finalContentType = 'image/jpeg';
+      finalExt = 'jpg';
+    } catch (err) {
+      console.error('HEIC conversion failed, using original:', err);
+      processedBuffer = inputBuffer;
+      finalContentType = file.type;
+      finalExt = file.name.split('.').pop() || 'heic';
+    }
+  } else {
+    processedBuffer = inputBuffer;
+    finalContentType = file.type;
+    finalExt = file.name.split('.').pop() || 'jpg';
+  }
+
+  // Upload to Supabase Storage
+  const fileName = `${orderId}-${Date.now()}.${finalExt}`;
+  const filePath = `${user.id}/${fileName}`;
 
   const { error: uploadError } = await supabase.storage
     .from('qris-proofs')
-    .upload(filePath, buffer, {
-      contentType: file.type,
+    .upload(filePath, processedBuffer, {
+      contentType: finalContentType,
       upsert: false,
     });
 
