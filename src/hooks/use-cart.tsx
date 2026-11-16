@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { addToCart, addToCartWithOption, getCart, removeFromCart, clearCart, refreshCart } from '@/lib/supabase/cart-actions';
+import { addToCart, addToCartWithOption, getCart, removeFromCart, clearCart, updateCartQty } from '@/lib/supabase/cart-actions';
 
 interface CartItem {
   cart_id: string;

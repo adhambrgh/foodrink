@@ -50,7 +50,7 @@ export async function createServerClient() {
 
 export async function getCart(): Promise<{ items: CartItem[]; error: string | null }> {
   'use server';
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { items: [], error: 'Unauthorized' };
@@ -80,7 +80,7 @@ export async function getCart(): Promise<{ items: CartItem[]; error: string | nu
 
 export async function addToCart(productId: string, qty: number = 1, optionId?: string) {
   'use server';
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -124,7 +124,7 @@ export async function addToCart(productId: string, qty: number = 1, optionId?: s
 
 export async function updateCartQty(cartId: string, qty: number) {
   'use server';
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -145,7 +145,7 @@ export async function updateCartQty(cartId: string, qty: number) {
 
 export async function removeFromCart(cartId: string) {
   'use server';
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -164,7 +164,7 @@ export async function removeFromCart(cartId: string) {
 
 export async function clearCart() {
   'use server';
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -182,7 +182,7 @@ export async function clearCart() {
 
 async function getOptionName(optionId: string): Promise<string> {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const { data } = await supabase
       .from('product_options')
       .select('name')
