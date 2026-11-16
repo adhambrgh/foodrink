@@ -94,13 +94,21 @@ function CheckoutContent() {
     e.preventDefault();
     setLoading(true);
 
+    // Prepare items with option information for API
+    const itemsForApi = filteredItems.map(i => ({
+      product_id: i.product_id,
+      qty: i.qty,
+      option_id: i.option_id || null,
+      option_name: i.option_name || null,
+    }));
+
     // Create order in database
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        items: filteredItems.map(i => ({ product_id: i.product_id, qty: i.qty })),
+        items: itemsForApi,
         address: formData.delivery_method === 'antar_ke_kelas'
           ? `${formData.recipient_name} - Kelas ${formData.grade} ${formData.major} - Ruangan ${formData.room}`
           : 'Ambil sendiri',

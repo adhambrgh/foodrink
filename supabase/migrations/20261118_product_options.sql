@@ -20,7 +20,8 @@ drop policy if exists "public read product options" on public.product_options;
 create policy "public read product options" on public.product_options
   for select using (is_available = true);
 
-drop policy if exists "admin full product options" on public.product_options;
+drop policy if exists "admi
+n full product options" on public.product_options;
 create policy "admin full product options" on public.product_options
   for all using (exists (
     select 1 from public.profiles where id = auth.uid() and role = 'admin'

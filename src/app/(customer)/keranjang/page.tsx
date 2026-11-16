@@ -187,6 +187,11 @@ return (
                       </button>
                     </div>
                     <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-text-muted">{item.product.description || 'Menu pilihan Foodrink'}</p>
+                    {item.option_name && (
+                      <p className="mt-1 text-xs text-text-muted">
+                        Rasa: {item.option_name}
+                      </p>
+                    )}
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <span className="text-sm font-bold text-text">{formatCurrency(item.product.price * item.qty)}</span>
                       <QuantityStepper

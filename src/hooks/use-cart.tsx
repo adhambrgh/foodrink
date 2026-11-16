@@ -1,13 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { addToCart, getCart, removeFromCart, updateCartQty, clearCart } from '@/lib/supabase/cart-actions';
+import { addToCart, addToCartWithOption, getCart, removeFromCart, clearCart, refreshCart } from '@/lib/supabase/cart-actions';
 
 interface CartItem {
   cart_id: string;
   product_id: string;
   qty: number;
-  product: any; // simplified, use proper type if needed
+  option_id?: string;
+  option_name?: string;
+  option_signature: string;
+  product: any;
 }
 
 interface CartContextValue {
@@ -17,6 +20,7 @@ interface CartContextValue {
   selectedCartIds: string[];
   setSelectedCartIds: (ids: string[] | ((prev: string[]) => string[])) => void;
   add: (productId: string, qty?: number) => Promise<void>;
+  addWithOption: (productId: string, qty: number, optionId?: string) => Promise<void>;
   update: (cartId: string, qty: number) => Promise<void>;
   remove: (cartId: string) => Promise<void>;
   clear: () => Promise<void>;
@@ -34,11 +38,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const load = async () => {
     setLoading(true);
     const res = await getCart();
-    if (res.error && res.error !== 'Unauthorized') {
+    if (res.error) {
       setError(res.error);
+      setItems([]);
     } else {
-      setError(undefined);
       setItems(res.items);
+      setError(undefined);
     }
     setLoading(false);
   };
@@ -49,6 +54,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = async (productId: string, qty: number = 1) => {
     const res = await addToCart(productId, qty);
+    if (res.error) setError(res.error);
+    else await load();
+  };
+
+  const addWithOption = async (productId: string, qty: number, optionId?: string) => {
+    const res = await addToCartWithOption(productId, qty, optionId);
     if (res.error) setError(res.error);
     else await load();
   };
@@ -71,15 +82,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     else await load();
   };
 
+  const refresh = async () => {
+    await load();
+  };
+
   return (
-    <CartContext.Provider value={{ items, loading, error, selectedCartIds, setSelectedCartIds, add, update, remove, clear, refresh: load }}>
+    <CartContext.Provider value={{ items, loading, error, selectedCartIds, setSelectedCartIds, add, addWithOption, update, remove, clear, refresh }}>
       {children}
     </CartContext.Provider>
   );
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider');
-  return ctx;
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within CartProvider');
+  return context;
 }

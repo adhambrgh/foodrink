@@ -2,9 +2,52 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { Product } from '@/lib/types';
 
-export async function getCart() {
+export interface CartItem {
+  cart_id: string;
+  product_id: string;
+  qty: number;
+  product: any;
+  option_id?: string;
+  option_name?: string;
+  option_signature: string;
+}
+
+export interface CartState {
+  items: CartItem[];
+  loading: boolean;
+  error?: string;
+  selectedCartIds: string[];
+  setSelectedCartIds: (ids: string[] | ((prev: string[]) => string[])) => void;
+  add: (productId: string, qty?: number) => Promise<void>;
+  addWithOption: (productId: string, qty: number, optionId?: string) => Promise<void>;
+  update: (cartId: string, qty: number) => Promise<void>;
+  remove: (cartId: string) => Promise<void>;
+  clear: () => Promise<void>;
+  refresh: () => Promise<void>;
+}
+
+export async function createClient() {
+  const { createServerClient } = await import('@supabase/ssr');
+  const { cookies } = await import('next/headers');
+  const cookieStore = cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet: any[]) {
+          // No-op in server action context
+        },
+      },
+    }
+  );
+}
+
+export async function getCart(): Promise<{ items: CartItem[]; error: string | null }> {
   'use server';
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -14,8 +57,8 @@ export async function getCart() {
   const { data, error } = await supabase
     .from('carts')
     .select(`
-      id, qty, product_id,
-      products (id, name, description, price, image_url, stock, is_active)
+      id, qty, product_id, option_id, option_name, option_signature,
+      products (id, name, price, is_active, stock)
     `)
     .eq('user_id', user.id);
 
@@ -25,38 +68,49 @@ export async function getCart() {
     cart_id: row.id,
     product_id: row.product_id,
     qty: row.qty,
-    product: row.products as Product,
+    option_id: row.option_id,
+    option_name: row.option_name,
+    option_signature: row.option_signature || '',
+    product: row.products as any,
   }));
 
   return { items, error: null };
 }
 
-export async function addToCart(productId: string, qty: number = 1) {
+export async function addToCart(productId: string, qty: number = 1, optionId?: string) {
   'use server';
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
 
+  // Validate product exists and is active
   const { data: product } = await supabase
     .from('products')
     .select('id, stock, is_active')
     .eq('id', productId)
     .single();
 
-  if (!product || !product.is_active) {
-    return { error: 'Produk tidak tersedia' };
-  }
+  if (!product || !product.is_active) return { error: 'Produk tidak tersedia' };
+  if (product.stock < qty) return { error: 'Stok tidak mencukupi' };
 
-  if (product.stock < qty) {
-    return { error: 'Stok tidak mencukupi' };
-  }
+  // Determine option signature for uniqueness
+  // If optionId provided and valid, use it; otherwise use empty string
+  const signature = optionId ? optionId : '';
 
-  const { data: upserted, error } = await supabase
+  // Upsert with option signature uniqueness
+  const { data, error } = await supabase
     .from('carts')
     .upsert(
-      { user_id: user.id, product_id: productId, qty },
-      { onConflict: 'user_id,product_id' }
+      {
+        user_id: user.id,
+        product_id: productId,
+        qty,
+        option_id: optionId,
+        option_name: optionId ? 'Rasa: ' + (await getOptionName(optionId)) : '',
+        option_signature: signature,
+      },
+      { onConflict: 'user_id,product_id,option_signature' }
     )
     .select('id')
     .single();
@@ -64,7 +118,7 @@ export async function addToCart(productId: string, qty: number = 1) {
   if (error) return { error: error.message };
 
   revalidatePath('/keranjang');
-  return { success: true, cart_id: upserted?.id };
+  return { success: true, cart_id: data?.id };
 }
 
 export async function updateCartQty(cartId: string, qty: number) {
@@ -74,23 +128,7 @@ export async function updateCartQty(cartId: string, qty: number) {
 
   if (!user) return { error: 'Unauthorized' };
 
-  if (qty < 1) {
-    return { error: 'Qty minimal 1' };
-  }
-
-  const { data: cartItem } = await supabase
-    .from('carts')
-    .select('product_id, products(stock)')
-    .eq('id', cartId)
-    .eq('user_id', user.id)
-    .single();
-
-  if (!cartItem) return { error: 'Item tidak ditemukan' };
-
-  const stock = (cartItem.products as any)?.stock || 0;
-  if (stock < qty) {
-    return { error: 'Stok tidak mencukupi' };
-  }
+  if (qty < 1) return { error: 'Qty minimal 1' };
 
   const { error } = await supabase
     .from('carts')
@@ -139,4 +177,38 @@ export async function clearCart() {
 
   revalidatePath('/keranjang');
   return { success: true };
+}
+
+async function getOptionName(optionId: string): Promise<string> {
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('product_options')
+      .select('name')
+      .eq('id', optionId)
+      .single();
+    return data?.name || '';
+  } catch {
+    return '';
+  }
+}
+
+// Helper for admin: get product with options
+export async function getProductWithOptions(id: string) {
+  'use server';
+  const supabase = createAdminClient();
+  const { data: product } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  const { data: options } = await supabase
+    .from('product_options')
+    .select('id, name, is_available, is_default')
+    .eq('product_id', id)
+    .eq('is_available', true)
+    .order('sort_order');
+
+  return { ...product, options: options || [] };
 }

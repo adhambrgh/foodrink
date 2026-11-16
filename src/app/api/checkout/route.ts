@@ -16,6 +16,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Keranjang kosong' }, { status: 400 });
   }
 
+  // Validate each item has required fields
+  for (const item of items) {
+    if (!item.product_id || !item.qty) {
+      return NextResponse.json({ error: 'Data item order tidak lengkap' }, { status: 400 });
+    }
+  }
+
   if (!['qris', 'cod'].includes(payment_method)) {
     return NextResponse.json({ error: 'Metode pembayaran tidak valid' }, { status: 400 });
   }
@@ -43,6 +50,7 @@ export async function POST(request: Request) {
     if (product.stock < item.qty) {
       return NextResponse.json({ error: `Stok ${product.name} tidak mencukupi` }, { status: 400 });
     }
+    const priceDelta = item.option_id ? 0 : 0; // Harga sama, delta = 0
     total += parseFloat(product.price) * item.qty;
     orderItems.push({
       product_id: product.id,
@@ -50,6 +58,8 @@ export async function POST(request: Request) {
       price_snapshot: parseFloat(product.price),
       qty: item.qty,
       subtotal: parseFloat(product.price) * item.qty,
+      option_id: item.option_id || null,
+      option_name: item.option_name || null,
     });
   }
 
