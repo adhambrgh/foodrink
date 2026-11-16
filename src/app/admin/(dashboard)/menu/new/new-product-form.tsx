@@ -1,12 +1,18 @@
 'use client';
 
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Trash2, Save } from 'lucide-react';
+import { Upload, Trash2, Plus } from 'lucide-react';
 import { createProduct } from '../actions';
-import { getCategories } from '../actions';
 
 type Category = { id: string; name: string };
+
+type Option = {
+  id?: string;
+  name: string;
+  is_available: boolean;
+  is_default: boolean;
+};
 
 type NewProductFormProps = {
   categories: Category[];
@@ -22,13 +28,13 @@ export function NewProductForm({ categories }: NewProductFormProps) {
     stock: '',
     category_id: '',
     image_url: '',
-    options: '[]',
   });
-
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [optionsError, setOptionsError] = useState<string | null>(null);
+  const [options, setOptions] = useState<Option[]>([
+    { name: '', is_available: true, is_default: true },
+  ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -64,47 +70,35 @@ export function NewProductForm({ categories }: NewProductFormProps) {
     setUploading(false);
   };
 
+  const addOption = () => {
+    setOptions([...options, { name: '', is_available: true, is_default: options.length === 0 }]);
+  };
+
+  const removeOption = (index: number) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
+
+  const updateOption = (index: number, field: keyof Option, value: any) => {
+    setOptions(options.map((o, i) => i === index ? { ...o, [field]: value } : o));
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setOptionsError(null);
 
-    // Parse options JSON
-    let options: any[] = [];
-    try {
-      options = JSON.parse(data.options || '[]');
-      // Validate: each option must have name
-      const valid = options.filter((o: any) => o && o.name && o.name.trim().length > 0);
-      if (valid.length !== options.length) {
-        setOptionsError('Setiap opsi harus memiliki nama.');
-        setLoading(false);
-        return;
-      }
-      // Only keep one default
-      let defaultUsed = false;
-      const validOptions = options.map((o: any) => {
-        if (o.is_default && !defaultUsed) {
-          defaultUsed = true;
-          return o;
-        }
-        return { ...o, is_default: false };
-      });
-      // Stringify back to JSON for state
-      data.options = JSON.stringify(validOptions);
-    } catch (e) {
-      setOptionsError('Format JSON opsi tidak valid.');
+    const validOptions = options
+      .map((o) => ({ ...o, name: o.name.trim() }))
+      .filter((o) => o.name.length > 0);
+
+    if (validOptions.length !== options.length && options.length > 0) {
+      alert('Setiap opsi harus memiliki nama.');
       setLoading(false);
       return;
     }
 
     const fd = new FormData();
-    fd.set('name', data.name);
-    fd.set('description', data.description);
-    fd.set('price', data.price);
-    fd.set('stock', data.stock);
-    fd.set('category_id', data.category_id);
-    fd.set('image_url', data.image_url);
-    fd.set('options', data.options);
+    Object.entries(data).forEach(([key, value]) => fd.set(key, value));
+    fd.set('options', JSON.stringify(validOptions));
 
     const result = await createProduct(fd);
     setLoading(false);
@@ -132,16 +126,6 @@ export function NewProductForm({ categories }: NewProductFormProps) {
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
             placeholder="Contoh: Nasi Goreng"
           />
-          {data.options && data.options.length > 0 && (
-            <p className="mt-1 text-xs text-text-muted">
-              Opsi saat ini: {data.options.length} rasa
-            </p>
-          )}
-          {optionsError && (
-            <p id="options-error" className="mt-1 text-sm font-medium text-error" role="alert">
-              {optionsError}
-            </p>
-          )}
         </div>
 
         <div>
@@ -185,6 +169,62 @@ export function NewProductForm({ categories }: NewProductFormProps) {
           </select>
         </div>
 
+        {/* Variants / Flavor Options */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-text">Varian Rasa</label>
+            <button type="button" onClick={addOption} className="text-sm text-primary hover:underline flex items-center gap-1">
+              <Plus className="w-4 h-4" /> Tambah
+            </button>
+          </div>
+          {options.length === 0 ? (
+            <p className="text-sm text-text-muted text-center py-4 border-2 border-dashed border-border rounded-lg">
+              Belum ada varian. Produk ini tidak memiliki pilihan rasa.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {options.map((opt, idx) => (
+                <div key={idx} className="flex items-center gap-2 p-3 bg-surface border border-border rounded-lg">
+                  <input
+                    type="text"
+                    value={opt.name}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOption(idx, 'name', e.target.value)}
+                    placeholder="Nama rasa (contoh: Coklat, Vanilla)"
+                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  />
+                  <label className="flex items-center gap-1.5 text-sm text-text">
+                    <input
+                      type="checkbox"
+                      checked={opt.is_available}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateOption(idx, 'is_available', e.target.checked)}
+                      className="w-4 h-4 text-primary"
+                    />
+                    Tersedia
+                  </label>
+                  <label className="flex items-center gap-1.5 text-sm text-text">
+                    <input
+                      type="radio"
+                      name="default_option"
+                      checked={opt.is_default}
+                      onChange={() => setOptions(options.map((o, i) => ({ ...o, is_default: i === idx })))}
+                      className="w-4 h-4 text-primary"
+                    />
+                    Default
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => removeOption(idx)}
+                    className="p-2 text-text-muted hover:text-error hover:bg-error/10 rounded-lg transition-colors"
+                    aria-label="Hapus varian"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div>
           <label htmlFor="image_url" className="block text-sm font-medium text-text mb-1.5">Gambar Produk</label>
           {imagePreview ? (
@@ -210,22 +250,8 @@ export function NewProductForm({ categories }: NewProductFormProps) {
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
         </div>
 
-        <div>
-          <label htmlFor="options" className="block text-sm font-medium text-text mb-1.5">Rasa/Varian (JSON)</label>
-          <textarea
-            id="options" name="options" rows={4} value={data.options} onChange={handleChange}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
-            placeholder='[{"name":"Coklat","is_default":true,"is_available":true,"sort_order":0},{"name":"Vanila","is_default":false,"is_available":true,"sort_order":1}]'
-          />
-          {optionsError && (
-            <p id="options-error" className="mt-1 text-sm font-medium text-error" role="alert">
-              {optionsError}
-            </p>
-          )}
-        </div>
-
         <button
-          type="submit" disabled={loading || uploading || !!optionsError}
+          type="submit" disabled={loading || uploading}
           className="w-full bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
         >
           {loading || uploading ? (

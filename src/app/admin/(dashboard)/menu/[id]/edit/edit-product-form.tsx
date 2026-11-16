@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Plus } from 'lucide-react';
 import { updateProduct } from '../../actions';
 
 type Category = { id: string; name: string };
+
+type Option = {
+  id?: string;
+  name: string;
+  is_available: boolean;
+  is_default: boolean;
+};
 
 type EditProductFormProps = {
   categories: Category[];
@@ -26,6 +33,14 @@ export function EditProductForm({ categories, product }: EditProductFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [options, setOptions] = useState<Option[]>(
+    (product.options || []).map((o: any) => ({
+      id: o.id,
+      name: o.name,
+      is_available: o.is_available,
+      is_default: o.is_default,
+    }))
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -41,23 +56,35 @@ export function EditProductForm({ categories, product }: EditProductFormProps) {
 
     try {
       const response = await fetch('/api/upload-image', { method: 'POST', body: uploadData });
-if (!response.ok) {
-  const err = await response.json();
-  alert('Upload gagal: ' + (err.error ?? 'unknown'));
-  setUploading(false);
-  return;
-}
-const result = await response.json();
-if (result.success && result.url) {
-  setImagePreview(result.url);
-  setData({ ...data, image_url: result.url });
-} else {
-  alert('Upload gagal: ' + (result.error ?? 'unknown'));
-}
+      if (!response.ok) {
+        const err = await response.json();
+        alert('Upload gagal: ' + (err.error ?? 'unknown'));
+        setUploading(false);
+        return;
+      }
+      const result = await response.json();
+      if (result.success && result.url) {
+        setImagePreview(result.url);
+        setData({ ...data, image_url: result.url });
+      } else {
+        alert('Upload gagal: ' + (result.error ?? 'unknown'));
+      }
     } catch {
       alert('Gagal upload gambar');
     }
     setUploading(false);
+  };
+
+  const addOption = () => {
+    setOptions([...options, { name: '', is_available: true, is_default: options.length === 0 }]);
+  };
+
+  const removeOption = (index: number) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
+
+  const updateOption = (index: number, field: keyof Option, value: any) => {
+    setOptions(options.map((o, i) => i === index ? { ...o, [field]: value } : o));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -66,6 +93,7 @@ if (result.success && result.url) {
 
     const fd = new FormData();
     Object.entries(data).forEach(([key, value]) => fd.set(key, value));
+    fd.set('options', JSON.stringify(options.map(({ id, ...o }) => o)));
     const result = await updateProduct(fd, product.id);
     setLoading(false);
 
@@ -108,6 +136,62 @@ if (result.success && result.url) {
             <option value="">Pilih kategori</option>
             {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
           </select>
+        </div>
+
+        {/* Variants / Flavor Options */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-text">Varian Rasa</label>
+            <button type="button" onClick={addOption} className="text-sm text-primary hover:underline flex items-center gap-1">
+              <Plus className="w-4 h-4" /> Tambah
+            </button>
+          </div>
+          {options.length === 0 ? (
+            <p className="text-sm text-text-muted text-center py-4 border-2 border-dashed border-border rounded-lg">
+              Belum ada varian. Produk ini tidak memiliki pilihan rasa.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {options.map((opt, idx) => (
+                <div key={idx} className="flex items-center gap-2 p-3 bg-surface border border-border rounded-lg">
+                  <input
+                    type="text"
+                    value={opt.name}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOption(idx, 'name', e.target.value)}
+                    placeholder="Nama rasa (contoh: Coklat, Vanilla)"
+                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  />
+                  <label className="flex items-center gap-1.5 text-sm text-text">
+                    <input
+                      type="checkbox"
+                      checked={opt.is_available}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateOption(idx, 'is_available', e.target.checked)}
+                      className="w-4 h-4 text-primary"
+                    />
+                    Tersedia
+                  </label>
+                  <label className="flex items-center gap-1.5 text-sm text-text">
+                    <input
+                      type="radio"
+                      name="default_option"
+                      checked={opt.is_default}
+                      onChange={() => setOptions(options.map((o, i) => ({ ...o, is_default: i === idx })))}
+                      className="w-4 h-4 text-primary"
+                    />
+                    Default
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => removeOption(idx)}
+                    className="p-2 text-text-muted hover:text-error hover:bg-error/10 rounded-lg transition-colors"
+                    aria-label="Hapus varian"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
