@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server-admin';
 import { revalidatePath } from 'next/cache';
 
 export interface CartItem {
@@ -27,11 +28,11 @@ export interface CartState {
   refresh: () => Promise<void>;
 }
 
-export async function createClient() {
-  const { createServerClient } = await import('@supabase/ssr');
+export async function createServerClient() {
+  const { createServerClient: createClient } = await import('@supabase/ssr');
   const { cookies } = await import('next/headers');
   const cookieStore = cookies();
-  return createServerClient(
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -49,7 +50,7 @@ export async function createClient() {
 
 export async function getCart(): Promise<{ items: CartItem[]; error: string | null }> {
   'use server';
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { items: [], error: 'Unauthorized' };
@@ -79,7 +80,7 @@ export async function getCart(): Promise<{ items: CartItem[]; error: string | nu
 
 export async function addToCart(productId: string, qty: number = 1, optionId?: string) {
   'use server';
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -123,7 +124,7 @@ export async function addToCart(productId: string, qty: number = 1, optionId?: s
 
 export async function updateCartQty(cartId: string, qty: number) {
   'use server';
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -144,7 +145,7 @@ export async function updateCartQty(cartId: string, qty: number) {
 
 export async function removeFromCart(cartId: string) {
   'use server';
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -163,7 +164,7 @@ export async function removeFromCart(cartId: string) {
 
 export async function clearCart() {
   'use server';
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' };
@@ -181,7 +182,7 @@ export async function clearCart() {
 
 async function getOptionName(optionId: string): Promise<string> {
   try {
-    const supabase = createClient();
+    const supabase = createServerClient();
     const { data } = await supabase
       .from('product_options')
       .select('name')
