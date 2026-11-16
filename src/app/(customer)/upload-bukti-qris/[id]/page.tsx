@@ -40,6 +40,7 @@ export default function UploadBuktiQrisPage() {
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [step, setStep] = useState<UploadStep | string>('upload');
   const [qrisImageUrl, setQrisImageUrl] = useState<string | null>(null);
 
@@ -113,6 +114,7 @@ export default function UploadBuktiQrisPage() {
     }
 
     setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
     setError(null);
 
     // Reset agar memilih file yang sama lagi tetap memicu onChange
@@ -450,30 +452,56 @@ export default function UploadBuktiQrisPage() {
               </h3>
 
               {selectedFile ? (
-                // Selected file info (no preview)
+                // Preview selected file
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-gray-50">
-                    <ImageIcon className="w-12 h-12 text-text-muted flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text truncate">{selectedFile.name}</p>
-                      <p className="text-xs text-text-muted mt-0.5">
-                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                        {selectedFile.type && ` • ${selectedFile.type}`}
-                      </p>
-                    </div>
+                  <div className="aspect-square rounded-lg overflow-hidden border border-border bg-gray-50 relative">
+                    {previewUrl ? (
+                      <>
+                        <img
+                          src={previewUrl}
+                          alt="Preview bukti pembayaran"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // HEIC/HEIF tidak bisa di-render di browser mobile
+                            e.currentTarget.style.display = 'none';
+                            const fallback = document.createElement('div');
+                            fallback.className = 'w-full h-full flex flex-col items-center justify-center p-4 text-center';
+                            fallback.innerHTML = `
+                              <svg class="w-16 h-16 text-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v12a2 2 0 002 2z" />
+                              </svg>
+                              <p class="text-sm text-text-muted">Pratinjau tidak tersedia</p>
+                              <p class="text-xs text-text-muted">Format HEIC/HEIF tidak bisa ditampilkan</p>
+                              <p class="text-xs text-text-muted mt-1">File tetap akan diupload</p>
+                            `;
+                            e.currentTarget.parentNode?.appendChild(fallback);
+                          }}
+                        />
+                      </>
+                    ) : (
+                      // Fallback for HEIC/HEIF files
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                        <ImageIcon className="w-16 h-16 text-text-muted mb-2" />
+                        <p className="text-sm text-text-muted">Pratinjau tidak tersedia</p>
+                        <p className="text-xs text-text-muted">Format HEIC/HEIF tidak bisa ditampilkan</p>
+                        <p className="text-xs text-text-muted mt-1">File tetap akan diupload</p>
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedFile(null);
+                        setPreviewUrl(null);
                       }}
-                      className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
                       aria-label="Hapus file"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
+                  <p className="text-xs text-text-muted text-center">File dipilih: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
                 </div>
               ) : (
                 // Upload picker (mobile friendly)
