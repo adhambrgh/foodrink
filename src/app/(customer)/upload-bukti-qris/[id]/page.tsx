@@ -386,8 +386,8 @@ export default function UploadBuktiQrisPage() {
                           <svg class="w-16 h-16 text-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2-2v12a2 2 0 002 2z" />
                           </svg>
-                          <p class="text-sm text-text-muted">${isHeicUrl ? 'Format HEIC/HEIF - silakan refresh halaman' : 'Pratinjau tidak tersedia'}</p>
-                          ${isHeicUrl ? '<p class="text-xs text-primary mt-1">Server sudah konversi ke JPEG, refresh untuk melihat preview</p>' : ''}
+                          <p class="text-sm text-text-muted">${isHeicUrl ? 'Format HEIC/HEIF tidak bisa ditampilkan' : 'Pratinjau tidak tersedia'}</p>
+                          ${isHeicUrl ? '<p class="text-xs text-primary mt-1">Klik "Ganti Bukti" lalu upload ulang agar server konversi ke JPEG</p>' : ''}
                         `;
                         e.currentTarget.parentNode?.appendChild(fallback);
                       }}
