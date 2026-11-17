@@ -59,7 +59,7 @@ export async function getCart(): Promise<{ items: CartItem[]; error: string | nu
     .from('carts')
     .select(`
       id, qty, product_id, option_id, option_name, option_signature,
-      products (id, name, price, is_active, stock)
+      products (id, name, price, is_active, stock, image_url, description)
     `)
     .eq('user_id', user.id);
 
