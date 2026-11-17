@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { ArrowLeft, CheckCircle, Clock, Package, Printer, Trash2, ImageIcon, QrCode } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Package, Printer } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
 import DeleteOrderButton from '@/components/admin/delete-order-button';
@@ -102,13 +102,11 @@ async function OrderContent({ id }: { id: string }) {
             <Printer className="w-4 h-4" /> Cetak / Simpan PDF
           </button>
           {isAdmin && (
-            <Suspense fallback={<div className="w-8 h-8" />}>
-              <DeleteOrderButton
-                orderId={order.id}
-                redirectTo="/admin/pesanan"
-                variant="icon"
-              />
-            </Suspense>
+            <DeleteOrderButton
+              orderId={order.id}
+              redirectTo="/admin/pesanan"
+              variant="icon"
+            />
           )}
         </div>
       </div>
