@@ -5,7 +5,7 @@ import { CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Clock, CreditCard,
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
 import OrderStatusButton from './status-button';
-import DeleteOrderButton from '@/components/admin/delete-order-button';
+import DeleteOrderButtonWrapper from '@/components/admin/delete-order-button-wrapper';
 import { usePagination } from '@/components/admin/pagination';
 
 export interface Order {
@@ -157,7 +157,7 @@ export default function OrderList({ orders: initialOrders }: { orders: Order[] }
                               <Link href={`/admin/pesanan/${order.id}`} className="inline-flex rounded-lg p-1.5 text-primary hover:bg-primary/10" title="Detail">
                                 <Package className="h-4 w-4" />
                               </Link>
-                              <DeleteOrderButton orderId={order.id} />
+                              <DeleteOrderButtonWrapper orderId={order.id} />
                             </div>
                           </td>
                         </tr>

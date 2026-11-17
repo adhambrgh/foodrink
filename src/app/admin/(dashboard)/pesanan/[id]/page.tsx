@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { ArrowLeft, CheckCircle, Clock, Package, Printer } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
-import DeleteOrderButton from '@/components/admin/delete-order-button';
+import DeleteOrderButtonWrapper from '@/components/admin/delete-order-button-wrapper';
 
 const statusConfig = {
   diproses: 'Sedang Diproses',
@@ -102,7 +102,7 @@ async function OrderContent({ id }: { id: string }) {
             <Printer className="w-4 h-4" /> Cetak / Simpan PDF
           </button>
           {isAdmin && (
-            <DeleteOrderButton
+            <DeleteOrderButtonWrapper
               orderId={order.id}
               redirectTo="/admin/pesanan"
               variant="icon"
