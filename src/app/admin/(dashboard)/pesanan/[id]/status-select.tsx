@@ -12,7 +12,6 @@ interface StatusSelectProps {
 const STATUS_OPTIONS = [
   { value: 'menunggu_pembayaran', label: 'Menunggu Pembayaran' },
   { value: 'diproses', label: 'Diproses' },
-  { value: 'dikirim', label: 'Dikirim' },
   { value: 'selesai', label: 'Selesai' },
 ] as const;
 
