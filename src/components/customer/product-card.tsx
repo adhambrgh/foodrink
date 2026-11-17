@@ -120,6 +120,19 @@ export default function ProductCard({
     const user = await requireUser();
     if (!user) return;
 
+    // Beli sekarang: langsung ke checkout, tanpa menyimpan ke keranjang
+    if (action === 'buy') {
+      const params = new URLSearchParams({
+        buy_now: '1',
+        pid: product.id,
+        qty: String(quantity),
+      });
+      if (selectedOption) params.set('opt', selectedOption);
+      setAction(null);
+      router.push(`/checkout?${params.toString()}`);
+      return;
+    }
+
     setBusy(true);
     const { addToCart: add } = await import('@/lib/supabase/cart-actions');
     const result = await add(product.id, quantity, selectedOption || undefined);
@@ -132,12 +145,7 @@ export default function ProductCard({
     }
 
     setAction(null);
-    if (action === 'buy') {
-      // Redirect to checkout with the new cart item
-      router.push(`/checkout?buy_now=${result.cart_id}`);
-    } else {
-      setMsg('Produk ditambahkan ke keranjang.');
-    }
+    setMsg('Produk ditambahkan ke keranjang.');
   };
 
   return (

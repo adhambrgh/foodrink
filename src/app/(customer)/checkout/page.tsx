@@ -22,10 +22,24 @@ interface CheckoutFormData {
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const buyNowCartId = searchParams.get('buy_now');
+  const buyNowPid = searchParams.get('pid');
+  const buyNowQty = Math.max(1, parseInt(searchParams.get('qty') || '1', 10) || 1);
+  const buyNowOpt = searchParams.get('opt');
+  const isBuyNow = Boolean(buyNowPid);
+  const legacyBuyNow = Boolean(searchParams.get('buy_now')) && !isBuyNow;
   const { items, loading: cartLoading, selectedCartIds, setSelectedCartIds } = useCart();
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [buyNowItem, setBuyNowItem] = useState<{
+    cart_id: string;
+    product_id: string;
+    qty: number;
+    option_id: string | null;
+    option_name: string | null;
+    product: any;
+  } | null>(null);
+  const [buyNowLoading, setBuyNowLoading] = useState(isBuyNow);
+  const [buyNowError, setBuyNowError] = useState<string | null>(null);
   const [formData, setFormData] = useState<CheckoutFormData>({
     delivery_method: 'ambil_sendiri',
     recipient_name: '',
@@ -36,19 +50,57 @@ function CheckoutContent() {
     payment_method: 'qris',
   });
 
-  // Auto-select buy_now item after cart loads
+  // Beli sekarang: ambil data produk + rasa langsung, tanpa lewat keranjang
   useEffect(() => {
-    if (!buyNowCartId) return;
-    if (cartLoading) return; // wait for cart to load
-
-    const item = items.find(i => i.cart_id === buyNowCartId);
-    if (item) {
-      setSelectedCartIds([buyNowCartId]);
+    if (!buyNowPid) {
+      setBuyNowLoading(false);
+      return;
     }
-    // If item not found after cart loads, it might be a stale cart_id - let user select manually
-  }, [buyNowCartId, cartLoading, items, setSelectedCartIds]);
+    let cancelled = false;
+    (async () => {
+      const [{ data: product, error: productError }, optionResult] = await Promise.all([
+        supabase
+          .from('products')
+          .select('id, price, is_active')
+          .eq('id', buyNowPid)
+          .single(),
+        buyNowOpt
+          ? supabase.from('product_options').select('name').eq('id', buyNowOpt).single()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+      if (cancelled) return;
+      if (productError || !product || !product.is_active) {
+        setBuyNowError('Produk tidak tersedia');
+      } else {
+        setBuyNowItem({
+          cart_id: '',
+          product_id: product.id,
+          qty: buyNowQty,
+          option_id: buyNowOpt,
+          option_name:
+            buyNowOpt && optionResult.data ? 'Rasa: ' + optionResult.data.name : null,
+          product: { price: Number(product.price) },
+        });
+      }
+      setBuyNowLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [buyNowPid, buyNowQty, buyNowOpt]);
 
-  const filteredItems = items.filter(item => selectedCartIds.includes(item.cart_id));
+  const filteredItems: {
+    cart_id: string;
+    product_id: string;
+    qty: number;
+    option_id?: string | null;
+    option_name?: string | null;
+    product: any;
+  }[] = isBuyNow
+    ? buyNowItem
+      ? [buyNowItem]
+      : []
+    : items.filter(item => selectedCartIds.includes(item.cart_id));
   const subtotal = filteredItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
   const total = subtotal; // Delivery optional later
 
@@ -77,13 +129,18 @@ function CheckoutContent() {
     fetchProfile();
   }, []);
 
-  // Only redirect to keranjang if no buy_now item AND cart is empty after loading
+  // Mode keranjang: redirect ke keranjang jika kosong setelah dimuat.
+  // Link lama (?buy_now=<cart_id> tanpa pid) dianggap basi dan dibuang ke keranjang.
   useEffect(() => {
-    if (cartLoading) return;
-    if (items.length === 0 && !buyNowCartId) {
+    if (isBuyNow || cartLoading) return;
+    if (legacyBuyNow) {
+      router.replace('/keranjang');
+      return;
+    }
+    if (items.length === 0) {
       router.replace('/keranjang');
     }
-  }, [cartLoading, items, router, buyNowCartId]);
+  }, [cartLoading, items, router, isBuyNow, legacyBuyNow]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -120,10 +177,15 @@ function CheckoutContent() {
     const data = await res.json();
 
     if (data.success) {
-      // Simpan cart_ids yang akan dipesan agar dapat dihapus di halaman sukses
-      const cartIdsToRemove = filteredItems.map(i => i.cart_id);
-      if (cartIdsToRemove.length > 0) {
-        sessionStorage.setItem('pending_cart_ids', JSON.stringify(cartIdsToRemove));
+      // Mode keranjang: catat cart_id agar bisa dibersihkan di halaman sukses.
+      // Beli sekarang tidak menyentuh keranjang, jadi tidak ada yang dibersihkan.
+      if (isBuyNow) {
+        sessionStorage.removeItem('pending_cart_ids');
+      } else {
+        const cartIdsToRemove = filteredItems.map(i => i.cart_id);
+        if (cartIdsToRemove.length > 0) {
+          sessionStorage.setItem('pending_cart_ids', JSON.stringify(cartIdsToRemove));
+        }
       }
       window.location.href = data.redirect_url;
     } else {
@@ -132,12 +194,19 @@ function CheckoutContent() {
     setLoading(false);
   };
 
-  if (cartLoading || items.length === 0) {
+  if (loadingProfile || (isBuyNow ? buyNowLoading : cartLoading || items.length === 0)) {
     return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>;
   }
 
-  if (loadingProfile) {
-    return <div className="min-h-screen bg-surface flex items-center justify-center"><LoadingScreen /></div>;
+  if (isBuyNow && (buyNowError || !buyNowItem)) {
+    return (
+      <div className="min-h-screen bg-surface flex flex-col items-center justify-center gap-3 p-4 text-center">
+        <p className="text-sm text-red-600">{buyNowError || 'Produk tidak tersedia'}</p>
+        <Link href="/" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
+          Kembali ke beranda
+        </Link>
+      </div>
+    );
   }
 
   const isPrefilled = (field: keyof CheckoutFormData) => 
@@ -148,7 +217,11 @@ function CheckoutContent() {
       {/* Header */}
       <header className="p-4 border-b border-border bg-surface">
         <div className="flex items-center gap-2">
-          <Link href="/keranjang" prefetch={true} className="p-2 rounded-lg hover:bg-surface-variant">
+          <Link
+            href={isBuyNow && buyNowPid ? `/${buyNowPid}` : '/keranjang'}
+            prefetch={true}
+            className="p-2 rounded-lg hover:bg-surface-variant"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="text-xl font-bold text-text">Checkout</h1>

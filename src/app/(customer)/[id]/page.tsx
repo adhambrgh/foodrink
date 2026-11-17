@@ -206,9 +206,27 @@ export default function ProductDetailPage() {
     }
 
     const mode = quantityDialog;
-    const cartId = await handleAddToCart(quantity);
+
+    // Beli sekarang: langsung ke checkout, tanpa menyimpan ke keranjang
+    if (mode === "buy") {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push(`/login?redirectTo=/${id}`);
+        return;
+      }
+      const params = new URLSearchParams({
+        buy_now: "1",
+        pid: id,
+        qty: String(quantity),
+      });
+      if (selectedOption) params.set("opt", selectedOption);
+      closeQuantityDialog();
+      router.push(`/checkout?${params.toString()}`);
+      return;
+    }
+
+    await handleAddToCart(quantity);
     closeQuantityDialog();
-    if (cartId && mode === "buy") router.push(`/checkout?buy_now=${cartId}`);
   };
 
   if (loading) {
