@@ -52,6 +52,33 @@ async function OrderContent({ id }: { id: string }) {
   const customerName = profile?.name;
   const isAdmin = profile?.role === 'admin';
 
+  // Format dates server-side to avoid hydration mismatch
+  const formattedCreatedAt = new Date(order.created_at).toLocaleString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const formattedProofUploadedAt = order.qris_proof_uploaded_at
+    ? new Date(order.qris_proof_uploaded_at).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+  const formattedVerifiedAt = order.qris_verified_at
+    ? new Date(order.qris_verified_at).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
   return (
     <div className="p-4 md:p-6 space-y-5 print:space-y-3 print:p-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -81,7 +108,7 @@ async function OrderContent({ id }: { id: string }) {
         <div>
           <p className="text-xs text-text-muted font-mono">#{order.id}</p>
           <h1 className="text-xl font-bold text-text font-heading mt-1">Detail Pesanan</h1>
-          <p className="text-sm text-text-muted">Dibuat: {new Date(order.created_at).toLocaleString('id-ID')}</p>
+          <p className="text-sm text-text-muted">Dibuat: {formattedCreatedAt}</p>
         </div>
         <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
           {statusConfig[order.status as keyof typeof statusConfig] || order.status}
@@ -103,14 +130,14 @@ async function OrderContent({ id }: { id: string }) {
             {isPaid ? <CheckCircle className="h-4 w-4 text-success" /> : <Clock className="h-4 w-4 text-yellow-500" />}
             {isPaid ? 'Sudah dibayar' : isCod ? 'Bayar saat pesanan selesai' : isQris ? 'Menunggu bukti pembayaran' : 'Menunggu pembayaran'}
           </p>
-          {isQris && order.qris_proof_uploaded_at && (
+          {isQris && formattedProofUploadedAt && (
             <p className="mt-2 text-xs text-text-muted">
-              Bukti diupload: {new Date(order.qris_proof_uploaded_at).toLocaleString('id-ID')}
+              Bukti diupload: {formattedProofUploadedAt}
             </p>
           )}
-          {isQris && order.qris_verified_at && (
+          {isQris && formattedVerifiedAt && (
             <p className="mt-1 text-xs text-text-muted">
-              Diverifikasi: {new Date(order.qris_verified_at).toLocaleString('id-ID')}
+              Diverifikasi: {formattedVerifiedAt}
             </p>
           )}
           {isQris && qrisImageUrl && (
