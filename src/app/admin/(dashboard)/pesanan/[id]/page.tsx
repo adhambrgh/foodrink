@@ -7,12 +7,7 @@ import { formatCurrency } from '@/lib/utils';
 import DeleteOrderButtonWrapper from '@/components/admin/delete-order-button-wrapper';
 import PrintButton from '@/components/admin/print-button';
 import ImagePreview from '@/components/admin/image-preview';
-
-const statusConfig = {
-  diproses: 'Sedang Diproses',
-  dikirim: 'Sedang Dikirim',
-  selesai: 'Selesai',
-} as const;
+import StatusSelect from './status-select';
 
 async function getCurrentQrisUrl(): Promise<string | null> {
   const supabase = createAdminClient();
@@ -133,9 +128,7 @@ async function OrderContent({ id }: { id: string }) {
           <h1 className="text-xl font-bold text-text font-heading mt-1">Detail Pesanan</h1>
           <p className="text-sm text-text-muted">Dibuat: {formattedCreatedAt}</p>
         </div>
-        <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
-          {statusConfig[order.status as keyof typeof statusConfig] || order.status}
-        </span>
+        <StatusSelect orderId={order.id} currentStatus={order.status} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
