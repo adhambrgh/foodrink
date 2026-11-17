@@ -172,9 +172,9 @@ export default function ProductCard({
             type="button"
             onClick={toggleFavorite}
             aria-label={favorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-            className={`absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition ${favorite ? 'text-red-500' : 'text-text-muted hover:text-red-500'}`}
+            className={`absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition duration-300 ease-out active:scale-95 ${favorite ? 'text-red-500' : 'text-text-muted hover:text-red-500'}`}
           >
-            <Heart className={`h-4 w-4 ${favorite ? 'fill-current' : ''}`} />
+            <Heart className={`h-4 w-4 transition duration-300 ease-out ${favorite ? 'fill-current' : ''}`} />
           </button>
         </div>
 

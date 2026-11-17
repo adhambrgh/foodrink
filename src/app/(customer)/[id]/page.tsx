@@ -296,9 +296,9 @@ export default function ProductDetailPage() {
               onClick={toggleFavorite}
               disabled={favLoading}
               aria-label={isFavorite ? "Hapus dari favorit" : "Simpan favorit"}
-              className={`flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(83,49,33,0.08)] transition active:scale-95 disabled:opacity-50 ${isFavorite ? "text-red-500" : "text-[#8a756b] hover:text-[#a94716]"}`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(83,49,33,0.08)] transition duration-300 ease-out active:scale-95 disabled:opacity-50 ${isFavorite ? "text-red-500" : "text-[#8a756b] hover:text-[#a94716]"}`}
             >
-              <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
+              <Heart className={`h-4 w-4 transition duration-300 ease-out ${isFavorite ? "fill-current" : ""}`} />
             </button>
           </div>
         </div>
