@@ -170,7 +170,7 @@ return (
                     {selectedCartIds.includes(item.cart_id) ? <CheckSquare className="h-5 w-5 text-primary" /> : <Square className="h-5 w-5 text-text-muted" />}
                   </label>
                   <img
-                    src={item.product.image_url || `https://picsum.photos/80/80?random=${item.product_id}`}
+                    src={item.product.image_url || '/images/logo.jpeg'}
                     alt={item.product.name}
                     className="h-20 w-20 shrink-0 rounded-xl object-cover"
                   />
