@@ -171,6 +171,8 @@ function CheckoutContent() {
           : 'Ambil sendiri',
         notes: formData.notes,
         payment_method: formData.payment_method,
+        source: isBuyNow ? 'buy_now' : 'cart',
+        pid: isBuyNow ? buyNowPid : null,
       }),
     });
 

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { items, address, notes, payment_method = 'qris' } = await request.json().catch(() => ({}));
+  const { items, address, notes, payment_method = 'qris', source, pid } = await request.json().catch(() => ({}));
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: 'Keranjang kosong' }, { status: 400 });
@@ -123,7 +123,8 @@ export async function POST(request: Request) {
   let redirectUrl: string | null = null;
 
   if (payment_method === 'qris') {
-    redirectUrl = `/upload-bukti-qris/${orderId}`;
+    const src = source === 'buy_now' ? 'buy_now' : 'cart';
+    redirectUrl = `/upload-bukti-qris/${orderId}?src=${src}${pid ? `&pid=${encodeURIComponent(String(pid))}` : ''}`;
   }
 
   return NextResponse.json({

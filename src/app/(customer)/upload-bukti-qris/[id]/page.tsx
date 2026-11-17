@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Camera } from 'lucide-react';
+import { Dialog } from '@/components/ui/Dialog';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Camera, Timer } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -43,6 +44,10 @@ export default function UploadBuktiQrisPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [step, setStep] = useState<UploadStep | string>('upload');
   const [qrisImageUrl, setQrisImageUrl] = useState<string | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+  const [expired, setExpired] = useState(false);
+  const [expiring, setExpiring] = useState(false);
+  const [returnTo, setReturnTo] = useState('/keranjang');
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -89,6 +94,31 @@ export default function UploadBuktiQrisPage() {
     fetchOrder();
     fetchQris();
   }, [orderId]);
+
+  // Tujuan redirect saat kedaluwarsa: sumber checkout (cart / beli sekarang)
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const src = sp.get('src');
+    const pid = sp.get('pid');
+    if (src === 'buy_now' && pid) setReturnTo(`/${pid}`);
+  }, []);
+
+  // Countdown 10 menit dari pembuatan order — berhenti setelah bukti terupload/lunas
+  useEffect(() => {
+    if (!order || order.payment_status === 'paid' || order.qris_proof_url) {
+      setSecondsLeft(null);
+      return;
+    }
+    const deadline = new Date(order.created_at).getTime() + 10 * 60 * 1000;
+    const tick = () => {
+      const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+      if (remaining <= 0) setExpired(true);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [order]);
 
   // Detect HEIC/HEIF from magic bytes (file content)
 const detectHeicFromBytes = async (file: File): Promise<boolean> => {
@@ -247,6 +277,21 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     }
   };
 
+  const handleExpiredRecheckout = async () => {
+    setExpiring(true);
+    try {
+      await fetch('/api/cancel-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderId }),
+      });
+    } catch {
+      // Cancel gagal tetap lanjut redirect
+    }
+    router.replace(returnTo);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -304,6 +349,20 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
               : hasProof ? 'Bukti pembayaran telah diupload. Tekan tombol konfirmasi untuk menyelesaikan.'
               : 'Scan QR DANA, bayar sesuai nominal, lalu upload screenshotnya'}
           </p>
+          {secondsLeft !== null && !expired && (
+            <div
+              className={`mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
+                secondsLeft <= 60 ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary'
+              }`}
+            >
+              <Timer className="w-3.5 h-3.5" />
+              Sisa waktu pembayaran{' '}
+              <span className="tabular-nums">
+                {String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:
+                {String(secondsLeft % 60).padStart(2, '0')}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -607,6 +666,36 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
           </a>
         </div>
       </div>
+
+      {/* Popup pembayaran kedaluwarsa */}
+      <Dialog open={expired} onOpenChange={() => {}} maxWidth="sm">
+        <div className="p-5 text-center space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-error/10 flex items-center justify-center">
+            <AlertCircle className="w-7 h-7 text-error" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-text">Pembayaran Lebih dari 10 Menit</h2>
+            <p className="text-sm text-text-muted mt-1">
+              Waktu pembayaran habis, pesanan ini dianggap gagal. Silakan checkout ulang.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleExpiredRecheckout}
+            disabled={expiring}
+            className="w-full py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {expiring ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Memproses...
+              </>
+            ) : (
+              'Checkout Ulang'
+            )}
+          </button>
+        </div>
+      </Dialog>
     </main>
   );
 }
