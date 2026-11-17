@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { ArrowLeft, CheckCircle, Clock, Package, Printer } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Package } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
 import DeleteOrderButtonWrapper from '@/components/admin/delete-order-button-wrapper';
+import PrintButton from '@/components/admin/print-button';
 
 const statusConfig = {
   diproses: 'Sedang Diproses',
@@ -37,18 +38,37 @@ async function getCurrentQrisUrl(): Promise<string | null> {
 
 async function OrderContent({ id }: { id: string }) {
   const supabase = createAdminClient();
-  const { data: orderData } = await supabase
-    .from('orders')
-    .select(`
-      id, status, payment_status, payment_method, total, address, notes,
-      created_at, qris_proof_url, qris_proof_uploaded_at, qris_verified_at,
-      profiles(name, role),
-      order_items(name_snapshot, qty, price_snapshot, subtotal)
-    `)
-    .eq('id', id)
-    .single();
+  let orderData = null;
+  let error: Error | null = null;
 
-  if (!orderData) notFound();
+  try {
+    const { data, error: dbError } = await supabase
+      .from('orders')
+      .select(`
+        id, status, payment_status, payment_method, total, address, notes,
+        created_at, qris_proof_url, qris_proof_uploaded_at, qris_verified_at,
+        profiles(name, role),
+        order_items(name_snapshot, qty, price_snapshot, subtotal)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (dbError) error = dbError;
+    else orderData = data;
+  } catch (e) {
+    error = e instanceof Error ? e : new Error('Gagal memuat pesanan');
+  }
+
+  if (error || !orderData) {
+    return (
+      <div className="p-4 md:p-6 space-y-5">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+          <h2 className="text-lg font-semibold text-red-700">Gagal memuat detail pesanan</h2>
+          <p className="mt-2 text-sm text-red-600">{error?.message || 'Kesalahan server'}</p>
+        </div>
+      </div>
+    );
+  }
 
   const order = orderData as any;
   const isPaid = order.payment_status === 'paid';
@@ -95,12 +115,7 @@ async function OrderContent({ id }: { id: string }) {
           <ArrowLeft className="w-4 h-4" /> Kembali ke pesanan
         </Link>
         <div className="flex items-center gap-2 no-print">
-          <button
-            onClick={() => window.print()}
-            className="hidden print:inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
-          >
-            <Printer className="w-4 h-4" /> Cetak / Simpan PDF
-          </button>
+          <PrintButton />
           {isAdmin && (
             <DeleteOrderButtonWrapper
               orderId={order.id}
