@@ -20,10 +20,19 @@ async function getCurrentQrisUrl(): Promise<string | null> {
   const jpgUrl = supabase.storage.from(BUCKET).getPublicUrl(`${BASE_NAME}.jpg`).data.publicUrl;
   const jpegUrl = supabase.storage.from(BUCKET).getPublicUrl(`${BASE_NAME}.jpeg`).data.publicUrl;
 
-  const { data: jpgExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpg' });
-  const { data: jpegExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpeg' });
-
-  return (jpegExists && jpegExists.length > 0) ? jpegUrl : jpgUrl;
+  try {
+    const { data: jpegExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpeg' });
+    if (jpegExists && jpegExists.length > 0) return jpegUrl;
+  } catch {
+    // Ignore storage list errors
+  }
+  try {
+    const { data: jpgExists } = await supabase.storage.from(BUCKET).list('', { search: 'qris-dana.jpg' });
+    if (jpgExists && jpgExists.length > 0) return jpgUrl;
+  } catch {
+    // Ignore storage list errors
+  }
+  return jpgUrl;
 }
 
 async function OrderContent({ id }: { id: string }) {
