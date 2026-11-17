@@ -1,7 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { logAudit, getClientIp, getUserAgent } from '@/lib/audit-log';
 
 type CookieSetting = { name: string; value: string; options?: Record<string, unknown> };
+
+const SECURE_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  path: '/',
+};
 
 // Routes that require a logged-in customer. Everything else is publicly browsable.
 const protectedRoutes = [
@@ -29,9 +37,10 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: CookieSetting[]) {
-          cookiesToSet.forEach(({ name, value }: CookieSetting) => {
+          cookiesToSet.forEach(({ name, value, options }: CookieSetting) => {
+            const cookieOptions = { ...SECURE_COOKIE_OPTIONS, ...options };
             request.cookies.set(name, value);
-            response.cookies.set(name, value);
+            response.cookies.set(name, value, cookieOptions);
           });
         },
       },
@@ -69,6 +78,16 @@ export async function middleware(request: NextRequest) {
       .single();
 
     if (profile?.role !== 'admin') {
+      // Log unauthorized admin access attempt
+      await logAudit({
+        adminId: user.id,
+        action: 'login',
+        resourceType: 'auth',
+        details: { error: 'unauthorized_access_attempt', path, success: false },
+        ipAddress: getClientIp(request),
+        userAgent: getUserAgent(request),
+      });
+
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 

@@ -3,7 +3,6 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { signIn, supabase } from '@/lib/supabase/client';
 
 function LoginForm() {
   const router = useRouter();
@@ -20,29 +19,23 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await signIn(email, password);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      const { data: { user } } = await supabase.auth.getUser();
+      const data = await res.json();
 
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (profile?.role !== 'admin') {
-          await fetch('/api/logout', { method: 'POST' });
-          setError('Akun Anda bukan admin. Silakan hubungi owner.');
-        } else {
-          router.push(decodeURIComponent(redirectTo));
-        }
+      if (!res.ok) {
+        setError(data.error || 'Login gagal');
       } else {
         router.push(decodeURIComponent(redirectTo));
+        router.refresh();
       }
+    } catch {
+      setError('Terjadi kesalahan jaringan');
     }
 
     setLoading(false);
