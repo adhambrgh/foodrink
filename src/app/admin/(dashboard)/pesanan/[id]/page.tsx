@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
 import DeleteOrderButtonWrapper from '@/components/admin/delete-order-button-wrapper';
 import PrintButton from '@/components/admin/print-button';
+import ImagePreview from '@/components/admin/image-preview';
 
 const statusConfig = {
   diproses: 'Sedang Diproses',
@@ -175,10 +176,10 @@ async function OrderContent({ id }: { id: string }) {
           {isQris && order.qris_proof_url && (
             <div className="mt-3">
               <p className="text-xs text-text-muted mb-1">Bukti pembayaran user:</p>
-              <img
+              <ImagePreview
                 src={order.qris_proof_url}
                 alt="Bukti pembayaran"
-                className="w-32 h-32 object-contain rounded border border-border"
+                thumbnailClassName="w-32 h-32 object-contain rounded border border-border"
               />
             </div>
           )}
