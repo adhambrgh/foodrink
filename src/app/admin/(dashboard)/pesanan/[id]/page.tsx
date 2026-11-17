@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { ArrowLeft, CheckCircle, Clock, Package, Printer, Trash2, ImageIcon, QrCode } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { formatCurrency } from '@/lib/utils';
@@ -25,8 +26,7 @@ async function getCurrentQrisUrl(): Promise<string | null> {
   return (jpegExists && jpegExists.length > 0) ? jpegUrl : jpgUrl;
 }
 
-export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+async function OrderContent({ id }: { id: string }) {
   const supabase = createAdminClient();
   const { data: orderData } = await supabase
     .from('orders')
@@ -66,11 +66,13 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             <Printer className="w-4 h-4" /> Cetak / Simpan PDF
           </button>
           {isAdmin && (
-            <DeleteOrderButton
-              orderId={order.id}
-              redirectTo="/admin/pesanan"
-              variant="icon"
-            />
+            <Suspense fallback={<div className="w-8 h-8" />}>
+              <DeleteOrderButton
+                orderId={order.id}
+                redirectTo="/admin/pesanan"
+                variant="icon"
+              />
+            </Suspense>
           )}
         </div>
       </div>
@@ -146,7 +148,23 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
         </div>
         <div className="mt-4 flex justify-between border-t border-border pt-3 font-bold"><span>Total</span><span className="text-primary">{formatCurrency(order.total)}</span></div>
       </section>
-
     </div>
+  );
+}
+
+export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return (
+    <Suspense fallback={
+      <div className="p-4 md:p-6 space-y-5">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    }>
+      <OrderContent id={id} />
+    </Suspense>
   );
 }
