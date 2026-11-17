@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 
@@ -10,8 +10,19 @@ interface DeleteOrderButtonProps {
   variant?: 'icon' | 'button';
 }
 
+async function deleteOrderAction(orderId: string): Promise<{ success: boolean; error?: string }> {
+  const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return { success: false, error: data.error || 'Gagal menghapus pesanan' };
+  }
+  return { success: true };
+}
+
 export default function DeleteOrderButton({ orderId, redirectTo, variant = 'icon' }: DeleteOrderButtonProps) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   async function handleDelete() {
@@ -19,20 +30,23 @@ export default function DeleteOrderButton({ orderId, redirectTo, variant = 'icon
     if (!confirm('Hapus pesanan ini? Tindakan tidak dapat dibatalkan.')) return;
 
     setBusy(true);
+    setError(null);
+
     try {
-      const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        alert(data.error || 'Gagal menghapus pesanan');
-        return;
-      }
-      if (redirectTo) {
-        router.push(redirectTo);
-      }
-      router.refresh();
+      startTransition(async () => {
+        const result = await deleteOrderAction(orderId);
+        if (!result.success) {
+          setError(result.error || 'Gagal menghapus pesanan');
+          setBusy(false);
+          return;
+        }
+        if (redirectTo) {
+          router.push(redirectTo);
+        }
+        router.refresh();
+      });
     } catch {
-      alert('Gagal menghapus pesanan');
-    } finally {
+      setError('Gagal menghapus pesanan');
       setBusy(false);
     }
   }
