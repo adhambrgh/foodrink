@@ -21,34 +21,28 @@ async function deleteOrderAction(orderId: string): Promise<{ success: boolean; e
 
 export default function DeleteOrderButton({ orderId, redirectTo, variant = 'icon' }: DeleteOrderButtonProps) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  async function handleDelete() {
+  function handleDelete() {
     if (busy) return;
     if (!confirm('Hapus pesanan ini? Tindakan tidak dapat dibatalkan.')) return;
 
     setBusy(true);
-    setError(null);
 
-    try {
-      startTransition(async () => {
-        const result = await deleteOrderAction(orderId);
-        if (!result.success) {
-          setError(result.error || 'Gagal menghapus pesanan');
-          setBusy(false);
-          return;
-        }
-        if (redirectTo) {
-          router.push(redirectTo);
-        }
-        router.refresh();
-      });
-    } catch {
-      setError('Gagal menghapus pesanan');
+    startTransition(async () => {
+      const result = await deleteOrderAction(orderId);
+      if (!result.success) {
+        alert(result.error || 'Gagal menghapus pesanan');
+        setBusy(false);
+        return;
+      }
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
+      router.refresh();
       setBusy(false);
-    }
+    });
   }
 
   if (variant === 'button') {
