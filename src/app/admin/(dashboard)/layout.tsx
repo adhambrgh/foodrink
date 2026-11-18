@@ -1,13 +1,9 @@
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Store } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AdminNav, MobileAdminNav } from './admin-nav';
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta', weight: ['600', '700'] });
 
 async function getProfile(userId: string) {
   const supabase = createClient();
@@ -33,7 +29,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   }
 
   return (
-    <div className={`${inter.variable} ${jakarta.variable} grid min-h-screen grid-cols-1 bg-surface text-foreground md:grid-cols-[14rem_minmax(0,1fr)]`}>
+    <div className="grid min-h-screen grid-cols-1 bg-surface text-foreground md:grid-cols-[14rem_minmax(0,1fr)]">
       {/* Sidebar kiri */}
       <aside className="hidden min-h-screen flex-col border-r border-border bg-surface md:flex">
         <AdminNav />

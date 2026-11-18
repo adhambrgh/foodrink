@@ -38,6 +38,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
       },
       spacing: {
         'space-xs': '0.25rem',
