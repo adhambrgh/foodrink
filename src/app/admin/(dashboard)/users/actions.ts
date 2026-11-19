@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server-admin';
 import { revalidatePath } from 'next/cache';
+import { normalizePhone } from '@/lib/utils';
 
 type ActiveThreshold = 7 | 30 | number | 'all';
 type UserStatus = 'active' | 'inactive' | 'never' | 'all';
@@ -105,14 +106,22 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
 
   let allUsers: AdminUser[] = authUsers.users.map(authUser => {
     const profile = profileMap.get(authUser.id);
+    const meta = authUser.raw_user_meta_data || {};
+    
+    // Priority: auth raw_user_meta_data > profiles table
+    const name = meta.name || profile?.name || '-';
+    const phone = meta.phone 
+      ? normalizePhone(meta.phone)
+      : (profile?.phone || '-');
+    
     const lastSignIn = authUser.last_sign_in_at || null;
     const status = computeStatus(lastSignIn, thresholdDays);
 
     return {
       id: authUser.id,
       email: authUser.email || '-',
-      name: profile?.name || '-',
-      phone: profile?.phone || '-',
+      name,
+      phone,
       role: (profile?.role as 'customer' | 'admin') || 'customer',
       created_at: authUser.created_at,
       last_sign_in_at: lastSignIn,
