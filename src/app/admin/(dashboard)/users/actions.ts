@@ -71,20 +71,37 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
   const roleFilter = filters.role || 'all';
   const thresholdDays = getThresholdDays(filters.activeThreshold || 7, filters.customDays);
 
-  const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers({
-    perPage: 1000,
-  });
+  // Fetch all users with pagination
+  let allAuthUsers: any[] = [];
+  let authPage = 1;
+  const perPage = 1000;
 
-  if (authError) {
-    return {
-      users: [],
-      total: 0,
-      page: 1,
-      pageSize,
-      stats: { total: 0, active: 0, inactive: 0, never: 0, admins: 0, customers: 0 },
-      error: authError.message,
-    };
+  while (true) {
+    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers({
+      page: authPage,
+      perPage,
+    });
+
+    if (authError) {
+      return {
+        users: [],
+        total: 0,
+        page: 1,
+        pageSize,
+        stats: { total: 0, active: 0, inactive: 0, never: 0, admins: 0, customers: 0 },
+        error: authError.message,
+      };
+    }
+
+    if (!authUsers?.users?.length) break;
+
+    allAuthUsers.push(...authUsers.users);
+
+    if (authUsers.users.length < perPage) break;
+    authPage++;
   }
+
+  const authUsers = { users: allAuthUsers };
 
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
