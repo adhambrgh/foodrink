@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server-admin';
 import { revalidatePath } from 'next/cache';
 
 type ActiveThreshold = 7 | 30 | number | 'all';
-type UserStatus = 'active' | 'inactive' | 'never' | 'deleted' | 'all';
+type UserStatus = 'active' | 'inactive' | 'never' | 'all';
 type UserRole = 'customer' | 'admin' | 'all';
 
 export interface AdminUser {
@@ -15,7 +15,6 @@ export interface AdminUser {
   role: 'customer' | 'admin';
   created_at: string;
   last_sign_in_at: string | null;
-  is_deleted: boolean;
   status: Exclude<UserStatus, 'all'>;
 }
 
@@ -48,10 +47,8 @@ export interface Filters {
 
 function computeStatus(
   lastSignIn: string | null,
-  deletedAt: string | null,
   thresholdDays: number
 ): Exclude<UserStatus, 'all'> {
-  if (deletedAt) return 'deleted';
   if (!lastSignIn) return 'never';
   const daysSince = (Date.now() - new Date(lastSignIn).getTime()) / (1000 * 60 * 60 * 24);
   return daysSince <= thresholdDays ? 'active' : 'inactive';
@@ -84,14 +81,14 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
       total: 0,
       page: 1,
       pageSize,
-      stats: { total: 0, active: 0, inactive: 0, never: 0, deleted: 0, admins: 0, customers: 0 },
+      stats: { total: 0, active: 0, inactive: 0, never: 0, admins: 0, customers: 0 },
       error: authError.message,
     };
   }
 
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
-    .select('id, role, phone, name, deleted_at, created_at');
+    .select('id, role, phone, name, created_at');
 
   if (profilesError) {
     console.error('Profiles query error:', profilesError);
@@ -100,7 +97,7 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
       total: 0,
       page: 1,
       pageSize,
-      stats: { total: 0, active: 0, inactive: 0, never: 0, deleted: 0, admins: 0, customers: 0 },
+      stats: { total: 0, active: 0, inactive: 0, never: 0, admins: 0, customers: 0 },
       error: `Failed to fetch profiles: ${profilesError.message}`,
     };
   }
@@ -110,7 +107,7 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
   let allUsers: AdminUser[] = authUsers.users.map(authUser => {
     const profile = profileMap.get(authUser.id);
     const lastSignIn = authUser.last_sign_in_at || null;
-    const status = computeStatus(lastSignIn, profile?.deleted_at || null, thresholdDays);
+    const status = computeStatus(lastSignIn, thresholdDays);
 
     return {
       id: authUser.id,
@@ -120,7 +117,6 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
       role: (profile?.role as 'customer' | 'admin') || 'customer',
       created_at: authUser.created_at,
       last_sign_in_at: lastSignIn,
-      is_deleted: !!profile?.deleted_at,
       status,
     };
   });
@@ -148,7 +144,6 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
     active: allUsers.filter(u => u.status === 'active').length,
     inactive: allUsers.filter(u => u.status === 'inactive').length,
     never: allUsers.filter(u => u.status === 'never').length,
-    deleted: allUsers.filter(u => u.status === 'deleted').length,
     admins: allUsers.filter(u => u.role === 'admin').length,
     customers: allUsers.filter(u => u.role === 'customer').length,
   };

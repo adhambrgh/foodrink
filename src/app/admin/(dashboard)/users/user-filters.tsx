@@ -4,7 +4,7 @@ import { Search, Download, FilterX } from 'lucide-react';
 import { useMemo } from 'react';
 
 type ActiveThreshold = 7 | 30 | number | 'all' | 'custom';
-type UserStatus = 'active' | 'inactive' | 'never' | 'deleted' | 'all';
+type UserStatus = 'active' | 'inactive' | 'never' | 'all';
 type UserRole = 'customer' | 'admin' | 'all';
 
 export interface Filters {
@@ -20,7 +20,6 @@ export interface Stats {
   active: number;
   inactive: number;
   never: number;
-  deleted: number;
   admins: number;
   customers: number;
 }
@@ -37,7 +36,6 @@ const STATUS_LABELS: Record<UserStatus, string> = {
   active: 'Aktif',
   inactive: 'Nonaktif',
   never: 'Belum Login',
-  deleted: 'Terhapus',
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {

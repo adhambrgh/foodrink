@@ -31,7 +31,6 @@ const STATUS_CONFIG = {
   active: { label: 'Aktif', icon: CheckCircle, className: 'bg-success/10 text-success' },
   inactive: { label: 'Nonaktif', icon: Clock, className: 'bg-amber/10 text-amber' },
   never: { label: 'Belum Login', icon: AlertCircle, className: 'bg-text-muted/10 text-text-muted' },
-  deleted: { label: 'Terhapus', icon: Users, className: 'bg-error/10 text-error' },
 };
 
 function RoleBadge({ role, onToggle, disabled }: { 
