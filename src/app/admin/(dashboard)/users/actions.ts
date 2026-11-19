@@ -28,7 +28,6 @@ export interface UsersResponse {
     active: number;
     inactive: number;
     never: number;
-    deleted: number;
     admins: number;
     customers: number;
   };
