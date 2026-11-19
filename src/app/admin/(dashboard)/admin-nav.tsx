@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare, QrCode } from 'lucide-react';
+import { Home, Menu, Receipt, Tags, Heart, ChevronRight, MessageSquare, QrCode, Users } from 'lucide-react';
 import { useState } from 'react';
 
 import { Bell } from 'lucide-react';
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/admin/reviews', label: 'Review', icon: MessageSquare },
   { href: '/admin/banner', label: 'Banner', icon: MessageSquare },
   { href: '/admin/notifikasi', label: 'Notifikasi', icon: Bell },
+  { href: '/admin/users', label: 'User', icon: Users },
 ];
 
 function NavLinks({ className = '' }: { className?: string }) {

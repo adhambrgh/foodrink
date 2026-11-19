@@ -264,7 +264,7 @@ function CheckoutContent() {
                 />
                 <div className="flex-1">
                   <span className="font-medium text-text">Ambil sendiri</span>
-                  <p className="text-sm text-text-muted">Ambil langsung di gerai FoodDrink</p>
+                  <p className="text-sm text-text-muted">Ambil langsung </p>
                 </div>
                 <Send className="w-5 h-5 text-text-muted" />
               </label>

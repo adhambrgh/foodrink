@@ -37,6 +37,8 @@ export const STATUS_COLOR_MAP: Record<string, string> = {
   ready: CHART_COLORS.ready,
   delivered: CHART_COLORS.delivered,
   cancelled: CHART_COLORS.cancelled,
+
+  
 };
 
 export const STATUS_FILL_MAP: Record<string, string> = {
