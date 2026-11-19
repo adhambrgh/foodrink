@@ -336,6 +336,15 @@ export default function ProductDetailPage() {
               Foto belum tersedia
             </div>
           )}
+
+          {product.stock <= 0 && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#2b211d]/50 z-10">
+              <span className="px-6 py-3 bg-[#F26B1D] text-white text-lg font-bold uppercase tracking-[0.1em] rounded-lg shadow-[0_4px_16px_rgba(242,107,29,0.5)]">
+                HABIS
+              </span>
+            </div>
+          )}
+
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#2b211d]/30 to-transparent" />
         </div>
 

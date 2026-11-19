@@ -176,6 +176,14 @@ export default function ProductCard({
             </span>
           </div>
 
+          {product.stock <= 0 && (
+            <div className="absolute left-2 top-8 z-10">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#F26B1D] text-white text-[10px] font-bold uppercase tracking-[0.1em] shadow-[0_2px_6px_rgba(242,107,29,0.4)]">
+                HABIS
+              </span>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={toggleFavorite}
