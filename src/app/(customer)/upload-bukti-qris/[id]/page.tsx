@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 import { Dialog } from '@/components/ui/Dialog';
-import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Camera, Timer } from 'lucide-react';
+import { QrCode, Upload, CheckCircle2, AlertCircle, ImageIcon, Loader2, XCircle, Camera, Timer, Download } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -379,10 +379,22 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         {/* QR Code Section */}
         {!isPaid && (
           <div className="bg-white rounded-xl border border-border p-4 mb-6">
-            <h3 className="font-medium text-text mb-3 flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-primary" />
-              QRIS
-            </h3>
+            <div className="flex items-center justify-between w-full mb-3">
+              <h3 className="font-medium text-text flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-primary" />
+                QRIS
+              </h3>
+              <a
+                href="/api/qris/download"
+                target="_blank"
+                rel="noopener noreferrer"
+                download="qris-foodrink.jpg"
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                <Download className="w-4 h-4" />
+                Unduh
+              </a>
+            </div>
             <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">
               {qrisImageUrl ? (
                 <img
