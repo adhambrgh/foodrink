@@ -106,7 +106,7 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
 
   let allUsers: AdminUser[] = authUsers.users.map(authUser => {
     const profile = profileMap.get(authUser.id);
-    const meta = authUser.raw_user_meta_data || {};
+    const meta = authUser.user_metadata || {};
     
     // Priority: auth raw_user_meta_data > profiles table
     const name = meta.name || profile?.name || '-';
