@@ -55,7 +55,7 @@ export async function createProduct(formData: FormData) {
   const image_url = formData.get('image_url') as string | null;
   const options = parseOptions(formData);
 
-  if (!name || !price || !stock || !category_id) {
+  if (!name || !price || Number.isNaN(stock) || stock < 0 || !category_id) {
     return { error: 'Nama, harga, stok, dan kategori wajib diisi' };
   }
 
@@ -104,7 +104,7 @@ export async function updateProduct(formData: FormData, id: string) {
   const image_url = formData.get('image_url') as string | null;
   const options = parseOptions(formData);
 
-  if (!name || !price || !stock || !category_id) {
+  if (!name || !price || Number.isNaN(stock) || stock < 0 || !category_id) {
     return { error: 'Nama, harga, stok, dan kategori wajib diisi' };
   }
 
