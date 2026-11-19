@@ -392,7 +392,7 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 className="text-sm text-primary hover:underline flex items-center gap-1"
               >
                 <Download className="w-4 h-4" />
-                Unduh
+                Unduh QRIS
               </a>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">

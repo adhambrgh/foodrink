@@ -62,9 +62,9 @@ export function UserFilters({ filters, onChange, stats, onClear }: UserFiltersPr
   , [filters]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-3 p-4 bg-surface-card border border-border rounded-xl">
-      {/* Search */}
-      <div className="flex-1 min-w-[220px] relative">
+    <div className="flex flex-wrap gap-3 p-4 bg-surface-card border border-border rounded-xl">
+      {/* Search - fleksibel dengan batas max */}
+      <div className="flex-1 min-w-[200px] max-w-[400px] relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
           type="search"
@@ -75,30 +75,30 @@ export function UserFilters({ filters, onChange, stats, onClear }: UserFiltersPr
         />
       </div>
 
-      {/* Status Filter */}
+      {/* Status Filter - auto width, wrap jika sempit */}
       <select
         value={filters.status}
         onChange={e => onChange({ ...filters, status: e.target.value as UserStatus })}
-        className="w-full md:w-36 px-3 py-2 rounded-lg border border-border bg-surface text-sm"
+        className="w-full sm:w-auto min-w-[150px] px-3 py-2 rounded-lg border border-border bg-surface text-sm"
       >
         {Object.entries(STATUS_LABELS).map(([value, label]) => (
           <option key={value} value={value}>{label}</option>
         ))}
       </select>
 
-      {/* Role Filter */}
+      {/* Role Filter - auto width */}
       <select
         value={filters.role}
         onChange={e => onChange({ ...filters, role: e.target.value as UserRole })}
-        className="w-full md:w-32 px-3 py-2 rounded-lg border border-border bg-surface text-sm"
+        className="w-full sm:w-auto min-w-[130px] px-3 py-2 rounded-lg border border-border bg-surface text-sm"
       >
         {Object.entries(ROLE_LABELS).map(([value, label]) => (
           <option key={value} value={value}>{label}</option>
         ))}
       </select>
 
-      {/* Active Threshold */}
-      <div className="flex items-center gap-2">
+      {/* Active Threshold - flex wrap */}
+      <div className="flex items-center gap-2 flex-wrap">
         <span className="text-xs text-text-muted whitespace-nowrap hidden sm:block">Aktif jika login:</span>
         <select
           value={String(filters.activeThreshold)}
@@ -112,7 +112,7 @@ export function UserFilters({ filters, onChange, stats, onClear }: UserFiltersPr
               onChange({ ...filters, activeThreshold: Number(val) });
             }
           }}
-          className="w-full md:w-28 px-3 py-2 rounded-lg border border-border bg-surface text-sm"
+          className="w-full sm:w-auto min-w-[130px] px-3 py-2 rounded-lg border border-border bg-surface text-sm"
         >
           {THRESHOLD_OPTIONS.map(opt => (
             <option key={String(opt.value)} value={String(opt.value)}>{opt.label}</option>
@@ -131,7 +131,7 @@ export function UserFilters({ filters, onChange, stats, onClear }: UserFiltersPr
         )}
       </div>
 
-      {/* Export PDF Button */}
+      {/* Export PDF Button - tidak shrink */}
       <button
         onClick={() => {
           const params = new URLSearchParams();
@@ -147,16 +147,16 @@ export function UserFilters({ filters, onChange, stats, onClear }: UserFiltersPr
           params.set('format', 'pdf');
           window.open(`/admin/users/export?${params.toString()}`, '_blank');
         }}
-        className="px-4 py-2 rounded-lg border border-primary bg-white text-primary text-sm font-medium hover:bg-primary/5 transition-colors flex items-center gap-1.5"
+        className="flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg border border-primary bg-white text-primary text-sm font-medium hover:bg-primary/5 transition-colors flex items-center gap-1.5"
       >
         <Download className="w-4 h-4" /> PDF
       </button>
 
-      {/* Clear Filters */}
+      {/* Clear Filters - tidak shrink */}
       {hasActiveFilters && onClear && (
         <button
           onClick={onClear}
-          className="px-4 py-2 rounded-lg border border-border bg-white text-text-muted text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-1.5"
+          className="flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg border border-border bg-white text-text-muted text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-1.5"
         >
           <FilterX className="w-4 h-4" /> Reset
         </button>
