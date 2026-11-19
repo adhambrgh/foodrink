@@ -89,9 +89,21 @@ export async function getAllUsersAdmin(filters: Filters = {}): Promise<UsersResp
     };
   }
 
-  const { data: profiles } = await supabase
+  const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select('id, role, phone, name, deleted_at, created_at');
+
+  if (profilesError) {
+    console.error('Profiles query error:', profilesError);
+    return {
+      users: [],
+      total: 0,
+      page: 1,
+      pageSize,
+      stats: { total: 0, active: 0, inactive: 0, never: 0, deleted: 0, admins: 0, customers: 0 },
+      error: `Failed to fetch profiles: ${profilesError.message}`,
+    };
+  }
 
   const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
