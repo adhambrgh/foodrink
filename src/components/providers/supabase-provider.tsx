@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 import { CartProvider } from '@/hooks/use-cart';
+import { ToastProvider } from '@/hooks/use-toast';
 
 type SupabaseContext = {
   session: Session | null;
@@ -36,7 +37,9 @@ export default function SupabaseProvider({ children }: { children: React.ReactNo
 
   return (
     <Context.Provider value={{ session, loading }}>
-      <CartProvider>{children}</CartProvider>
+      <ToastProvider>
+        <CartProvider>{children}</CartProvider>
+      </ToastProvider>
     </Context.Provider>
   );
 }

@@ -82,6 +82,21 @@
   will-change: opacity;
 }
 
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   input[data-toggle] {
     transition-duration: 0.01ms !important;
