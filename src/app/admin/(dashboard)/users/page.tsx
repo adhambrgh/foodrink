@@ -1,6 +1,8 @@
 import { getAllUsersAdmin } from './actions';
 import UserListClient from './user-list';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminUsersPage() {
   const { users, total, stats, error } = await getAllUsersAdmin({
     page: 1,
