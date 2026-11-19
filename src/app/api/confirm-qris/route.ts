@@ -50,8 +50,8 @@ export async function POST(request: Request) {
     .eq('id', orderId);
 
   if (updateError) {
-    console.error('Update order error:', updateError);
-    return NextResponse.json({ error: 'Gagal konfirmasi pembayaran' }, { status: 500 });
+    console.error('Confirm QRIS update error:', JSON.stringify(updateError, null, 2));
+    return NextResponse.json({ error: 'Gagal konfirmasi pembayaran: ' + updateError.message }, { status: 500 });
   }
 
   // Decrease stock for confirmed QRIS orders

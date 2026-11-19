@@ -113,8 +113,8 @@ export async function POST(request: Request) {
     .eq('id', orderId);
 
   if (updateError) {
-    console.error('Update order error:', updateError);
-    return NextResponse.json({ error: 'Gagal update status pesanan' }, { status: 500 });
+    console.error('Update order error:', JSON.stringify(updateError, null, 2));
+    return NextResponse.json({ error: 'Gagal update status pesanan: ' + updateError.message }, { status: 500 });
   }
 
   return NextResponse.json({
